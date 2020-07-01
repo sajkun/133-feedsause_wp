@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="212px" height="212px" viewBox="0 0 212 212" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 52.5 (67469) - http://www.bohemiancoding.com/sketch -->
+    <title>Combined Shape Copy 5</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <path d="M116,0 L116,90.78125 C116,101.395473 124.604527,110 135.21875,110 C145.832973,110 154.4375,101.395473 154.4375,90.78125 L154.4375,13.2424242 L154.443885,13.2424242 C154.51858,10.4980991 155.245834,7.91702875 156.475768,5.64939301 C188.940878,18.0453887 212,49.4802636 212,86.300885 L212,125.699115 C212,173.361778 173.361778,212 125.699115,212 L86.300885,212 C38.6382223,212 6.26804116e-14,173.361778 5.68434189e-14,125.699115 L5.68434189e-14,86.300885 C5.23698284e-14,49.771247 22.6961018,18.5425677 54.7563125,5.94683998 C57.628284,8.90096408 59.4359941,12.9053463 59.5561152,17.3333333 L59.5625,17.3333333 L59.5625,52.78125 C59.5625,63.3954725 68.1670275,72 78.78125,72 C89.3954725,72 98,63.3954725 98,52.78125 L98,0 L116,0 Z" id="path-1"></path>
+    </defs>
+    <g id="2019-Logo" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Light-Copy" transform="translate(-494.000000, -494.000000)">
+            <g id="Combined-Shape-Copy-5" transform="translate(486.000000, 480.000000)">
+                <g id="Combined-Shape" transform="translate(8.000000, 14.000000)">
+                    <mask id="mask-2" fill="white">
+                        <use xlink:href="#path-1"></use>
+                    </mask>
+                    <use id="Mask" fill="#5769FF" xlink:href="#path-1"></use>
+                    <path d="M21.2939237,214 C3.01774667,186.26142 -8,150.399203 -8,111.235869 C-8,23.2647123 2.8784867,176.54848 71.4549741,176.54848 C140.031461,176.54848 238,23.2647123 238,111.235869 C238,150.399203 227.445505,186.26142 209.683367,214 L21.2939237,214 Z" fill="#3E45D9" mask="url(#mask-2)"></path>
+                </g>
+                <g id="Oval-3-Copy" transform="translate(0.000000, 98.000000)"></g>
+                <g id="Group-2" transform="translate(46.000000, 0.000000)">
+                    <g id="Group" transform="translate(0.000000, 4.014228)"></g>
+                    <g id="Combined-Shape-Copy-3" transform="translate(78.021643, 0.000000)"></g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
