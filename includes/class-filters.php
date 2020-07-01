@@ -422,6 +422,8 @@ class theme_filter_class{
   public static function add_to_cart_redirect($url){
     global $woocommerce;
     $checkout_url = wc_get_checkout_url();
+
+    $checkout_url = (isset($_GET['fast_order_id']))? $checkout_url .'?fast_order_id='.$_GET['fast_order_id'] : $checkout_url;
     return $checkout_url;
   }
 
@@ -1040,12 +1042,24 @@ new theme_filter_class();
 add_action('woocommerce_checkout_create_order_line_item', 'theme_save_additional_item_data', 10, 4);
 
 function theme_save_additional_item_data($item, $cart_item_key, $values, $order ){
+
   if(isset($values['extra_data'])){
     $item['extra_data'] = $values['extra_data'];
   }
 
   if(isset($values['group_id'])){
-    $item['group_id'] = $values['group_id'];
+    $item['group_id'] = array( $values['group_id'] );
+  }
+
+  if(isset($_POST['fast_order_id'])){
+    $item['fast_order_id'] = array( $_POST['fast_order_id'] );
+
+    $order_id = $order->get_id();
+
+    if(!update_post_meta((int)$_POST['fast_order_id'], 'is_fasttracked', 'yes' )){
+
+      add_post_meta((int)$_POST['fast_order_id'], 'is_fasttracked', 'yes', true );
+    }
   }
 }
 
@@ -1053,6 +1067,38 @@ add_action('woocommerce_order_item_line_item_html', 'print_additional_data_line'
 
 function print_additional_data_line( $item_id, $item, $order ){
   $meta = $item->get_meta('extra_data');
+  $meta2 = $item->get_meta('fast_order_id');
+
+  if($meta2){
+    ?>
+  <tr>
+    <td></td>
+    <td>
+      <div class="view">
+        <table cellspacing="0" class="display_meta">
+          <tbody>
+          <?php
+          ?>
+          <tr>
+            <th>Fasttrack for&nbsp;order:</th>
+            <td>
+              <p>
+                <?php
+                echo $meta2[0];
+                ?>
+              </p>
+            </td>
+          </tr>
+        <?php
+         ?>
+        </tbody></table>
+      </div>
+    </td>
+    <td colspan="4"> </td>
+  </tr>
+  <?php
+  }
+
   if(!$meta){return;}
   ?>
 
@@ -1089,3 +1135,4 @@ function print_additional_data_line( $item_id, $item, $order ){
   </tr>
   <?php
 }
+

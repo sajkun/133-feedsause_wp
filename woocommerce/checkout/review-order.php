@@ -44,7 +44,8 @@ $options = get_theme_checkout_content();
                   	echo _n('Product', 'Products', $cart_item['count_items']);
                    ?>
                 </span>
-                <?php if ($cart_item['count_images'] > 0): ?>
+                <?php
+                if ($cart_item['count_images'] > 0): ?>
 
                 <span class="checkout-item-new-detail">
                   <svg class="icon svg-icon-items"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-items"></use> </svg>
@@ -56,19 +57,25 @@ $options = get_theme_checkout_content();
                 <?php endif ?>
              </div>
 
+
+            <?php if(count( $cart_item['sizes']) > 0){ ?>
+
             <div class="clearfix">
               <svg class="icon svg-icon-size"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-size"></use> </svg>
               <span class="checkout-item-new-detail">
                 <?php echo implode(', ', $cart_item['sizes']); ?>
               </span>
             </div>
+            <?php } ?>
 
+            <?php if($cart_item['comment']){ ?>
             <div class="clearfix">
               <svg class="icon svg-icon-pen"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-pen"></use> </svg>
               <span class="checkout-item-new-detail">
                 <?php echo $cart_item['comment']; ?>
               </span>
             </div>
+            <?php } ?>
           </div>
           <a href="javascript:void(0)"  class="trigger-expand-details">[<span class="state">+</span>] Details</a>
       </div>

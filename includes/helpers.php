@@ -930,95 +930,97 @@ class theme_formatted_cart{
   /**
   * Main construct class
   */
-  public function __construct(){
+  public function __construct($from = 'cart'){
     $formatted = array();
 
-    foreach (wc()->cart->get_cart() as $item_id => $cart_item) {
-      $group_id = isset($cart_item['group_id']) ? $cart_item['group_id'] : $item_id;
+    if('cart' == $from){
+      foreach (wc()->cart->get_cart() as $item_id => $cart_item) {
+        $group_id = isset($cart_item['group_id']) ? $cart_item['group_id'] : $item_id;
 
-      if(!$group_id) {continue;}
+        if(!$group_id) {continue;}
 
-      $product = wc_get_product($cart_item['product_id']);
-      if(!$product) {continue;}
+        $product = wc_get_product($cart_item['product_id']);
+        if(!$product) {continue;}
 
-      $avoid = [
-        (int)get_option('wfp_priority_delivery_product_id'),
-        (int)get_option('wfp_return_product_id'),
-      ];
+        $avoid = [
+          (int)get_option('wfp_priority_delivery_product_id'),
+          (int)get_option('wfp_return_product_id'),
+        ];
 
-      if(in_array($cart_item['product_id'], $avoid)){
-        continue;
-      }
-
-      if(!isset($formatted[$group_id])){
-        $formatted[$group_id] = array(
-          'recipe_name' => $product->get_title(),
-          'product_id' => $cart_item['product_id'],
-          'items'      => array(),
-        );
-      }
-
-      // if product is variable add data about variations
-      if($product->get_type() === 'variable'){
-
-        $formatted[$group_id]['available_variations'] = $product->get_available_variations();
-
-        // get all variations
-        $attrubutes =  array();
-        $attributes_product = $product->get_variation_attributes();
-
-        foreach ($attributes_product as $attribute_name => $attr) {
-
-          //for each variation get terms
-          $terms = wc_get_product_terms(
-            $product->get_id(),
-            $attribute_name,
-            array('fields' => 'all', )
-          );
-
-
-          // add empty item if it does not exists;
-          if(!isset($attrubutes[$attribute_name])){
-            $attrubutes[$attribute_name] = array(
-              'items' => array(),
-            );
-          }
-
-          // add title for each attribute if it's count > 1
-         if (count($attributes_product) > 1):
-          $attribute_labels = get_option('theme_attributes_images');
-
-          switch ($attribute_labels['attribute_'.$attribute_name ]['type']) {
-            case 'icon':
-              $icon  =  sprintf('<i class="icon-%s"></i>', $attribute_labels['attribute_'.$attribute_name ]['icon'] );
-              break;
-            case 'image':
-              $image_id  = (int)$attribute_labels['attribute_'.$attribute_name ]['icon_id'];
-              $image_url = wp_get_attachment_image_url($image_id, 'thumbnail');
-              $icon      = sprintf('<img class="image-icon" src="%s" height="18" width="18" alt="">', $image_url );
-              break;
-            default:
-              $icon = '';
-              break;
-          }
-          $attrubutes[$attribute_name]['name'] = $icon .' <b>'. wc_attribute_label( $attribute_name ).'</b>';
-          endif;
-
-          // add term data
-          foreach ($terms as $key => $t) {
-            if(in_array($t->slug, $attributes_product[$attribute_name])){
-              $attrubutes[$attribute_name]['items'][] = array(
-                'name' => $t->name,
-                'slug' => $t->slug,
-              );
-            }
-          }
+        if(in_array($cart_item['product_id'], $avoid)){
+          continue;
         }
 
-        $formatted[$group_id]['attributes'] =  $attrubutes ;
-      }
+        if(!isset($formatted[$group_id])){
+          $formatted[$group_id] = array(
+            'recipe_name' => $product->get_title(),
+            'product_id' => $cart_item['product_id'],
+            'items'      => array(),
+          );
+        }
 
-      $formatted[$group_id]['items'][$item_id]  = $cart_item;
+        // if product is variable add data about variations
+        if($product->get_type() === 'variable'){
+
+          $formatted[$group_id]['available_variations'] = $product->get_available_variations();
+
+          // get all variations
+          $attrubutes =  array();
+          $attributes_product = $product->get_variation_attributes();
+
+          foreach ($attributes_product as $attribute_name => $attr) {
+
+            //for each variation get terms
+            $terms = wc_get_product_terms(
+              $product->get_id(),
+              $attribute_name,
+              array('fields' => 'all', )
+            );
+
+
+            // add empty item if it does not exists;
+            if(!isset($attrubutes[$attribute_name])){
+              $attrubutes[$attribute_name] = array(
+                'items' => array(),
+              );
+            }
+
+            // add title for each attribute if it's count > 1
+           if (count($attributes_product) > 1):
+            $attribute_labels = get_option('theme_attributes_images');
+
+            switch ($attribute_labels['attribute_'.$attribute_name ]['type']) {
+              case 'icon':
+                $icon  =  sprintf('<i class="icon-%s"></i>', $attribute_labels['attribute_'.$attribute_name ]['icon'] );
+                break;
+              case 'image':
+                $image_id  = (int)$attribute_labels['attribute_'.$attribute_name ]['icon_id'];
+                $image_url = wp_get_attachment_image_url($image_id, 'thumbnail');
+                $icon      = sprintf('<img class="image-icon" src="%s" height="18" width="18" alt="">', $image_url );
+                break;
+              default:
+                $icon = '';
+                break;
+            }
+            $attrubutes[$attribute_name]['name'] = $icon .' <b>'. wc_attribute_label( $attribute_name ).'</b>';
+            endif;
+
+            // add term data
+            foreach ($terms as $key => $t) {
+              if(in_array($t->slug, $attributes_product[$attribute_name])){
+                $attrubutes[$attribute_name]['items'][] = array(
+                  'name' => $t->name,
+                  'slug' => $t->slug,
+                );
+              }
+            }
+          }
+
+          $formatted[$group_id]['attributes'] =  $attrubutes ;
+        }
+
+        $formatted[$group_id]['items'][$item_id]  = $cart_item;
+      }
     }
 
     $this->items = $formatted;
@@ -1273,6 +1275,7 @@ if(!function_exists('get_estimates')){
     return $ready_date;
   }
 }
+
 function woocommerce_get_price_discounted( $price, $product ) {
 
   $_price = $product->get_price();
@@ -1309,4 +1312,118 @@ function woocommerce_get_price_discounted( $price, $product ) {
   }
 
   return $_price;
+}
+
+function get_formatted_order_items($order_items){
+  /*
+    prepare formatted items variable
+  */
+
+  $formatted = array();
+
+  foreach ( $order_items as $item_id => $item ):
+
+    $extra_data      = $item->get_meta('extra_data');
+    $group_id_may_be = $item->get_meta('group_id');
+
+    $group_id = (is_array($group_id_may_be))? $group_id_may_be[0] : $group_id_may_be;
+
+    $meta    = $item->get_formatted_meta_data();
+
+
+    if($group_id){
+
+      if (!isset( $formatted[ $group_id ])){
+        $formatted[ $group_id ] = array(
+          'items' => array(),
+        );
+      }
+
+     $formatted[ $group_id ]['images'] = isset($formatted[ $group_id ]['images'])? $formatted[ $group_id ]['images']: 0;
+
+     $product = wc_get_product($item->get_product_id());
+
+     if($product){
+       $formatted[ $group_id ]['name'] =  $product->get_title();
+
+        $formatted[ $group_id ]['product_id'] = $product->get_id();
+     }
+
+
+      if($extra_data){
+        $formatted[ $group_id ]['items'][$item_id]['extra_data'] = $extra_data;
+
+        $formatted[ $group_id ]['comment'] = $extra_data['comment']['value'];
+        $formatted[ $group_id ]['sizes'] = $extra_data['sizes']['value'];
+      }
+
+      if($meta){
+        $formatted[ $group_id ]['items'][$item_id]['meta'] = $meta;
+
+        foreach ($meta as $m) {
+          if($m->key == 'pa_number-of-images'){
+            $formatted[ $group_id ]['images'] += (int)$m->value;
+          }
+        }
+      }
+
+    }else{
+      $group_id = $item_id;
+
+      if (!isset( $formatted[$group_id ])){
+        $formatted[ $group_id ] = array(
+          'items' => false,
+        );
+      }
+
+      $product = wc_get_product($item->get_product_id());
+
+      if($product){
+       $formatted[ $group_id ]['name'] =  $product->get_title();
+
+        $formatted[ $group_id ]['product_id'] = $product->get_id();
+      }
+    }
+
+  endforeach;
+  return $formatted;
+}
+
+
+
+function is_only_fasttrack_checkout($return = false){
+
+  $response = false;
+
+  $cart_items = wc()->cart->get_cart();
+
+  $product_fast_id = (int)get_option('wfp_priority_delivery_product_id');
+
+  $key_fast = -1;
+
+  if(count($cart_items ) === 1){
+    foreach ($cart_items as $key => $item) {
+      $key_fast  = $item['product_id'] === $product_fast_id? $key  :  $key_fast;
+    }
+  }
+
+
+  if($return){
+    $response = $key_fast != -1 ? true : false;
+    return  $response ;
+  }
+}
+
+
+function fix_fasstrack_product($checkout){
+  $cart_items = wc()->cart->get_cart();
+  $product_fast_id = (int)get_option('wfp_priority_delivery_product_id');
+
+  foreach ($cart_items as $key => $item) {
+    if($item['product_id'] === $product_fast_id){
+      $cart_items = wc()->cart->set_quantity($key , 1);
+    }else{
+      continue;
+    }
+  }
 }

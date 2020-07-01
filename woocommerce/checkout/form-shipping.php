@@ -20,6 +20,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 $options = get_theme_checkout_content();
+
+
+$cart_items = wc()->cart->get_cart();
+
+ if(!is_only_fasttrack_checkout(true)):
+
 ?>
 <div class="woocommerce-shipping-fields checkout-block"  style="z-index: 1; position: relative">
 	<?php if ( true === WC()->cart->needs_shipping_address() ) :
@@ -133,3 +139,5 @@ $options = get_theme_checkout_content();
 
 	<?php do_action( 'woocommerce_after_order_notes', $checkout ); ?>
 </div>
+<?php
+endif;

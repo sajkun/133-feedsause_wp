@@ -26,6 +26,10 @@ if ( empty( $product ) || ! $product->is_visible() ) {
 	return;
 }
 
+$return_product_id = (int)get_option('wfp_return_product_id');
+$priority_delivery_product_id  = (int)get_option('wfp_priority_delivery_product_id');
+$single_product_id  = (int)get_option('wfp_single_product_id');
+
 // Ensure that single product or subscription are invisble in product's list
 
 $is_subsciption    = get_post_meta($product->get_id(), '_ywsbs_subscription', true);

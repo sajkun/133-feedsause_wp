@@ -21,6 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 $options = get_theme_checkout_content();
 
+add_action('woocommerce_before_checkout_form', 'fix_fasstrack_product');
 
 switch ($options['type']) {
 	case 'premium':
@@ -44,8 +45,8 @@ switch ($options['type']) {
 
 		do_action( 'woocommerce_before_checkout_form', $checkout );
 
-
 		// If checkout registration is disabled and not logged in, the user cannot checkout.
+
 		if ( ($checkout->is_registration_required() && ! is_user_logged_in() ) || !$continued_checkout ) {
 
 			if('yes' !== get_option('woocommerce_enable_checkout_login_reminder')){
@@ -61,6 +62,13 @@ switch ($options['type']) {
 		}
 			?>
 		<form name="checkout" method="post" class="checkout woocommerce-checkout" action="<?php echo esc_url( wc_get_checkout_url() ); ?>" enctype="multipart/form-data">
+
+			<?php
+
+				if (isset($_GET['fast_order_id'])){
+					printf('<input type="hidden" name="fast_order_id" value="%s">', $_GET['fast_order_id']);
+				}
+			?>
 
 			<div class="row">
 

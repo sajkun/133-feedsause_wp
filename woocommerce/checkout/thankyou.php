@@ -64,49 +64,42 @@ if ( ! defined( 'ABSPATH' ) ) {
           <?php _e('We’re excited to get your product to our studio','theme-translations'); ?>
         </p>
       </h2>
-			<div class="order-summary-info">
-        <div class="order-summary-info__block">
+
+        <div class="order-summary__item order-summary-info" style="padding-left:0; padding-right:0">
+          <div class="order-summary-info__block">
             <?php $status = $order->get_status();
-	            $hex_color ='#333';
-	            $color     ='#000';
-						if(class_exists('WC_Order_Status_Manager_Order_Status') && function_exists('adjustBrightness')){
-	            $status_post = new WC_Order_Status_Manager_Order_Status($status);
-	            $hex_color = $status_post->get_color();
-	            $color = adjustBrightness($hex_color, -100);
-	          }
+              $hex_color ='#333';
+              $color     ='#000';
+            if(class_exists('WC_Order_Status_Manager_Order_Status') && function_exists('adjustBrightness')){
+              $status_post = new WC_Order_Status_Manager_Order_Status($status);
+              $hex_color = $status_post->get_color();
+              $color = adjustBrightness($hex_color, -100);
+            }
              ?>
-          <div class="order-status" style="background-color: <?php echo $hex_color ?>; color: <?php echo $color ?>">
-          	<?php echo $status; ?>
+            <div class="order-status" style="background-color: <?php echo $hex_color ?>; color: <?php echo $color ?>">
+              <?php echo $status; ?>
+            </div>
+            <?php if (class_exists('WC_pdf_functions')): ?>
+            <a href="<?php echo add_query_arg( 'pdfid', $order->get_id() );?>" class="invoice" download><svg class="icon svg-icon-print"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-print" ></use> </svg><?php _e('Invoice','theme-translations');?></a>
+            <?php endif ?>
+
+            <p class="order-summary-info__title"><?php _e( 'Order', 'woocommerce' ); ?>: #<?php echo $order->get_order_number(); ?> </p>
+            <p class="order-summary-info__comment">
+              <?php echo wc_format_datetime( $order->get_date_created() ); ?>
+            </p>
+          </div><!-- order-summary-info__block -->
+
+          <div class="order-summary-info__block">
+            <?php do_action('print_theme_order_summary', $order, false); ?>
           </div>
-          <?php if (class_exists('WC_pdf_functions')): ?>
-          <a href="<?php echo add_query_arg( 'pdfid', $order->get_id() );?>" class="invoice" download><svg class="icon svg-icon-print"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-print" ></use> </svg><?php _e('Invoice','theme-translations');?></a>
-          <?php endif ?>
 
-          <p class="order-summary-info__title"><?php _e( 'Order', 'woocommerce' ); ?>: #<?php echo $order->get_order_number(); ?> </p>
-          <p class="order-summary-info__comment">
-            <?php echo wc_format_datetime( $order->get_date_created() ); ?>
-          </p>
-        </div>
+          <?php do_action('print_thank_you_estimates', $order); ?>
 
-        <?php
-          $my_account_id = get_option('woocommerce_myaccount_page_id');
-					$order_items           = $order->get_items( apply_filters( 'woocommerce_purchase_order_item_types', 'line_item' ) );
-         ?>
-        <div class="order-summary-info__block">
+          <div class="order-summary-info__block no-border">
+            <a href="<?php echo esc_url(wc_get_account_endpoint_url( 'orders') );?>" class="checkout__submit"><?php _e('Go to Dashboard','theme-translations');?> <i class="icon-arrow"></i></a>
+          </div>
+        </div><!-- order-summary-info -->
 
-          <?php do_action('print_theme_order_summary', $order, false); ?>
-
-        </div><!-- order-summary-info__block -->
-
-        <?php do_action('print_thank_you_estimates'); ?>
-
-				<?php if ($my_account_id >=0): ?>
-
-        <div class="order-summary-info__block no-border">
-          <a href="<?php echo esc_url(wc_get_account_endpoint_url( 'orders') );?>" class="checkout__submit"><?php _e('Go to Dashboard','theme-translations');?> <i class="icon-arrow"></i></a>
-        </div>
-				<?php endif ?>
-      </div>
 		<?php endif; ?>
 		<?php do_action( 'woocommerce_thankyou_' . $order->get_payment_method(), $order->get_id() ); ?>
 		<?php do_action( 'woocommerce_thankyou', $order->get_id() ); ?>

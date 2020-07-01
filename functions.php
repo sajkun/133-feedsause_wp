@@ -941,12 +941,21 @@ add_action('woocommerce_checkout_process', 'if_date_is_selected');
 function if_date_is_selected() {
     $validated = false;
 
-    foreach ($_POST['free_collection_date'] as $key => $d) {
-      $validated = (!empty($d))? true : $validated;
+    $is_single_product_order = false;
+    $single_product_id = (int)get_option('wfp_single_product_id');
+
+    foreach(wc()->cart->get_cart() as $item){
+      $is_single_product_order  = $single_product_id === $item['product_id'] ? true :  $is_single_product_order;
     }
 
-    if(!$validated){
-      wc_add_notice( 'Please select Self Ship or Free Collection date.', 'error' );
+    if(isset($_POST['free_collection_date'] )){
+      foreach ($_POST['free_collection_date'] as $key => $d) {
+        $validated = (!empty($d))? true : $validated;
+      }
+    }
+
+    if(!$validated && (!$is_single_product_order || count(wc()->cart->get_cart())>1) && !is_only_fasttrack_checkout(true)){
+      wc_add_notice( 'Please select Self Ship or Free Collection date.' , 'error' );
     }
 }
 
@@ -956,3 +965,6 @@ function add_menu_attributes( $atts, $item, $args ) {
   return $atts;
 }
 add_filter( 'nav_menu_link_attributes', 'add_menu_attributes', 10, 3 );
+
+
+

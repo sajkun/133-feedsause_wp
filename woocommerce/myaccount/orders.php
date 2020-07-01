@@ -22,8 +22,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+$product_fast_id = (int)get_option('wfp_priority_delivery_product_id');
 do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
-
 <?php if ( $has_orders ) : ?>
   <div class="container_sm container">
   <div class="spacer-h-50"></div>
@@ -31,9 +31,18 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 		<?php foreach ( $customer_orders->orders as $customer_order ) :
 			$order      = wc_get_order( $customer_order );
 			$item_count = $order->get_item_count();
-			$order_items           = $order->get_items( apply_filters( 'woocommerce_purchase_order_item_types', 'line_item' ) );
-			?>
-			<div class="col-12 col-md-6 col-lg-4 filtering-item woocommerce-orders-table__row woocommerce-orders-table__row--status-<?php echo esc_attr( $order->get_status() ); ?> order" data-type="<?php echo esc_attr( $order->get_status() ); ?>">
+			$order_items  = $order->get_items( apply_filters( 'woocommerce_purchase_order_item_types', 'line_item' ) );
+      if($item_count === 1){
+        $continue = false;
+        foreach ($order_items as $key => $item) {
+          $continue  = ($item->get_product_id() == $product_fast_id)? true : $continue;
+        }
+
+        if($continue) continue;
+      }
+      ?>
+
+			<div class="col-12 col-md-6 col-lg-4 filtering-item woocommerce-orders-table__row order-summary__item woocommerce-orders-table__row--status-<?php echo esc_attr( $order->get_status() ); ?> order" style="padding-left:15px; padding-right:15px;" data-type="<?php echo esc_attr( $order->get_status() ); ?>">
 				<div class="order-preview">
             <?php $status = $order->get_status();
 	            $hex_color ='#333';

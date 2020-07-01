@@ -185,11 +185,11 @@ class theme_content_output{
     } else if(theme_construct_page::is_page_type('woo-my-account') ){
        echo $button_intercom;
        ?>
-       <a href="<?php echo get_permalink( wc_get_page_id( 'shop' ) );?>" class="button button_header"><span class="plus"></span> <span>Create Photos</span></a>
+       <a href="<?php echo get_permalink( wc_get_page_id( 'shop' ) );?>" class="button button_header"><span class="plus"></span> <span>Book Now</span></a>
       <?php
     } else{
       if (function_exists('wc_get_page_id') && (wc_get_page_id( 'shop' ) >=0 )): ?>
-       <a href="<?php echo get_permalink( wc_get_page_id( 'shop' ) );?>" class="button button_header"><span class="plus"></span> <span>Create Photos</span></a>
+       <a href="<?php echo get_permalink( wc_get_page_id( 'shop' ) );?>" class="button button_header"><span class="plus"></span> <span>Book Now</span></a>
     <?php
       endif;
     }
@@ -2050,7 +2050,9 @@ class theme_content_output{
   * @hooked to print_thank_you_estimates - 10
   * @hooked to woocommerce_checkout_order_review - 10
   */
-  public static function print_checkout_estimates(){
+  public static function print_checkout_estimates($order = false){
+
+
     $options         = get_theme_checkout_content();
     $helper          = new theme_formatted_cart();
 
@@ -2061,14 +2063,33 @@ class theme_content_output{
     $priority_delivery_product = wc_get_product($priority_delivery_product_id);
 
     $days_offset     = ($has_prem)? get_ready_date_offset(true) : get_ready_date_offset(false) ;
+
     $days_offset_js  = ($has_prem)? get_ready_date_offset(true, 'js') :  get_ready_date_offset(false, 'js');
 
     $ready_date      = date('d F Y', strtotime($days_offset));
     $subscriptions   = get_all_subscriptions();
 
+
     $class = (('regular' === $options['type'] ) && (theme_construct_page::is_page_type('woo-checkout')))? 'checkout__aside-block' : 'order-summary-info__block no-border';
 
      $class =(is_wc_endpoint_url('order-received'))? 'order-summary-info__block no-border' : $class;
+
+
+     if($order){
+         $date_info = $order->get_date_created();
+         $date_str = $date_info->date("d-m-Y H:i:s");
+         $ready_date_ = new DateTime( $date_str );
+
+         $days_offset = get_ready_date_offset(false);
+
+       foreach ($order->get_items() as $key => $item) {
+        $days_offset = ($item->get_product_id() == (int)$priority_delivery_product_id)? get_ready_date_offset(true) : $days_offset;
+
+       }
+       $ready_date_->modify($days_offset);
+
+       $ready_date = $ready_date_->format('d F Y');
+     }
     ?>
 
     <div class="<?php echo $class ?>">
@@ -2077,12 +2098,12 @@ class theme_content_output{
       <?php if (!$has_prem):
         $ready_date      = date('d F', strtotime('+5 days'));
         ?>
-        <?php if ($priority_delivery_product): ?>
+        <?php /*if ($priority_delivery_product): ?>
 
         <p class="checkout__aside-text"><?php _e('Get your images as soon as', 'theme-translation');?> <b><?php echo $ready_date ?></b></p>
 
         <a href="<?php echo $priority_delivery_product->add_to_cart_url() ?>" name="add-to-cart"  class="link-prem">Upgrade to Premium </a>
-        <?php endif ?>
+        <?php endif */?>
       <?php endif ?>
     </div>
     <?php
@@ -2234,32 +2255,45 @@ class theme_content_output{
 
     $order_items           = $order->get_items( apply_filters( 'woocommerce_purchase_order_item_types', 'line_item' ) );
 
-    foreach ( $order_items as $item_id => $item ):
-      $meta    = $item->get_formatted_meta_data();
-      $product = $item->get_product();
-     ?>
-    <?php if ((count($order_items )>1)|| $print_full_data_single ): ?>
+    $info = get_formatted_order_items( $order_items );
 
-     <div class="my-order__item">
-        <div class="my-order__item-content">
-          <span class="my-order__item-title">
-            <?php echo $product->get_title();?>
-            <?php
-            $data = array();
-            foreach ($item->get_formatted_meta_data() as $key => $value):
-              $display = strip_tags($value->display_value);
-              if(!$display ) continue;
-              $get_price_in_text = get_price_in_text($display);
-              $data[]  = ( $get_price_in_text )? $get_price_in_text['no-price'] : $display ;
-            endforeach;
-             ?>
-          </span>
-          <?php if ($data): ?>
-          <span class="my-order__item-about"><?php echo implode(', ',$data ) ?></span>
-          <?php endif ?>
-        </div>
-        <div class="my-order__item-price"><?php echo wc_price($item->get_total()); ?></div>
+
+    foreach ( $info as $item_id => $item ):
+     ?>
+    <?php if ($item['items'] && (count($item['items'] )>=1)|| $print_full_data_single ): ?>
+
+    <div class="row">
+      <div class="col-7">
+        <span class="order-summary__item-title"> <?php echo $item['name'] ?></span>
       </div>
+      <div class="col-5 textright"></div>
+    </div><!-- row -->
+    <div class="row">
+      <div class="col-12">
+        <span class="order-summary__item-detail">
+          <svg class="icon svg-icon-box"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-box"></use> </svg>
+        <?php printf(_n('%s Product', '%s Products', count($item['items'])), count($item['items']));?></span>
+        <span class="order-summary__item-detail">
+          <svg class="icon svg-icon-items"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-items"></use> </svg>
+          <?php printf(_n('%s Photo', '%s Photos', $item['images']), $item['images']);?> </span>
+      </div>
+    </div>
+
+
+    <div class="clearfix">
+      <svg class="icon svg-icon-size"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-size"></use> </svg>
+      <span class="order-summary__item-detail">
+        <?php echo implode(', ', $item['sizes']); ?>
+      </span>
+    </div>
+
+    <div class="clearfix">
+      <svg class="icon svg-icon-pen"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-pen"></use> </svg>
+      <span class="order-summary__item-detail">
+        <?php echo $item['comment'] ?></span>
+    </div>
+
+
     <?php else: ?>
     <div class="row">
 
@@ -2271,8 +2305,9 @@ class theme_content_output{
             1
           </p>
         </div>
-      <?php else: ?>
-
+      <?php else:
+       ?>
+      <?php if (isset($meta)): ?>
         <?php foreach ($meta as $key => $m): ?>
           <div class="col-6">
             <p class="checkout__aside-subtitle"><?php echo esc_attr($m->display_key); ?></p>
@@ -2282,6 +2317,7 @@ class theme_content_output{
             </p>
           </div>
         <?php endforeach; ?>
+      <?php endif ?>
         <?php endif; ?>
 
       <?php if (count($order_items )===1): ?>
