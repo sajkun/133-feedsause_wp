@@ -100,6 +100,7 @@ class velesh_theme_meta{
 
     $data     = array(
       ['name' =>'_is_theme_featured', 'unique' => true],
+      ['name' =>'_is_free_sample', 'unique' => true],
       ['name' =>'custom_product_ingredients', 'unique' => true],
       ['name' =>'_header_style', 'unique' => true],
       ['name' => '_items_count',  'unique' => true],
@@ -917,6 +918,7 @@ function product_valid_period_field($post){
     <?php
       global $post;
       $meta   = get_post_meta($post->ID, '_is_theme_featured', true);
+      $meta2   = get_post_meta($post->ID, '_is_free_sample', true);
      ?>
      <p class="form-field _show_zoom">
       <label for="_is_theme_featured">
@@ -924,6 +926,14 @@ function product_valid_period_field($post){
       </label>
 
        <input type="checkbox" name="_is_theme_featured" id="_is_theme_featured" <?php echo ($meta == 'yes')? 'checked="checked"' : '' ; ?> value="yes" placeholder="">
+      &nbsp;
+     </p>
+     <p class="form-field _show_zoom">
+      <label for="_is_free_sample">
+          Product is a Free Sample
+      </label>
+
+       <input type="checkbox" name="_is_free_sample" id="_is_free_sample" <?php echo ($meta2 == 'yes')? 'checked="checked"' : '' ; ?> value="yes" placeholder="">
       &nbsp;
      </p>
   </div>

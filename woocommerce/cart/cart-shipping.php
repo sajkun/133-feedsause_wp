@@ -80,16 +80,35 @@ global $custom_enable_shipping_check;
 			           $m = new WC_Request_shipping_with_date($method->get_instance_id());
 
 			           $use_date = $m->get_instance_option('enable_datepicker');
-			           if('yes' === $use_date){
-				           $comment = $m->get_instance_option('datepicker_comment');
+			           // if('yes' === $use_date){
 
-				           printf('<span class="shipping-item__comment">%s</span>', $comment);
+			           $comment = $m->get_instance_option('datepicker_comment');
+
+			           $date = new DateTime();
+			           $check = $date->format('Y-m-d') . ' 17:00:00';
+			           $date_check =  new DateTime( $check );
+			           $date_ready =  new DateTime( $check );
+
+			           if($date_check > $date){
+			           	$date_ready->modify('+1 day');
+			           }else{
+			           	$date_ready->modify('+2 day');
 			           }
+
+			           $text = sprintf('<span class="green">%s</span>', $date_ready->format('l d F Y'));
+
+			           $comment = str_replace('{date}', $text ,  $comment);
+
+			           printf('<span class="shipping-item__comment">%s</span>', $comment);
+
+			           // }
 							 }
 
 							 echo '</span>';
 							  if( 'yes' ===  $use_date ){
 							?>
+
+							<?php /*
 			        <span class="shipping-item__date">
 			          <span class="shipping-item__date-input mob">
 			            <input type="date" name="free_collection_date[<?php echo  $method_id  ?>]">
@@ -98,7 +117,7 @@ global $custom_enable_shipping_check;
 			            <input type="text" class="datepicker">
 			          </span>
 			          <svg class="icon svg-icon-calendar"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-calendar"></use></svg>
-			        </span>
+			        </span> */ ?>
 			        <?php if ('yes' ===  $m->get_instance_option('enable_shipping_check')):
 							 $custom_enable_shipping_check = 'yes';
 			         ?>
@@ -127,15 +146,7 @@ global $custom_enable_shipping_check;
 						<input type="radio" name="shipping_method[0]" data-index="0" id="shipping_method_0_shipping_method_with_date7" value="shipping_method_with_date:7" class="shipping_method shipping_type">					  <div class="shipping-item__view">
 	           <svg class="icon svg-icon-teleg"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-teleg"></use></svg>
 
-	           <span class="shipping-item__title" for="shipping_method_0_shipping_method_with_date7">Free Collection<span class="shipping-item__comment">Not available in your city yet</span></span>			        <span class="shipping-item__date">
-			          <span class="shipping-item__date-input mob">
-			            <input type="date" name="">
-			          </span>
-			          <span class="shipping-item__date-input dt">
-			            <input type="text" class="datepicker hasDatepicker" id="dp1553348832485">
-			          </span>
-			          <svg class="icon svg-icon-calendar"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-calendar"></use></svg>
-			        </span>
+	           <span class="shipping-item__title" for="shipping_method_0_shipping_method_with_date7">Free Collection<span class="shipping-item__comment">Not available in your city yet</span></span>
 			        													</div>
 					</div>
 				<?php endif ?>

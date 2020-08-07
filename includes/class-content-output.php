@@ -60,7 +60,7 @@ class theme_content_output{
         }
       </style>
       <nav class="mobile-menu">
-        <div class="mobile-menu__container"  style="<?php echo $style; ?>">
+        <div class="mobile-menu__container"  <?php echo 'style="'.$style.'"'; ?> >
           <div class="mobile-menu__scroll">
             <?php
               if (!theme_construct_page::is_page_type('woo-my-account')) {
@@ -847,7 +847,7 @@ class theme_content_output{
                 <?php
                 $src = get_country_flag_url_by_currency($selected_currency);
                  if (file_exists($src['path'])): ?>
-                <img width="20" height="13" src="<?php echo $src['url']; ?>" alt="<?php echo $selected_currency ?>" style="display:inline-block; vertical-align: middle">
+                <img width="20" height="13" src="<?php echo $src['url']; ?>" alt="<?php echo $selected_currency ?>" <?php  echo 'style="display:inline-block; vertical-align: middle"' ?> >
                 <?php endif ?>
                 <span><?php echo get_woocommerce_currency_symbol($selected_currency) ?> <?php echo $selected_currency ?></span>
               </div>
@@ -857,7 +857,7 @@ class theme_content_output{
                     <?php
                     $src = get_country_flag_url_by_currency($default_currency);
                     if (file_exists($src['path'])): ?>
-                     <img width="20" height="13" src="<?php echo $src['url']; ?>" alt="<?php echo $default_currency ?>" style="display:inline-block; vertical-align: middle">
+                     <img width="20" height="13" src="<?php echo $src['url']; ?>" alt="<?php echo $default_currency ?>" <?php  echo 'style="display:inline-block; vertical-align: middle" ' ?> >
                     <?php endif ?>
                     <span><?php echo get_woocommerce_currency_symbol() ?> <?php echo $default_currency ?></span></li>
 
@@ -866,7 +866,7 @@ class theme_content_output{
                     <?php
                     $src = get_country_flag_url_by_currency($key);
                     if (file_exists($src['path'])): ?>
-                    <img width="20" height="13" src="<?php echo $src['url']; ?>" alt="<?php echo $key ?>" style="display:inline-block; vertical-align: middle">
+                    <img width="20" height="13" src="<?php echo $src['url']; ?>" alt="<?php echo $key ?>" <?php  echo 'style="display:inline-block; vertical-align: middle" ' ?>>
                      <?php endif ?>
                     <span><?php echo get_woocommerce_currency_symbol($key) ?> <?php echo $key ?></span></li>
                   <?php endforeach ?>
@@ -2123,7 +2123,7 @@ class theme_content_output{
     ?>
     <div class="checkout__aside-coupon">
       <a href="javascript:void(0)" onclick="show_slide_down('coupon_code')" class="coupon-trigger"><?php _e('Redeem a Coupon', 'theme-translations'); ?></a>
-        <input type="text" oninput="theme_apply_coupon()" placeholder="Coupon Code" class="form-field form-field_hidden coupon_code" style="">
+        <input type="text" oninput="theme_apply_coupon()" placeholder="Coupon Code" class="form-field form-field_hidden coupon_code">
     </div>
     <?php
     else:
@@ -2335,7 +2335,7 @@ class theme_content_output{
 
     <?php if (count($order_items )>1 || $print_full_data_single ): ?>
       <?php _e('Total','theme-translations');?>
-       <b style="float:right"><?php echo $order->get_formatted_order_total(); ?></b>
+       <b <?php echo 'style="float:right" ' ?> ><?php echo $order->get_formatted_order_total(); ?></b>
      <?php endif;
   }
 
@@ -2911,7 +2911,7 @@ class theme_content_output{
             </div><!-- tag-cloud -->
             <form action="" method="POST">
               <input type="hidden" name="continued" value='yes'>
-              <button class="button-basic" style="border:0;"><?php _e('Continue with Basic', 'theme-translations' ); ?></button>
+              <button class="button-basic" <?php echo 'style="border:0;"'; ?>><?php _e('Continue with Basic', 'theme-translations' ); ?></button>
             </form>
           </div>
 
@@ -3252,7 +3252,7 @@ class theme_content_output{
     ?>
 
 
-    <section class="vc_section vc_custom_1576165770692 vc_section-has-fill"><div class="vc_row wpb_row vc_row-fluid container container_sm"><div class="wpb_column vc_column_container vc_col-sm-12"><div class="vc_column-inner"><div class="wpb_wrapper"><div class="vc_row wpb_row vc_inner vc_row-fluid vc_column-gap-15 vc_row-o-equal-height vc_row-flex"><div class="wpb_column vc_column_container vc_col-sm-8 vc_col-has-fill"><div class="smartstudio__box vc_column-inner vc_custom_1576077396675"><div class="wpb_wrapper"><div class="vc_empty_space" style="height: 55px"><span class="vc_empty_space_inner"></span></div>
+    <section class="vc_section vc_custom_1576165770692 vc_section-has-fill"><div class="vc_row wpb_row vc_row-fluid container container_sm"><div class="wpb_column vc_column_container vc_col-sm-12"><div class="vc_column-inner"><div class="wpb_wrapper"><div class="vc_row wpb_row vc_inner vc_row-fluid vc_column-gap-15 vc_row-o-equal-height vc_row-flex"><div class="wpb_column vc_column_container vc_col-sm-8 vc_col-has-fill"><div class="smartstudio__box vc_column-inner vc_custom_1576077396675"><div class="wpb_wrapper"><div class="vc_empty_space" <?php echo 'style="height: 55px"' ?>><span class="vc_empty_space_inner"></span></div>
       <div class="wpb_single_image wpb_content_element vc_align_center">
 
         <figure class="wpb_wrapper vc_figure">
@@ -3262,7 +3262,7 @@ class theme_content_output{
 
       <div class="wpb_text_column wpb_content_element  vc_custom_1576076257838">
         <div class="wpb_wrapper">
-          <p style="text-align: center;padding-left: 35px;padding-right: 35px;"><span style="color: #e0e8f9;">Our innovative studio technology designed to deliver custom photos in 72 hours, ready to use on your online store or social media.</span></p>
+          <p <?php echo 'style="text-align: center;padding-left: 35px;padding-right: 35px;"' ?>><span <?php echo 'style="color: #e0e8f9;"' ?>>Our innovative studio technology designed to deliver custom photos in 72 hours, ready to use on your online store or social media.</span></p>
 
         </div>
       </div>
@@ -3272,7 +3272,7 @@ class theme_content_output{
           <center><a href="https://feedsauce.com/recipes/" class="button cta__button"><span class="plus"></span> <span> &nbsp; &nbsp;Start Creating &nbsp; &nbsp;</span></a></center>
         </div>
       </div>
-    <div class="vc_empty_space" style="height: 55px"><span class="vc_empty_space_inner"></span></div></div></div></div><div class="wpb_column vc_column_container vc_col-sm-4 vc_col-has-fill"><div class="fasttrack__box vc_column-inner vc_custom_1576077964190"><div class="wpb_wrapper">
+    <div class="vc_empty_space" <?php echo 'style="height: 55px"' ?>><span class="vc_empty_space_inner"></span></div></div></div></div><div class="wpb_column vc_column_container vc_col-sm-4 vc_col-has-fill"><div class="fasttrack__box vc_column-inner vc_custom_1576077964190"><div class="wpb_wrapper">
       <div class="wpb_single_image wpb_content_element vc_align_center">
 
         <figure class="wpb_wrapper vc_figure">
@@ -3289,17 +3289,16 @@ class theme_content_output{
 
       <div class="wpb_text_column wpb_content_element  vc_custom_1576083633692 killMargin">
         <div class="wpb_wrapper">
-          <p style="font-family: PoppinsFont,Poppins,sans-serif !important; color: #fff; text-align: center; font-size: 28px; font-weight: 500; line-height: 1.2em; margin-top: -20px !important;">Supercharge your brand</p>
+          <p <?php echo 'style="font-family: PoppinsFont,Poppins,sans-serif !important; color: #fff; text-align: center; font-size: 28px; font-weight: 500; line-height: 1.2em; margin-top: -20px !important;"' ?> >Supercharge your brand</p>
 
         </div>
       </div>
 
       <div class="wpb_text_column wpb_content_element  vc_custom_1576083696003">
         <div class="wpb_wrapper">
-          <p class="p1" style="text-align: center;"><span class="s1" style="color: #e0e8f9; font-size: 14px !important;">
+          <p class="p1" <?php echo 'style="text-align: center;"><span class="s1" style="color: #e0e8f9; font-size: 14px !important;" '; ?>>
 
-            Have your product picked up tomorrow and photos ready by <span class="date green"  style="
-    color: #3CBF8A; font-weight: bold;"><?php echo $ready_date_prem ?></span>
+            Have your product picked up tomorrow and photos ready by <span class="date green" <?php echo 'style="color: #3CBF8A; font-weight: bold;" '; ?> ><?php echo $ready_date_prem ?></span>
 
 
           </span></p>
@@ -3310,14 +3309,14 @@ class theme_content_output{
 
 
 
-    <section class="vc_section vc_custom_1576161916481 vc_section-has-fill"><div class="vc_row wpb_row vc_row-fluid container container_sm vc_custom_1576164834145 vc_row-has-fill"><div class="wpb_column vc_column_container vc_col-sm-12"><div class="vc_column-inner"><div class="wpb_wrapper"><div class="vc_row wpb_row vc_inner vc_row-fluid vc_custom_1576164837515 vc_row-has-fill"><div class="wpb_column vc_column_container vc_col-sm-12"><div class="tour__box vc_column-inner"><div class="wpb_wrapper"><div class="vc_empty_space" style="height: 20px"><span class="vc_empty_space_inner"></span></div>
+    <section class="vc_section vc_custom_1576161916481 vc_section-has-fill"><div class="vc_row wpb_row vc_row-fluid container container_sm vc_custom_1576164834145 vc_row-has-fill"><div class="wpb_column vc_column_container vc_col-sm-12"><div class="vc_column-inner"><div class="wpb_wrapper"><div class="vc_row wpb_row vc_inner vc_row-fluid vc_custom_1576164837515 vc_row-has-fill"><div class="wpb_column vc_column_container vc_col-sm-12"><div class="tour__box vc_column-inner"><div class="wpb_wrapper"><div class="vc_empty_space" <?php echo 'style="height: 20px"'; ?>><span class="vc_empty_space_inner"></span></div>
   <div class="wpb_raw_code wpb_content_element wpb_raw_html vc_custom_1576163464660">
     <div class="wpb_wrapper">
       <div class="vc_col-sm-2">
 
 </div>
 <div class="vc_col-sm-8">
-<p style="font-family: PoppinsFont,Poppins,sans-serif !important; color: #fff; text-align: center; font-size: 40px; font-weight: 500; line-height: 1.2em;">Stay in full creative control at every stage.</p>
+<p <?php echo 'style="font-family: PoppinsFont,Poppins,sans-serif !important; color: #fff; text-align: center; font-size: 40px; font-weight: 500; line-height: 1.2em;"'; ?>'>Stay in full creative control at every stage.</p>
 </div>
 <div class="vc_col-sm-2">
 
@@ -3347,13 +3346,9 @@ class theme_content_output{
     </figure>
   </div>
 </div></div></div></div></div></div></div></div></section>
-
-
-
-
-        <section class="white media-details-wrapper">
+       <section class="white media-details-wrapper">
           <div class="container container_sm">
-            <div class="media-details" style="background-image:url(<?php echo THEME_URL ?>/images/bg_orbit_s.jpg);">
+            <div class="media-details" <?php echo 'style="background-image:url('. THEME_URL.'/images/bg_orbit_s.jpg);"';?>>
               <p class="media-details__category"><?php echo $subtitle; ?></p>
               <h3 class="media-details__title"><?php echo $title; ?></h3>
               <p class="media-details__text"><?php echo $text; ?></p>

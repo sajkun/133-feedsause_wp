@@ -18,8 +18,28 @@
 defined( 'ABSPATH' ) || exit;
 
 global $product;
+$product_id = $product->get_id();
+
 
 $attribute_keys = array_keys( $attributes );
+
+$image_counts = get_post_meta($product_id, '_items_count', true);
+
+if($image_counts ){
+  $image_counts = array_unique( $image_counts );
+  $image_counts = array_values($image_counts);
+  sort( $image_counts , SORT_NUMERIC   );
+  $image_counts[count($image_counts) - 1] = 'or '. $image_counts[count($image_counts) - 1];
+}
+
+$min_price = 999999;
+
+foreach($product->get_available_variations() as $_product){
+  $min_price = min($min_price, (int)$_product['display_price']);
+}
+
+$free_product_id = get_field('free_sample', $product->get_id());
+$free_product    = wc_get_product($free_product_id);
 
 do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 
@@ -38,7 +58,11 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 
 		<input type="hidden" value="<?php echo $product->get_id() ?>"    ref="product_id">
 
+    <input type="hidden" value="<?php echo $free_product_id; ?>"    ref="product_id_free">
+
 		<input type="hidden" value="<?php echo $product->get_title() ?>" ref="recipe_name">
+
+    <input type="hidden" value="<?php echo $free_product->get_title() ?>" ref="recipe_name_free">
 
 		<input type="hidden" value='<?php echo json_encode($attribute_keys); ?>' ref="attributes">
 
@@ -92,56 +116,118 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
         v-on:after-leave="leaveAfter"
       >
 
-			<div class="product-instance-options"  v-for="(product, index) in products" :key="index" :ref="'instance_' + index">
+			<div class="product-instance-options"  v-for="(product, index) in products" :key="index" :ref="'instance_' + index" >
 				<div class="clearfix">
 					<text-input  v-bind:_id="index" v-on:product_name_changed="update_product_name($event, index)"  v-bind:class="'single-recipe__item-name'" :ref="'name'" v-model="product.name"></text-input>
 			  </div>
-				<?php
-         foreach ( $attributes as $attribute_name => $options ): ?>
-					<?php if (count($attributes) > 1):
-						switch ($attribute_labels['attribute_'.$attribute_name ]['type']) {
-							case 'icon':
-								$icon  =  sprintf('<i class="icon-%s"></i>', $attribute_labels['attribute_'.$attribute_name ]['icon'] );
-								break;
-							case 'image':
-								$image_id  = (int)$attribute_labels['attribute_'.$attribute_name ]['icon_id'];
-				        $image_url = wp_get_attachment_image_url($image_id, 'thumbnail');
-				        $icon      = sprintf('<img class="image-icon" src="%s" height="18" width="18" alt="">', $image_url );
-								break;
-							default:
-								$icon = '';
-								break;
-						}
-						?>
-						<span class="single-recipe__label">
-							<?php echo $icon ?>
-							<b><?php echo wc_attribute_label( $attribute_name ); // WPCS: XSS ok. ?> </b>
-						</span>
-					<?php endif ?>
-	      	<div class="row gutters-10 justify-content-between" :ref="'attribute_<?php echo $attribute_name; ?>'">
-						<?php
-						   $terms = wc_get_product_terms(
-                $product->get_id(),
-                $attribute_name,
-                array(
-                    'fields' => 'all',
-                )
-              );
-						foreach ($terms as $num => $term) {
-							?>
-                <product-option
-                v-bind:_id ="index"
-                _option_text="<?php echo $term->name ?>"
-                v-model="product.attributes['attribute_<?php echo $attribute_name ?>']"
-                _option_value="<?php echo $term->slug ?>"
-                _option_name="attribute_<?php echo $attribute_name ?>"
-                v-on:update_input_value="update_product($event, index, 'attribute_<?php echo $attribute_name; ?>')"></product-option>
-							<?php
-							} ?>
-			  	</div><!-- row -->
-			    <div class="spacer-h-10"></div>
-			    <div class="spacer-h-10"></div>
-					<?php endforeach; ?>
+
+        <div class="row gutters-10">
+
+          <div class="col-6">
+            <div class="product-switcher" v-on:click=" order_product = 'regular' "  v-bind:class="{active : order_product === 'regular'}">
+              <span class="product-switcher__option-view text-left">
+                 <span class="row no-gutters">
+                  <span class="col-8">
+                    <span class="title">Multiple Photos </span>
+                    <?php if ($image_counts): ?>
+                    <span class="price"> <?php echo implode(' ', $image_counts); ?></span>
+                    <?php endif ?>
+                  </span>
+                  <span class="col-4 valign-center text-right">
+                    <span class="marked">from</span>
+                    <span class="marked"><?php echo wc_price($min_price) ?></span>
+                  </span>
+                </span>
+              </span>
+            </div>
+          </div><!-- col-6 -->
+
+          <div class="col-6" >
+            <transition
+              v-bind:css="false"
+              v-on:before-enter="beforeEnter"
+              v-on:enter="enter"
+              v-on:leave="leave"
+              v-on:after-enter="enterAfter"
+              v-on:after-leave="leaveAfter"
+             >
+              <div class="product-switcher" v-if="products.length <= 1" v-on:click=" update_selection_data(index, 'free') " v-bind:class="{active : order_product === 'free'}">
+                <span class="product-switcher__option-view text-left">
+                   <span class="row">
+                    <span class="col-7">
+                      <span class="title">Free Sample </span>
+                      <span class="price"> 1 Photo</span>
+                    </span>
+                    <span class="col-5 valign-center">
+                      <span class="free">Free</span>
+                    </span>
+                  </span>
+                </span>
+              </div>
+            </transition>
+          </div><!-- col-6 -->
+
+        </div><!-- row -->
+
+
+        <div class="spacer-h-10"> </div>
+        <transition
+          v-bind:css="false"
+          v-on:before-enter="beforeEnter"
+          v-on:enter="enter"
+          v-on:leave="leave"
+          v-on:after-enter="enterAfter"
+          v-on:after-leave="leaveAfter"
+         >
+        <div class=""  v-if="order_product == 'regular'">
+  				<?php
+           foreach ( $attributes as $attribute_name => $options ): ?>
+    					<?php if (count($attributes) > 1):
+    						switch ($attribute_labels['attribute_'.$attribute_name ]['type']) {
+    							case 'icon':
+    								$icon  =  sprintf('<i class="icon-%s"></i>', $attribute_labels['attribute_'.$attribute_name ]['icon'] );
+    								break;
+    							case 'image':
+    								$image_id  = (int)$attribute_labels['attribute_'.$attribute_name ]['icon_id'];
+    				        $image_url = wp_get_attachment_image_url($image_id, 'thumbnail');
+    				        $icon      = sprintf('<img class="image-icon" src="%s" height="18" width="18" alt="">', $image_url );
+    								break;
+    							default:
+    								$icon = '';
+    								break;
+    						}
+    						?>
+    						<span class="single-recipe__label">
+    							<?php echo $icon ?>
+    							<b><?php echo wc_attribute_label( $attribute_name ); // WPCS: XSS ok. ?> </b>
+    						</span>
+    					<?php endif ?>
+    	      	<div class="row gutters-10 justify-content-between" :ref="'attribute_<?php echo $attribute_name; ?>'">
+    						<?php
+    						   $terms = wc_get_product_terms(
+                    $product->get_id(),
+                    $attribute_name,
+                    array(
+                        'fields' => 'all',
+                    )
+                  );
+    						foreach ($terms as $num => $term) {
+    							?>
+                    <product-option
+                    v-bind:_id ="index"
+                    _option_text="<?php echo $term->name ?>"
+                    v-model="product.attributes['attribute_<?php echo $attribute_name ?>']"
+                    _option_value="<?php echo $term->slug ?>"
+                    _option_name="attribute_<?php echo $attribute_name ?>"
+                    v-on:update_input_value="update_product($event, index, 'attribute_<?php echo $attribute_name; ?>')"></product-option>
+    							<?php
+    							} ?>
+              </div><!-- row -->
+      		    <div class="spacer-h-10"></div>
+      		    <div class="spacer-h-10"></div>
+  		  		<?php endforeach; ?>
+          </div>
+        </transition>
         <transition
           v-bind:css="false"
           v-on:before-enter="beforeEnter"
@@ -169,9 +255,20 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
         </transition>
 			</div><!-- product-instance-options -->
       </transition-group>
-			<div class="clearfix">
-		    <a href="javascript:void(0)" v-on:click="add_new_product" class="trigger-add">[+]  Add Another Product</a>
-		  </div>
+
+      <transition
+        v-bind:css="false"
+        v-on:before-enter="beforeEnter"
+        v-on:enter="enter"
+        v-on:leave="leave"
+        v-on:after-enter="enterAfter"
+        v-on:after-leave="leaveAfter"
+       >
+  			<div class="clearfix" v-if="order_product === 'regular'" >
+  		    <a href="javascript:void(0)" v-on:click="add_new_product" class="trigger-add">[+]  Add Another Product</a>
+  		  </div>
+      </transition>
+
 			<div class="spacer-h-10"></div>
 			<div class="spacer-h-10"></div>
 		  <div class="single-recipe__hr"></div>

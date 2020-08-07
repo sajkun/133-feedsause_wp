@@ -1210,9 +1210,10 @@ class theme_formatted_cart{
 
 
   protected function get_image_count($item, $product){
-    $count = 0;
+    $count = 1;
     $meta = get_post_meta($item['product_id'], '_items_count', true);
     if($meta){
+      $count = 0;
       foreach ($item['items'] as $key => $_item) {
         $count += (int)$meta[$_item['variation_id']];
       }

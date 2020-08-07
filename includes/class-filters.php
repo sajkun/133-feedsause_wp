@@ -133,7 +133,27 @@ class theme_filter_class{
      // add_filter('the_title', array($this, 'add_price_to_title'), 100, 2);
 
     add_filter('pre_get_posts', array($this, 'exlude_some_products'));
+
+
+
+    add_filter( 'woocommerce_is_purchasable', array($this,'price_0_is_purchasable') , 10, 2 );
+
   }
+
+   /**
+    * makes product with 0 price purchaseable
+    *
+    * @param $purchasable - bool
+    * @param $product - WC_Product obj
+    *
+    * @return $purchasable - bool
+    */
+   public static function price_0_is_purchasable( $purchasable, $product ){
+        if( $product->get_price() >= 0 )
+            $purchasable = true;
+        return $purchasable;
+    }
+
 
     public function exlude_some_products( $query ){
       if(!is_admin()){
@@ -311,13 +331,21 @@ class theme_filter_class{
  * @return $query - query object
  */
   public static function exclude_products_incategories($query){
-    if(!is_admin() && theme_construct_page::is_page_type( 'woo-shop-category' ) && isset($query->query_vars['wc_query']) && 'product_query' === $query->query_vars['wc_query']){
+
+    $is_shop = function_exists('is_shop') && is_shop();
+
+    if(!is_admin() &&( theme_construct_page::is_page_type( 'woo-shop-category') || $is_shop )&& isset($query->query_vars['wc_query']) && 'product_query' === $query->query_vars['wc_query']){
 
       $query->query_vars['meta_query'] = array(
+        'relationship' => 'AND',
         array(
           'key'     => '_is_theme_featured',
           'compare' => 'NOT EXISTS'
         ),
+        // array(
+        //   'key'     => '_is_free_sample',
+        //   'compare' => 'NOT EXISTS'
+        // ),
       );
     }
 

@@ -1431,6 +1431,7 @@ products_mixin ={
         var valid_attr = vm.are_attributes_selected(product, product_id, false);
 
         vm.products[product_id].alert_variations_no_select = valid_attr.not_selected;
+
         vm.products[product_id].alert_variations_not_found =  !valid_attr.not_selected && !valid_attr.valid;
       })
     },
@@ -1601,6 +1602,14 @@ products_mixin ={
         button_text: 'Add to Basket',
       };
 
+      var vm = this;
+
+      Vue.nextTick(function(){
+        vm.sizes_alert_is_init = true;
+      })
+
+
+
       for(var id in _default){
         this[id] = _default[id];
       }
@@ -1642,6 +1651,12 @@ products_mixin ={
           //show or hide alerts
           this.products[product_id].alert_variations_no_select = not_selected;
           this.products[product_id].alert_variations_not_found = !not_selected && !valid_attr;
+
+          if(this.order_product ==='free') {
+            valid = true;
+            this.products[product_id].alert_variations_no_select = false;
+            this.products[product_id].alert_variations_not_found = false;
+          }
         }
 
          this.sizes_alert_is_init = false;
@@ -1811,6 +1826,10 @@ if(document.getElementById('single-product-variations')){
     ],
 
     data:{
+      order_product: 'regular', // or 'free'
+      product_id: -1,
+      sizes: [],
+      recipe_name: '',
       products: [{
         name: '',
         attributes: {},
@@ -1820,10 +1839,25 @@ if(document.getElementById('single-product-variations')){
         alert_name: false,
         alert_name_duplicate: false,
       }],
-       button_text: 'Add to Basket',
+
+      button_text: 'Add to Basket',
     },
 
     watch: {
+      order_product: function(val){
+
+        switch(val){
+          case 'free':
+            this.recipe_name = this.$refs.recipe_name_free.value;
+            this.product_id = this.$refs.product_id_free.value;
+            break;
+          default:
+            this.recipe_name = this.$refs.recipe_name.value;
+            this.product_id = this.$refs.product_id.value;
+            break;
+        }
+      },
+
       sizes: function(){
         this.sizes_alert_is_init = false;
 
@@ -1847,9 +1881,7 @@ if(document.getElementById('single-product-variations')){
     },
 
     methods:{
-
       update_scroll: function(){},
-
       get_variation_data: function(){
         return JSON.parse( document.getElementById("single-product-variations").dataset.product_variations);
       },
@@ -1883,16 +1915,43 @@ if(document.getElementById('single-product-variations')){
         // prepare data about products for request
         var products = [];
 
-        for(id in this.products){
-          products.push({
-            name:         this.products[id].name,
-            attributes:   this.products[id].attributes,
-            variation_id: this.products[id].variation.variation_id,
-          })
+
+        switch(this.order_product){
+          case 'free':
+            for(id in this.products){
+              products.push({
+                name:         this.products[id].name,
+                attributes:   [],
+                variation_id: this.product_id,
+              })
+            }
+           break;
+
+          default:
+            for(id in this.products){
+
+              products.push({
+                name:         this.products[id].name,
+                attributes:   this.products[id].attributes,
+                variation_id: this.products[id].variation.variation_id,
+              })
+            }
+          break;
         }
 
         // send a request to add a product
         this.send_add_request(products);
+      },
+
+
+      update_selection_data: function(index, order_product){
+
+        this.order_product = order_product;
+
+        if(order_product == 'free'){
+          this.products[index].alert_variations_no_select = false;
+          this.products[index].alert_variations_not_found = false;
+        }
       },
 
 
@@ -1906,6 +1965,7 @@ if(document.getElementById('single-product-variations')){
         var vm = this;
         this.button_text = "Adding to Basket..."
 
+
         // create and object for aja request
         var data_send = {
           data: {
@@ -1918,6 +1978,8 @@ if(document.getElementById('single-product-variations')){
           action: 'add_product_to_cart',
         };
 
+        console.log( data_send );
+
          // blocks window while script is running
         jQuery('#single-product-variations').closest('.site-container').addClass('processing');
 
@@ -1929,7 +1991,6 @@ if(document.getElementById('single-product-variations')){
         })
 
         .done(function(data, state, xhr) {
-
           console.groupCollapsed('product added to cart succesfully');
 
           console.log(data);
