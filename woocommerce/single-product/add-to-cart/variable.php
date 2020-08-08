@@ -58,11 +58,11 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 
 		<input type="hidden" value="<?php echo $product->get_id() ?>"    ref="product_id">
 
-    <input type="hidden" value="<?php echo $free_product_id; ?>"    ref="product_id_free">
+    <input type="hidden" value="<?php echo $free_product_id?: -1; ?>"    ref="product_id_free">
 
 		<input type="hidden" value="<?php echo $product->get_title() ?>" ref="recipe_name">
 
-    <input type="hidden" value="<?php echo $free_product->get_title() ?>" ref="recipe_name_free">
+    <input type="hidden" value="<?php echo $free_product_id? $free_product->get_title() : ''; ?>" ref="recipe_name_free">
 
 		<input type="hidden" value='<?php echo json_encode($attribute_keys); ?>' ref="attributes">
 
@@ -121,6 +121,7 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 					<text-input  v-bind:_id="index" v-on:product_name_changed="update_product_name($event, index)"  v-bind:class="'single-recipe__item-name'" :ref="'name'" v-model="product.name"></text-input>
 			  </div>
 
+            <?php if ($free_product_id): ?>
         <div class="row gutters-10">
 
           <div class="col-6">
@@ -143,6 +144,7 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
           </div><!-- col-6 -->
 
           <div class="col-6" >
+
             <transition
               v-bind:css="false"
               v-on:before-enter="beforeEnter"
@@ -168,6 +170,7 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
           </div><!-- col-6 -->
 
         </div><!-- row -->
+            <?php endif ?>
 
 
         <div class="spacer-h-10"> </div>

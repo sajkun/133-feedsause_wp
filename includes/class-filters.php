@@ -342,10 +342,10 @@ class theme_filter_class{
           'key'     => '_is_theme_featured',
           'compare' => 'NOT EXISTS'
         ),
-        // array(
-        //   'key'     => '_is_free_sample',
-        //   'compare' => 'NOT EXISTS'
-        // ),
+        array(
+          'key'     => '_is_free_sample',
+          'compare' => 'NOT EXISTS'
+        ),
       );
     }
 
