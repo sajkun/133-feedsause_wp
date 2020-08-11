@@ -1428,3 +1428,34 @@ function fix_fasstrack_product($checkout){
     }
   }
 }
+
+function is_sample_already_ordered($product_id_check){
+  if(!is_user_logged_in()){
+    return false;
+  }
+
+  $user_id = get_current_user_id();
+
+
+  $customer_orders = get_posts( array(
+    'numberposts' => -1,
+    'meta_key'    => '_customer_user',
+    'meta_value'  => get_current_user_id(),
+    'post_type'   => wc_get_order_types(),
+    'post_status' => array_keys( wc_get_order_statuses() ),
+    'fields'  => 'ids'
+  ) );
+
+  foreach ($customer_orders as $key => $order_id) {
+    $order = wc_get_order( $order_id );
+    $items = $order->get_items();
+    foreach ( $items as $item_id => $item ) {
+       $product_id = $item->get_variation_id() ? $item->get_variation_id() : $item->get_product_id();
+       if ( $product_id === $product_id_check ) {
+           return true;
+       }
+    }
+  }
+
+  return false;
+}

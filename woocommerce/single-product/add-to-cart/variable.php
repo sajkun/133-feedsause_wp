@@ -38,8 +38,9 @@ foreach($product->get_available_variations() as $_product){
   $min_price = min($min_price, (int)$_product['display_price']);
 }
 
-$free_product_id = get_field('free_sample', $product->get_id());
+$free_product_id = get_field('free_sample', $product_id);
 $free_product    = wc_get_product($free_product_id);
+
 
 do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 
@@ -121,7 +122,7 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 					<text-input  v-bind:_id="index" v-on:product_name_changed="update_product_name($event, index)"  v-bind:class="'single-recipe__item-name'" :ref="'name'" v-model="product.name"></text-input>
 			  </div>
 
-            <?php if ($free_product_id): ?>
+        <?php if ($free_product_id && !is_sample_already_ordered( $free_product_id )): ?>
         <div class="row gutters-10">
 
           <div class="col-6">
@@ -170,7 +171,7 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
           </div><!-- col-6 -->
 
         </div><!-- row -->
-            <?php endif ?>
+        <?php endif ?>
 
 
         <div class="spacer-h-10"> </div>
