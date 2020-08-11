@@ -299,12 +299,12 @@ class velesh_init_theme{
   }
 
 
-    public static  function add_settings_for_google_auth(){
+    public  function add_settings_for_google_auth(){
       add_options_page('Google-auth-settings', 'Google Authification settings', 'manage_options', 'wfp_settings_google_auth', array($this, 'wfp_settings_google_auth_cb'));
     }
 
 
-    public static function wfp_settings_google_auth_cb(){
+    public function wfp_settings_google_auth_cb(){
 
       if (isset($_POST['google_auth_user_id'])) {
         update_option('google_auth_user_id' , $_POST['google_auth_user_id']);
@@ -920,16 +920,16 @@ $theme_init = new velesh_init_theme();
 
 
 if ( ! function_exists ( 'yith_pdf_invoice_show_order_barcode' ) ) {
-	/**
-	 * @param YITH_Document $document
-	 */
-	function yith_pdf_invoice_show_order_barcode( $document ) {
-		$order    = $document->order;
-		$order_id = yit_get_prop ( $order, 'id' );
-		echo do_shortcode ( '<p></p><p></p>[yith_render_barcode id="' . $order_id . '"]' );
-	}
+  /**
+   * @param YITH_Document $document
+   */
+  function yith_pdf_invoice_show_order_barcode( $document ) {
+    $order    = $document->order;
+    $order_id = yit_get_prop ( $order, 'id' );
+    echo do_shortcode ( '<p></p><p></p>[yith_render_barcode id="' . $order_id . '"]' );
+  }
 
-	add_action ( 'yith_ywpi_template_notes', 'yith_pdf_invoice_show_order_barcode', 20 );
+  add_action ( 'yith_ywpi_template_notes', 'yith_pdf_invoice_show_order_barcode', 20 );
 }
 
 

@@ -62,7 +62,7 @@ class velesh_theme_meta{
        <input type="hidden" name="do_theme_save" value="yes">
        <p class="form-field _weight_field ">
        <label for="_items_count[<?php echo $variation->ID ?>]">Number of photo per item</label>
-       <input type="number" class="short regular-text wc_input_decimal" style="" name="_items_count[<?php echo $variation->ID ?>]" id="_items_count[<?php echo $variation->ID ?>]" value="<?php echo $item_count[$variation->ID] ?>" placeholder="0"> </p>
+       <input type="number" class="short regular-text wc_input_decimal" name="_items_count[<?php echo $variation->ID ?>]" id="_items_count[<?php echo $variation->ID ?>]" value="<?php echo $item_count[$variation->ID] ?>" placeholder="0"> </p>
       <?php
     }
 
@@ -146,7 +146,7 @@ class velesh_theme_meta{
       <td>
         <div class="image-download" >
           <input type="hidden" class="image-id" name="_thumbnail" value="<?php echo $image_id ?>">
-          <div class="image-placeholder" style="max-width:64px" onclick="load_image(this)">
+          <div class="image-placeholder" <?php echo 'style="max-width:64px"' ?>onclick="load_image(this)">
             <img src="<?php echo $image[0] ?>" alt="" style="width: 64px; height: auto">
           </div>
           <div class="button-holder">
@@ -256,7 +256,7 @@ class velesh_theme_meta{
   /**
   * Adds metaboxes to posts
   */
-  public static function print_metaboxes(){
+  public function print_metaboxes(){
 
     add_meta_box( 'order_additional_date', __( 'Requested delivery date', 'theme-translations' ), array($this, 'ex_order_additional'), 'shop_order', 'side', 'high' );
 
