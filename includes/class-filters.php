@@ -332,9 +332,15 @@ class theme_filter_class{
  */
   public static function exclude_products_incategories($query){
 
-    $is_shop = function_exists('is_shop') && is_shop();
+    $is_shop = function_exists('is_shop')? is_shop() : false;
+    $is_product_category = function_exists('is_shop')? is_shop() : false;
 
-    if(!is_admin() &&( theme_construct_page::is_page_type( 'woo-shop-category') || $is_shop )&& isset($query->query_vars['wc_query']) && 'product_query' === $query->query_vars['wc_query']){
+
+    if(!is_admin() &&  ($is_shop || theme_construct_page::is_page_type( 'woo-shop-category')) &&  $query->is_main_query()){
+      $query->query_vars['posts_per_page']  = -1;
+    }
+
+    if(!is_admin() &&( theme_construct_page::is_page_type( 'woo-shop-category') )&& isset($query->query_vars['wc_query']) && 'product_query' === $query->query_vars['wc_query']){
 
       $query->query_vars['meta_query'] = array(
         'relationship' => 'AND',

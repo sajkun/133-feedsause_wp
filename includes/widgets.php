@@ -24,6 +24,10 @@ class theme_product_widget extends WP_Widget {
     $style = (isset($data['style']))? $data['style'] : '';
     if(!$data || !($data['product'])) return false;
 
+    global $widget_products;
+
+    $widget_products = $widget_products?: array();
+
     global $theme_product_widget_size;
 
     switch ($style ) {
@@ -45,6 +49,10 @@ class theme_product_widget extends WP_Widget {
             global $product;
             foreach ($products as $key => $p):
               $product = $p;
+              $widget_products[$p->get_id()] = array(
+                'product_id' => $p->get_id(),
+                'published' => false,
+              );
               wc_get_template_part( 'content', 'product' );
             endforeach ?>
           </div><!-- row -->

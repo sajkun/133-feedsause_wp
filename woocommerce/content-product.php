@@ -25,6 +25,8 @@ global $product;
 if ( empty( $product ) || ! $product->is_visible() ) {
 	return;
 }
+global $widget_products;
+
 
 $return_product_id = (int)get_option('wfp_return_product_id');
 $priority_delivery_product_id  = (int)get_option('wfp_priority_delivery_product_id');
@@ -36,6 +38,17 @@ $is_subsciption    = get_post_meta($product->get_id(), '_ywsbs_subscription', tr
 
 if ( ( 'yes' === $is_subsciption ) || ((int)$single_product_id  === $product->get_id())  || ((int)$priority_delivery_product_id  === $product->get_id())  || ((int)$return_product_id  === $product->get_id()) ) {
 	return;
+}
+
+$product_id = $product->get_id();
+
+if($widget_products && in_array( $product_id , array_keys($widget_products))){
+
+	if ($widget_products[$product_id]['published']) {
+		return;
+	}else{
+		$widget_products[$product_id]['published'] = true;
+	}
 }
 
 global $theme_product_widget_size;
