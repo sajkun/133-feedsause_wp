@@ -69,6 +69,7 @@ class velesh_init_theme{
     define('PROGRESS', THEME_URL.'/images/admin/progress.gif');
     define('DUMMY', THEME_URL.'/images/admin/blank.png');
     define('DUMMY_S', THEME_URL.'/images/admin/blank_s.png');
+    define('THEME_DEBUG', true);
   }
 
 
@@ -77,6 +78,7 @@ class velesh_init_theme{
    */
   public function define_theme_supports(){
     add_theme_support( 'woocommerce' );
+    add_theme_support( 'duh' );
 
     add_theme_support( 'html5', array( 'comment-list', 'comment-form', 'search-form', 'caption' ) );
 
@@ -226,22 +228,17 @@ class velesh_init_theme{
    */
   public function include_global(){
     global $pagenow;
-    include_once(THEME_PATH.'/includes/class-custom-posts.php');
+
     include_once(THEME_PATH.'/includes/helpers.php');
-    include_once(THEME_PATH.'/includes/class-ajax.php');
-    include_once(THEME_PATH.'/includes/class-theme-customizer.php');
-    include_once(THEME_PATH.'/includes/class-menu-walker.php');
-    include_once(THEME_PATH.'/includes/class-filters.php');
-    include_once(THEME_PATH.'/includes/widgets.php');
-    include_once(THEME_PATH.'/includes/shipping-method-theme.php');
-    include_once(THEME_PATH.'/includes/shortcodes.php');
-    include_once(THEME_PATH.'/includes/class-menu-edit-walker.php');
 
     if($pagenow == 'nav-menus.php'){
       include_once(THEME_PATH.'/includes/class-menu-edit.php');
       $menu_image = new custom_edit_menu_image();
     }
 
+    include_php_from_dir(THEME_PATH.'/includes/');
+
+    include_php_from_dir(THEME_PATH.'/order_tracker/includes/');
   }
 
 
@@ -296,11 +293,17 @@ class velesh_init_theme{
 
     add_action('admin_menu', array($this,'add_settings_for_google_auth'));
 
+    if(THEME_DEBUG){
+      add_action('wp_footer', 'exec_clog', PHP_INT_MAX);
+      add_action('admin_footer', 'exec_clog', PHP_INT_MAX);
+      add_action('end_page', 'exec_clog', PHP_INT_MAX);
+    }
   }
 
 
     public  function add_settings_for_google_auth(){
       add_options_page('Google-auth-settings', 'Google Authification settings', 'manage_options', 'wfp_settings_google_auth', array($this, 'wfp_settings_google_auth_cb'));
+
     }
 
 
@@ -965,6 +968,5 @@ function add_menu_attributes( $atts, $item, $args ) {
   return $atts;
 }
 add_filter( 'nav_menu_link_attributes', 'add_menu_attributes', 10, 3 );
-
 
 

@@ -5,20 +5,110 @@
 * @package theme/helpers
 */
 
-if(!function_exists('clog')){
+
+if(!function_exists('log')){
+
   /**
  * prints an inline script with output in console
  *
  * @param mixed $content - obj|array|string
  */
-  function clog($content){
-    echo '<script> console.log(';
-    echo json_encode($content);
-    echo ')</script>';
+  function clog($content, $color = false){
+    // if(!$content) return;
+
+    global $clog_data;
+    $clog_data = (!$clog_data)? array() : $clog_data;
+
+    $color = (is_object($content) || is_array($content))? false : $color;
+
+    $clog_data[] = array(
+       'content' => $content,
+       'color'   => $color,
+       'type'    => 'regular'
+    );
   }
 }
 
+if(!function_exists('exec_clog')){
+  function exec_clog(){
+    global $clog_data;
 
+    if(!$clog_data) return;
+
+    foreach ($clog_data as $key => $data) {
+      switch ($data['color']){
+         case 'red':
+            $script_open =  '<script> console.log("\x1b[0m\x1b[31m %s \x1b[0m",';
+          break;
+         case 'green':
+            $script_open =  '<script> console.log("\x1b[0m\x1b[32m %s \x1b[0m",';
+          break;
+         case 'blue':
+            $script_open =  '<script> console.log("\x1b[0m\x1b[34m %s \x1b[0m",';
+          break;
+         case 'purple':
+            $script_open =  '<script> console.log("\x1b[0m\x1b[35m %s \x1b[0m",';
+          break;
+         case 'cyan':
+            $script_open =  '<script> console.log("\x1b[0m\x1b[36m %s \x1b[0m",';
+          break;
+         case 'grey':
+            $script_open =  '<script> console.log("\x1b[0m\x1b[37m %s \x1b[0m",';
+          break;
+        default:
+            $script_open = '<script> console.log(';
+          break;
+      }
+
+      switch ($data['type']) {
+        case 'end':
+          echo '<script> console.groupEnd()</script>';
+          break;
+        case 'start':
+          printf( '<script> console.groupCollapsed("%s")</script>', $data['content']);
+          break;
+        case 'start:expanded':
+          printf( '<script> console.group("%s")</script>', $data['content']);
+          break;
+
+        default:
+          echo $script_open;
+          echo json_encode($data['content']);
+          echo ')</script>';
+          break;
+      }
+    }
+}
+
+
+if(!function_exists('glog')){
+  /**
+ * prints an inline script with output in console
+ *
+ * @param mixed $content - obj|array|string
+ */
+  function glog($content = 'group log', $expand = false){
+      global $clog_data;
+      $clog_data = (!$clog_data)? array() : $clog_data;
+      if ($content) {
+
+            $clog_data[] = array(
+               'content' => $content,
+               'color'   => false,
+               'type'    => (!$expand)?'start' : 'start:expanded'
+            );
+
+      }
+      else{
+        $clog_data[] = array(
+           'content' => $content,
+           'color'   => false,
+           'type'    => 'end'
+        );
+      }
+    }
+  }
+}
 if(!function_exists('dlog')){
 
   /**
@@ -27,7 +117,7 @@ if(!function_exists('dlog')){
  * @param mixed $content - obj|array|string
  */
   function dlog($content, $start=false, $end=false){
-    if(THEME_DEBUG === true && (!defined('DOING_AJAX'))){
+    if( 'THEME_DEBUG' === true && (!defined('DOING_AJAX'))){
 
       if ($start) {
         printf( '<script> console.groupCollapsed("%s")</script>', $content);
@@ -1436,7 +1526,6 @@ function is_sample_already_ordered($product_id_check){
 
   $user_id = get_current_user_id();
 
-
   $customer_orders = get_posts( array(
     'numberposts' => -1,
     'meta_key'    => '_customer_user',
@@ -1458,4 +1547,34 @@ function is_sample_already_ordered($product_id_check){
   }
 
   return false;
+}
+
+if(!function_exists('include_php_from_dir')){
+
+  /**
+  * Includes all php files from specified directory
+  *
+  * @param $path - string
+  */
+  function include_php_from_dir($path){
+    if(is_dir($path)){
+      foreach (glob($path.'/*') as $child_name){
+        if(is_dir($child_name)){
+          include_php_from_dir($child_name);
+        }else{
+         if(file_exists( $child_name )){
+           $ext = pathinfo($child_name, PATHINFO_EXTENSION);
+           if($ext === 'php'){
+             include_once($child_name);
+           }
+         }
+        }
+      }
+    }else{
+      $ext = pathinfo($path, PATHINFO_EXTENSION);
+      if($ext === 'php'){
+        include_once($path);
+      }
+    }
+  }
 }

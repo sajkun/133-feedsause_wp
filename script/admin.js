@@ -195,3 +195,17 @@ function string_replace(needle, highstack){
     }
     return template;
 }
+
+jQuery(document).ready(function(){
+  jQuery('.color-field').wpColorPicker();
+
+  jQuery('#order-list-sort').sortable({
+    stop: function( event, ui ) {
+      var items = jQuery('#order-list-sort').find('.block-item');
+      items.each(function(index, el) {
+        jQuery(el).find('.order').val(index);
+      });
+    },
+  });
+  jQuery('#order-list-sort').disableSelection();
+})

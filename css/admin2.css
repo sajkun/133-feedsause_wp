@@ -1,3 +1,16 @@
+.spacer-h-10{
+  height: 10px;
+  display: block;
+}
+.spacer-h-20{
+  height: 20px;
+  display: block;
+}
+.spacer-h-30{
+  height: 30px;
+  display: block;
+}
+
 .button-holder{
   display: -webkit-flex;
   display: -moz-flex;
@@ -722,6 +735,13 @@ border: 1px solid  #000;
   justify-content:  flex-start;
   max-width: 100%;
 }
+
+.item-lg{
+  flex:  0 0 480px;
+  margin: 0 10px 20px;
+}
+
+.item-md,
 .image-text-wrapper__item,
 .gallery-wrapper__item{
   flex:  0 0 360px;
@@ -737,4 +757,111 @@ border: 1px solid  #000;
 .gallery-wrapper__item img{
   max-width: 100%;
   height: auto;
+}
+
+.duh-settings-wrapper{
+  background: #fff;
+  border-radius: 10px;
+  padding: 30px;
+  border: 1px solid #ccd0d4;
+  box-shadow: 0 1px 1px rgba(0,0,0,.04);
+}
+.duh-table-settings{
+  text-align: left !important;
+  font-size: 14px;
+}
+
+.duh-table-settings th,
+.duh-table-settings td{
+  text-align: left !important;
+
+}
+
+.duh-tabs{
+  margin: 0 0 -2px;
+  padding: 0;
+  position: relative;
+  z-index: 10;
+}
+
+.duh-hide-check{
+  display: none;
+  position: absolute;
+  visibility: hidden;
+  opacity: 0;
+}
+
+.duh-tabs label{
+  padding: 5px 15px;
+  border: 1px solid transparent;
+  border-color: #ccd0d4;
+  background-color: #ccd0d4;
+  transition: all .1s;
+  border-radius: 5px 5px 0 0;
+  word-spacing: 0;
+}
+
+.duh-page-settings-content{
+  padding: 15px;
+  border: 1px solid #ccd0d4;
+  position: relative;
+  z-index: 1;
+}
+
+.duh-tabs li{
+  display: inline-block;
+  margin-right: 2px;
+}
+
+.duh-page-settings-content{
+  display: none;
+   background: #fff;
+}
+
+
+#order-list-sort .block-item{
+  margin-bottom: 20px;
+  border: 1px solid #eee;
+}
+
+#order-list-sort .block-item h3{
+  cursor: move;
+}
+
+#general:checked ~ .duh-tabs [for="general"]{
+  background: #fff;
+  border-bottom-color:#fff;
+}
+
+#general:checked ~ .general{
+  display: block;
+}
+
+
+#frontdesk:checked ~ .duh-tabs [for="frontdesk"]{
+  background: #fff;
+  border-bottom-color:#fff;
+}
+
+#frontdesk:checked ~ .frontdesk{
+  display: block;
+}
+
+
+#orders:checked ~ .duh-tabs [for="orders"]{
+  background: #fff;
+  border-bottom-color:#fff;
+}
+
+#orders:checked ~ .orders{
+  display: block;
+}
+
+#extra_data:checked ~ .duh-tabs [for="extra_data"]{
+  background: #fff;
+  border-bottom-color:#fff;
+}
+
+#extra_data:checked ~ .extra_data{
+  display: block;
 }

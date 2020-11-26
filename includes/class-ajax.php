@@ -453,6 +453,7 @@
 
     wp_send_json($result);
   }
+
 }
 
  new theme_ajax_class();
