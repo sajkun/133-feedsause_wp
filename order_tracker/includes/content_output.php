@@ -44,5 +44,17 @@ if(!class_exists('tracker_content_output')){
     public static function print_block_screen(){
       print_duh_template_part( 'block-screen' ,'order_tracker/templates/global', array());
     }
+
+
+    /**
+    * prints block screen
+    */
+    public static function print_popups(){
+      print_duh_template_part( 'popup-address' ,'order_tracker/templates/global', array());
+
+      print_duh_template_part( 'popup-address-billing' ,'order_tracker/templates/global', array());
+
+      print_duh_template_part( 'popup-product' ,'order_tracker/templates/global', array());
+    }
   }
 }

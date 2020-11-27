@@ -96,6 +96,68 @@ if(!class_exists('theme_order_tracker')){
       * Get date range for initial order load
       */
 
+      $args = array(
+        'limit'   => -1,
+        'exclude' => array(
+          (int)get_option('wfp_priority_delivery_product_id'),
+          (int)get_option('wfp_return_product_id'),
+          (int)get_option('wfp_single_product_id'),
+        ),
+      );
+
+      $products = wc_get_products($args);
+
+      $available_products = array_filter($products, function($p){
+        return "variable" == $p->get_type();
+      });
+
+      /**
+      * get keys for product array
+      */
+      $available_products_keys = array_values(array_map(function($product){
+        return strtolower($product->get_title());
+      }, $available_products ));
+
+
+      /**
+      * get products for product array
+      */
+
+      /**
+      * format data about variations
+      */
+      $available_products = array_map(function($product){
+        $variation_obj = $product->get_available_variations('objects');
+        $variations = array_map( function($var){
+          $images = $var->get_meta('_items_count');
+          $image_count = 1;
+
+          if(isset($images[$var->get_id()])){
+            $image_count = $images[$var->get_id()];
+          }else{
+            $image_count = get_count_from_name($var->get_name());
+          }
+          return array(
+            'price'   => $var->get_regular_price(),
+            'images'  => $image_count,
+            'variation_id' => $var->get_id(),
+          );
+        } , $variation_obj );
+
+        $variation_ids = array_values(array_map( function($var){
+          return $var->get_id();
+        }, $variation_obj ));
+
+        return array(
+          'name'            => $product->get_title(),
+          'variations'      => array_combine($variation_ids,$variations ),
+          'free_product_id' => $product->get_meta('free_sample'),
+        );
+      }, $available_products );
+
+
+
+
        $data = isset($_COOKIE['date_range_frontdesk'])? json_decode(str_replace('\\','', $_COOKIE['date_range_frontdesk'])): false;
 
        if(!$data){
@@ -151,12 +213,17 @@ if(!class_exists('theme_order_tracker')){
           array_unshift($filter_values[$filter_key], 'All '.$filter_key);
        }
 
+
+       /**/
+       $user = get_user_by('ID',get_current_user_id());
+
        /**
        * create array of all data to print
        */
       $data = array(
         'theme_debug'             => THEME_DEBUG? 1: 0,
         'all_users'               => $users,
+        'available_products'      => array_combine($available_products_keys, $available_products),
         'filter_values'           => $filter_values,
         'order_campaigns'         => $campaigns,
         'order_brands'            => $brands,
@@ -165,6 +232,7 @@ if(!class_exists('theme_order_tracker')){
         'order_statuses'          => $order_statuses_frontdesk,
         'frondtdesk_items'        => $orders,
         'WP_URLS'                 => $urls,
+        'logged_in_user'          => array('name'=>$user->display_name, 'user_id'=> $user->ID),
       );
 
       foreach ($data as $name => $value) {

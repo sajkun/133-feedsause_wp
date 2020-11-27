@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
             <order-status-select ref="order_status" _select_name="order_status" v-bind:_current_status='order_data.order_status' v-bind:class="'text-left'" v-on:update_list="update_order_status"></order-status-select>
 
-            <a href="#"  v-on:click.prevent="do_save=true" class="button-save-order">
+            <a href="#"  v-on:click.prevent="exec_save" class="button-save-order">
                <svg class="icon svg-icon-ok-marker"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-ok-marker"></use> </svg>
               Update
             </a>
@@ -109,7 +109,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                         </td>
                         <td><p class="leads-block__label">E-mail</p></td>
                         <td>
-                          <input-field _name="email" v-bind:_value="order_data.customer.email" v-on:input_value_changed="update_order($event, 'customer')">
+                            <span class="leads-block__text no-margin" v-bind:title="order_data.customer.email">{{order_data.customer.email}}</span>
                         </td>
                       </tr>
                       <tr>
@@ -158,12 +158,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 
                   <div class="leads-block__row">
                     <p class="no-notes" v-if="computed_enquery_notes.length === 0">No notes there yet</p>
-                    <div v-for="note,key in computed_enquery_notes" class="note-block">
+                    <div v-for="note, key in computed_enquery_notes" class="note-block">
                       <div class="note-block__header clearfix">
                         <span class="name">{{note.user_name}}</span>
                         <span class="date">{{note.date}}</span>
 
-                        <i class="remove-note-icon"  v-on:click="delete_note(note.key, 'enquery')">
+                        <i class="remove-note-icon"  v-on:click="delete_note('enquery', note.text, note.date)">
                           <svg class="icon svg-icon-trash"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-trash"></use></svg>
                         </i>
                       </div>
@@ -176,7 +176,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                       </div>
                     </div>
 
-                    <span class="note-block__show-more" v-on:click="enquery_notes_count = order_data.messages.enquery.length" v-if="enquery_notes_count < computed_enquery_notes_count"> <i class="icon"></i> Show {{order_data.messages.enquery.length - 1}} more</span>
+                    <span class="note-block__show-more" v-on:click="enquery_notes_count = order_data.messages.enquery.length + 999" v-if="enquery_notes_count < computed_enquery_notes_count"> <i class="icon"></i> Show {{order_data.messages.enquery.length - 1}} more</span>
                     <div class="spacer-h-20"></div>
                   </div>
 
@@ -215,16 +215,6 @@ if ( ! defined( 'ABSPATH' ) ) {
                   </div>
                 </div><!-- leads-block__row -->
                 <div class="hr"></div>
-
-                <div class="leads-block__row" v-if="new_order">
-                  <a href="#" class="add-button new-order-item" v-on:click.prevent="shop_popup('product')">
-                    + Product
-                  </a>
-                  <a href="#" class="add-button" v-on:click.prevent="shop_popup('fee')">
-                    + Fee
-                  </a>
-                </div><!-- leads-block__row -->
-                <div class="hr" v-if="new_order"></div>
 
                 <div class="products-block">
                   <div class="products-block__item" v-for="(item, key) in order_data.order.items" :key="key">
@@ -291,28 +281,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                 <div class="leads-block__row">
                   <table class="leads-block__data">
                     <tbody>
-                      <tr v-if="new_order" v-for="(addon, addon_key) in order_data.order.addons" >
-                        <td>
-                          <p class="leads-block__label no-margin">{{addon.title}}</p>
-                        </td>
-                        <td class="width-120">
-                           <select-imitation-obj
-                             :ref="addon_key"
-                             v-if="addon_key != 'discount'"
-                             v-bind:class="'fullwidth'"
-                             v-bind:_select_name="addon_key"
-                             v-bind:_options="order_addons[addon_key]"
-                             v-on:update_list="update_order_addon($event, addon_key);"
-                             ></select-imitation-obj>
-
-                           <input type="text" class="leads-block__input styled" v-if="addon_key == 'discount'"  v-model="order_data.order.addons.discount.name" placeholder="Enter coupon code">
-                        </td>
-                        <td>
-                          <p class="leads-block__label"  v-if="addon_key != 'discount'">{{order_data.order.currency_symbol}}{{addon.price}}</p>
-                          <p class="leads-block__label"  v-if="addon_key == 'discount'">{{order_data.order.currency_symbol}}{{order_data.order.addons.discount.price}}</p>
-                        </td>
-                      </tr>
-                      <tr v-for="(addon, addon_key) in order_data.order.addons" v-if="!new_order">
+                      <tr v-for="(addon, addon_key) in order_data.order.addons">
                         <td class="td-5">
                           <p class="leads-block__label no-margin">{{addon.title}}</p>
                         </td>
@@ -325,7 +294,6 @@ if ( ! defined( 'ABSPATH' ) ) {
                         <td>
                           <p class="leads-block__label">{{addon.price}}</p>
                         </td>
-                      </tr>
                       </tr>
                     </tbody>
                   </table>
@@ -392,10 +360,10 @@ if ( ! defined( 'ABSPATH' ) ) {
                           <span class="leads-block__label no-margin">Requested</span>
                         </td>
                         <td class="width-250">
-                          <span class="leads-block__text" v-if="!new_order && order_data.product_collection.requested">{{order_data.product_collection.requested}} </span>
+                          <span class="leads-block__text" v-if=" order_data.product_collection.requested">{{order_data.product_collection.requested}} </span>
 
                           <datepicker-styled
-                            v-if="new_order || !order_data.product_collection.requested"
+                            v-if="!order_data.product_collection.requested"
                             v-bind:_name="'requested'"
                             v-bind:_value="order_data.product_collection.requested"
                             v-on:input_value_changed="update_order($event, 'product_collection')"
@@ -462,13 +430,13 @@ if ( ! defined( 'ABSPATH' ) ) {
                       </td>
                       <td><p class="leads-block__label no-margin">Due</p></td>
                       <td>
-                        <datepicker-styled  v-if="!order_data.due_date.date || new_order"
+                        <datepicker-styled  v-if="!order_data.due_date.date"
                           v-bind:class="'fullwidth'"
                           :_name="'due_date'"
                           v-on:input_value_changed = "update_due_date($event)"
                         ></datepicker-styled>
                         <div class="text-right">
-                          <span class="due-date" v-if="order_data.due_date.date && !new_order" >{{due_date.value}}</span>
+                          <span class="due-date" v-if="order_data.due_date.date" >{{due_date.value}}</span>
                           <span v-html="due_date.days_left" v-if="order_data.due_date.date && !new_order"></span>
                         </div>
 
@@ -493,7 +461,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                         <span class="name">{{note.user_name}}</span>
                         <span class="date">{{note.date}}</span>
 
-                        <i class="remove-note-icon"  v-on:click="delete_note(note.key, 'studio')">
+                        <i class="remove-note-icon"  v-on:click="delete_note('studio', note.text, note.date)">
                           <svg class="icon svg-icon-trash"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-trash"></use></svg>
                         </i>
                       </div>

@@ -515,6 +515,7 @@ animation_mixin = {
 }
 var fds_order = {
     watch:{
+
       visible:function(val){
         if(val){
         }else{
@@ -571,65 +572,51 @@ var fds_order = {
 
     computed:{
       computed_enquery_notes: function(){
-        var notes = this.order_data.messages.enquery;
-        var notes_c = [];
-        var counter = 0;
+        var notes = this.order_data.messages.enquery.filter(el => {
+          return el.show == '1';
+        });
 
-        for (var id = notes.length - 1; id >= 0;  id--) {
-          var note = notes[id];
+        notes.sort(function (a, b){
+          var date_a = new Date(a._date);
+          var date_b = new Date(a._date);
+          if(date_a == date_b){
+            return 0;
+          }
+          return date_b > date_a ? 1 : -1;
+        });
 
-           if(note.show == 1 && counter < this.enquery_notes_count){
-              note.key =  notes.length -1 - id;
-              notes_c.push(note);
-              counter++;
-           }
-        }
-        return notes_c;
+        return notes.splice(0, this.enquery_notes_count);
       },
 
       computed_enquery_notes_count: function(){
-        var counter = 0;
-        var notes = this.order_data.messages.enquery;
-
-        for (var id = notes.length -1; id >= 0;  id--) {
-          var note = notes[id];
-
-           if(note.show == 1){
-              counter++;
-           }
-        }
-        return counter;
+        var shown = this.order_data.messages.enquery.map(el=>{
+          return parseInt(el.show);
+        });
+        return shown.reduce((a, b) => a + b, 0);
       },
 
       computed_studio_notes: function(){
-        var notes = this.order_data.messages.studio;
-        var notes_c = [];
-        var counter = 0;
+        var notes = this.order_data.messages.studio.filter(el => {
+          return el.show == '1';
+        });
 
-        for (var id = notes.length - 1; id >= 0;  id--) {
-          var note = notes[id];
+        notes.sort(function (a, b){
+          var date_a = new Date(a._date);
+          var date_b = new Date(a._date);
+          if(date_a == date_b){
+            return 0;
+          }
+          return date_b > date_a ? 1 : -1;
+        });
 
-           if(note.show == 1 && counter < this.studio_notes_count){
-              note.key =  notes.length -1 - id;
-              notes_c.push(note);
-              counter++;
-           }
-        }
-        return notes_c;
+        return notes.splice(0, this.studio_notes_count);
       },
 
       computed_studio_notes_count: function(){
-        var counter = 1;
-        var notes = this.order_data.messages.studio;
-
-        for (var id = notes.length -1; id >= 0;  id--) {
-          var note = notes[id];
-
-           if(note.show == 1){
-              counter++;
-           }
-        }
-        return counter;
+        var shown = this.order_data.messages.studio.map(el=>{
+          return parseInt(el.show);
+        });
+        return shown.reduce((a, b) => a + b, 0);
       },
 
       due_date:function(){
@@ -750,6 +737,40 @@ var fds_order = {
         this.$set(this.order_data.order.items[key], 'expanded', !exp);
       },
 
+      exec_save:function(){
+        this.do_save = true;
+        this.exec_save_wordpress();
+      },
+
+      exec_save_vue: function(){
+        var item = frontdesk_list.get_item_by('order_id', this.order_data.order_id);
+        item.data = this.order_data;
+      },
+
+      exec_save_wordpress:function(){
+        var data = strip(this.order_data);
+
+        jQuery.ajax({
+          url: WP_URLS.ajax,
+          type: 'POST',
+          dataType: 'json',
+          data: {action: 'update_order_meta', data: data},
+        })
+
+        .done(function() {
+          console.log("success");
+        })
+
+        .fail(function() {
+          console.log("error");
+        })
+
+        .always(function(e) {
+          console.log(e);
+        });
+
+      },
+
      /**
      * updates order_data
      */
@@ -758,6 +779,7 @@ var fds_order = {
           this.order_data[key][data.name] = data['val'];
         }else{
           this.order_data[data.name] = data['val'];
+          console.log(strip(this.order_data));
         }
       },
 
@@ -804,17 +826,13 @@ var fds_order = {
         this.requre_save = true;
 
         var date = new Date();
-
-        var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May','Jun', 'Jul', 'Aug', "Sep", 'Oct', "Nov", "Dec"];
-
-        var minutes =  (date.getMinutes() < 10)?  '0' + date.getMinutes():  date.getMinutes();
-
-        var date_formatted = months[date.getMonth()] + ' ' + date.getDate() + ' ' + date.getFullYear() + ' at ' + date.getHours() + ':' + minutes;
+        var fmt  = new DateFormatter();
 
         var new_note = {
-          'date'       : date_formatted,
-          'user_name'  : '',
-          'user_id'    : '',
+          'date'       : fmt.formatDate(date, 'M d Y') + ' at ' + fmt.formatDate(date, 'H:i'),
+          '_date'      : fmt.formatDate(date, 'Y-m-d H:i:s'),
+          'user_name'  : logged_in_user.name,
+          'user_id'    : logged_in_user.user_id,
           'is_manager' : 'no',
           'done'       : 'no',
           'show'       : 1,
@@ -825,30 +843,23 @@ var fds_order = {
           this.order_data.messages.enquery.push(new_note);
           this.enquery_note_text = '';
           this.$refs.note_textarea_enquery.style.height = '';
-          // this.save_lead_meta('lead_notes', 'notes');
         }else if (type =='studio'){
           new_note.text = this.studio_note_text;
           this.order_data.messages.studio.push(new_note);
           this.studio_note_text = '';
           this.$refs.note_textarea_studio.style.height = '';
-           // this.save_lead_meta('lead_notes_tco', 'notes_tco');
         }
       },
 
       /**
       * delete note callback
       */
-      delete_note: function(key , type){
+      delete_note: function(type, text, date){
         type = 'undefined' !== typeof(type)? type : 'enquery';
-
-       if(type == 'enquery'){
-          key = this.order_data.messages.enquery.length - key - 1;
-          this.order_data.messages.enquery[key].show = 0;
-        }
-       if(type == 'studio'){
-          key = this.order_data.messages.studio.length - key - 1;
-          this.order_data.messages.studio[key].show = 0;
-        }
+        key = this.order_data.messages[type].findIndex(e=>{
+          return e.text == text && e.date == date;
+        });
+        this.order_data.messages[type][key].show = 0;
       },
 
       update_due_date: function(data){
@@ -871,6 +882,11 @@ var fds_order = {
             break;
           case 'address':
             popup_address.set_prop('visible', true);
+            popup_address.set_prop('new_order', this.new_order);
+            break;
+          case 'billing_address':
+            popup_address_billing.set_prop('visible', true);
+            popup_address_billing.set_prop('new_order', this.new_order);
             break;
         }
       },
@@ -1487,7 +1503,7 @@ var order_addons ={
   },
 }
 
-available_products = {
+_available_products = {
   swatch : {
     name: 'Swatch',
     variations: {
@@ -1542,7 +1558,8 @@ var frontdesk_list,
     popup_fee,
     popup_address,
     studio_app,
-    list_filter_mixin
+    list_filter_mixin,
+    popup_address_billing
 ;
 
 /***********************
@@ -1590,6 +1607,8 @@ var blank_order = {order_id:      '',
     data: {
       order_id:      '',
       name:          '',
+
+      address_billing: '',
 
       customer: {
         'date_added': '',
@@ -3598,7 +3617,7 @@ if(document.getElementById('frontdesk_list')){
     mixins: [get_set_props, list_filter_mixin],
 
     data: {
-        visible: true,
+        visible: false,
 
         filters: {
           campaigns : 'All Campaigns',
@@ -3957,32 +3976,6 @@ if(document.getElementById('single-frontdesk-order')){
 
     methods:{
 
-      exec_save_vue: function(){
-        var item = frontdesk_list.get_item_by('order_id', this.order_data.order_id);
-        item.data = this.order_data;
-      },
-
-      exec_save_wordpress:function(){
-        var data = strip(this.order_data);
-
-        jQuery.ajax({
-          url: WP_URLS.ajax,
-          type: 'POST',
-          dataType: 'json',
-          data: {action: 'update_order_meta', data: data},
-        })
-        .done(function() {
-          console.log("success");
-        })
-        .fail(function() {
-          console.log("error");
-        })
-        .always(function(e) {
-          console.log(e);
-        });
-
-      },
-
       /**
       * hides single element and shows order_list and filters
       */
@@ -4020,11 +4013,10 @@ if(document.getElementById('new-frontdesk-order')){
     mixins: [get_set_props, animation_mixin, fds_order],
 
     data: {
-      visible: false,
+      visible: true,
       new_order: true,
       item_index: -1,
-      order_data: blank_order,
-      order_data_inner: {},
+      order_data: blank_order.data,
       changed: false,
       do_save: false,
       studio_note_text:  '',
@@ -4058,11 +4050,11 @@ if(document.getElementById('new-frontdesk-order')){
     mounted: function(){
     },
 
-
-
     methods:{
       add_product: function(data){
         this.order_data.order.items.push(data);
+
+        console.log(strip(this.order_data.order.items));
       },
 
       add_fee: function(data){
@@ -4106,14 +4098,39 @@ if(document.getElementById('new-frontdesk-order')){
           return;
         }
 
-        this.order_data.order_id = 15;
-        var items = frontdesk_list.get_prop('items');
-        var new_item = {
-          order_id: this.order_data.order_id,
-          data: this.order_data,
-        }
+        block();
 
-        items.push(new_item);
+        var vm = this;
+
+        jQuery.ajax({
+          url: WP_URLS.ajax,
+          type: 'POST',
+          dataType: 'json',
+          data: {action: 'create_new_order',
+            data: vm.order_data,
+          },
+        })
+        .done(function(e) {
+          console.log(e);
+          vm.order_data.order_id = e.order_id;
+          var items = frontdesk_list.get_prop('items');
+
+          var new_item = {
+            order_id: vm.order_data.order_id,
+            data    : vm.order_data,
+          }
+
+          items.push(new_item);
+
+
+        })
+        .fail(function() {
+          console.log("error");
+        })
+        .always(function() {
+          unblock();
+        });
+
       },
 
       /**
@@ -4172,6 +4189,7 @@ if(document.getElementById('new-frontdesk-order')){
         this.order_data = {
           order_id:      '',
           name:          '',
+          address_billing: '',
 
           customer: {
             'date_added': '',
@@ -4314,11 +4332,15 @@ if(document.getElementById('add-product')){
 
   methods: {
     set_product_data: function(data){
+      this.is_product_selected = false;
       this.$refs.recipe.$el.classList.remove('error');
       this.variations = data.variations;
       this.recipe     = data.recipe;
       this.free_product_id = data.free_product_id;
-      this.is_product_selected = (data.variations || data.free_product_id)? true : false;
+      var vm = this;
+      Vue.nextTick(function(){
+        vm.is_product_selected = (data.variations || data.free_product_id)? true : false;
+      })
     },
 
     update_sizes: function(size){
@@ -4349,7 +4371,7 @@ if(document.getElementById('add-product')){
 
       var item = {
         title        : this.product_title,
-        item_id      : '',
+        product_id   : this.selected_product_id,
         product_name : this.recipe,
         image_count  :  'undefined'  !== typeof(this.variations[this.selected_product_id])? this.variations[this.selected_product_id].images + ' images' : '1 image',
         price        :  'undefined'  !== typeof(this.variations[this.selected_product_id])? this.variations[this.selected_product_id].price : 0,
@@ -4515,6 +4537,7 @@ if(document.getElementById('add-address')){
         line_1: '',
         line_2: '',
         zip: '',
+        new_order: '',
       };
     },
 
@@ -4547,7 +4570,11 @@ if(document.getElementById('add-address')){
           }
         }
 
-        frontdesk_order_new.update_order({name: 'address', val: item.join(', ')}, 'product_collection');
+        if(this.new_order){
+          frontdesk_order_new.update_order({name: 'address', val: item.join(', ')}, 'product_collection');
+        }else{
+          frontdesk_order.update_order({name: 'address', val: item.join(', ')}, 'product_collection');
+        }
 
         this.visible = false;
 
@@ -4564,6 +4591,101 @@ if(document.getElementById('add-address')){
           city:   'Enter a City or Town please',
           line_1: 'Enter an address please',
           zip:    'Enter postal code please',
+        }
+
+        var validated = {
+          is_valid: true,
+          messages: [],
+        };
+
+        for(var id in check){
+          var item = this[id];
+            if(!item){
+              this.$refs[id].classList.add('error');
+              validated.is_valid = false;
+              validated.messages.push(check[id]);
+            }
+          }
+        return validated;
+      },
+    }
+  })
+}
+if(document.getElementById('add-address-billing')){
+  popup_address_billing = new Vue({
+    el: '#add-address-billing',
+    mixins: [get_set_props, animation_mixin],
+    data: function(){
+      return {
+        visible: false,
+        countries: ["United Kingdon", 'Ireland'],
+        country: 'United Kingdon',
+        city: '',
+        line_1: '',
+        line_2: '',
+        zip: '',
+        company: '',
+      };
+    },
+
+    watch:{
+      visible:function(){
+        this.country  = 'United Kingdon';
+        this.city  = '';
+        this.line_1  = '';
+        this.line_2  = '';
+        this.zip  = '';
+        this.company  = '';
+      }
+    },
+
+    methods: {
+      submit: function(){
+        var validated = this.validate();
+        var vm = this;
+
+        if(!validated.is_valid){
+          setTimeout(function(){
+            alert(validated.messages.join('\n'));
+          },100);
+
+          return;
+        };
+
+        var _keys = [
+          'country',
+          'zip',
+          'city',
+          'line_1',
+          'line_2',
+          'company',
+        ];
+
+        var item = [];
+
+        for(var id of _keys){
+          if(this[id]){
+            item.push(this[id]);
+          }
+        }
+
+       frontdesk_order_new.update_order({name: 'address_billing', val: item.join(', ')}, 'core');
+
+        this.visible = false;
+      },
+
+      update_data: function(data){
+        if(data.val){
+          this[data.name] = data.val;
+        }
+      },
+
+      validate: function(){
+        var check = {
+          city:    'Enter a City or Town please',
+          line_1:  'Enter an address please',
+          zip:     'Enter postal code please',
+          company: 'Enter your company name please',
         }
 
         var validated = {

@@ -62,7 +62,7 @@ class velesh_theme_meta{
        <input type="hidden" name="do_theme_save" value="yes">
        <p class="form-field _weight_field ">
        <label for="_items_count[<?php echo $variation->ID ?>]">Number of photo per item</label>
-       <input type="number" class="short regular-text wc_input_decimal" name="_items_count[<?php echo $variation->ID ?>]" id="_items_count[<?php echo $variation->ID ?>]" value="<?php echo $item_count[$variation->ID] ?>" placeholder="0"> </p>
+       <input type="number" class="short regular-text wc_input_decimal" name="_items_count[<?php echo $variation->ID ?>]" id="_items_count[<?php echo $variation->ID ?>]" value="<?php echo isset($item_count[$variation->ID])? $item_count[$variation->ID] : ''; ?>" placeholder="0"> </p>
       <?php
     }
 
