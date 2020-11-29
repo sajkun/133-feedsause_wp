@@ -93,7 +93,77 @@ if(!class_exists('theme_order_tracker')){
       }, get_users($args_users));
 
       /**
-      * Get date range for initial order load
+      * get customer's data
+      */
+        global $wp_roles;
+        $args_customers = array(
+          'limit'          => -1,
+          'posts_per_page' => -1,
+          'role__in'       =>array('customer'),
+        );
+
+        $all_customers = array_map(function($el){
+          $customer = new WC_Customer($el->ID);
+          return array(
+            'name'    => $el->display_name,
+            'user_id' => $el->ID,
+            'brand'   => $customer->get_billing_company(),
+            'billing' => $customer->get_billing(),
+            'email'   => $customer->get_email(),
+            'user_registered' => $el->data->user_registered,
+          );
+        },get_users($args_customers));
+
+      /**
+      * products addons
+      */
+      $priority_delivery = wc_get_product((int)get_option('wfp_priority_delivery_product_id'));
+
+      $return_product = wc_get_product((int)get_option('wfp_return_product_id'));
+
+      $order_addons = array(
+        'turnaround' => array(
+          'fasttrack'=> array(
+            'name'=> 'Fast Track',
+            'price'=> $priority_delivery->get_regular_price(),
+            'product_id' => (int)get_option('wfp_priority_delivery_product_id'),
+          ),
+          'regular'=> array(
+            'name'=> 'Standart',
+            'price'=> 0,
+            'product_id' => -1,
+          ),
+        ),
+
+        'handling'   => array(
+          'return' => array(
+            'name'=> 'Return Products',
+            'price'=> $return_product->get_regular_price(),
+            'product_id' => (int)get_option('wfp_return_product_id'),
+          ),
+          'regular'=> array(
+            'name'=> 'Hold Product',
+            'price'=> 0,
+            'product_id' => -1,
+          ),
+        ),
+
+        'sendvia'    => array(
+          'free'=> array(
+            'name'=> 'Free Collection',
+            'price'=> 0,
+            'product_id' => -1,
+          ),
+          'self' => array(
+            'name'=> 'Self Shipping',
+            'price'=> 0,
+            'product_id' => -1,
+          ),
+        ),
+      );
+
+      /**
+      * Get products
       */
 
       $args = array(
@@ -118,10 +188,6 @@ if(!class_exists('theme_order_tracker')){
         return strtolower($product->get_title());
       }, $available_products ));
 
-
-      /**
-      * get products for product array
-      */
 
       /**
       * format data about variations
@@ -156,8 +222,9 @@ if(!class_exists('theme_order_tracker')){
       }, $available_products );
 
 
-
-
+      /**
+      * get date settings
+      */
        $data = isset($_COOKIE['date_range_frontdesk'])? json_decode(str_replace('\\','', $_COOKIE['date_range_frontdesk'])): false;
 
        if(!$data){
@@ -173,7 +240,7 @@ if(!class_exists('theme_order_tracker')){
        * get order data
        */
 
-       $orders = get_items_for_tracker('frontdesk',  $start_date->format('Y-m-d H:i:s'), $end_date->format('Y-m-d H:i:s') );
+       $orders = get_items_for_tracker('frontdesk',  $start_date->format('Y-m-d H:i:s'), $end_date->format('Y-m-d 23:59:59') );
 
        /**
        * get elements filtered
@@ -188,7 +255,7 @@ if(!class_exists('theme_order_tracker')){
        $grab_filter = array(
          'campaign' => ['customer.campaigns'],
          'source'   => ['customer.source'],
-         'team'      => ['customer.assigned', 'studio.creator'],
+         'team'     => ['customer.assigned', 'studio.creator'],
        );
 
        foreach ($grab_filter as $filter_key => $filter_sources) {
@@ -213,6 +280,29 @@ if(!class_exists('theme_order_tracker')){
           array_unshift($filter_values[$filter_key], 'All '.$filter_key);
        }
 
+       /**
+       * get all available coupons
+       */
+       $args = array(
+            'posts_per_page'   => -1,
+            'orderby'          => 'title',
+            'order'            => 'asc',
+            'post_type'        => 'shop_coupon',
+            'post_status'      => 'publish',
+        );
+
+       $coupons = array_map(function($item){
+         $coupon = new WC_Coupon($item->ID);
+
+         return array(
+           'name'          => $item->post_title,
+           'coupon_id'     => $item->ID,
+           'price'         => $coupon->get_amount(),
+           'discount_type' => $coupon->get_discount_type(),
+         );
+       },get_posts($args));
+
+
 
        /**/
        $user = get_user_by('ID',get_current_user_id());
@@ -223,15 +313,19 @@ if(!class_exists('theme_order_tracker')){
       $data = array(
         'theme_debug'             => THEME_DEBUG? 1: 0,
         'all_users'               => $users,
+        'all_customers'           => $all_customers,
         'available_products'      => array_combine($available_products_keys, $available_products),
         'filter_values'           => $filter_values,
         'order_campaigns'         => $campaigns,
         'order_brands'            => $brands,
         'order_sources'           => $sources,
+        'all_coupons'             => $coupons,
+        'order_addons'            => $order_addons,
         'frondtdesk_columns_data' => $frondtdesk_columns_data,
         'order_statuses'          => $order_statuses_frontdesk,
         'frondtdesk_items'        => $orders,
         'WP_URLS'                 => $urls,
+        'tracker_options'         => $options,
         'logged_in_user'          => array('name'=>$user->display_name, 'user_id'=> $user->ID),
       );
 

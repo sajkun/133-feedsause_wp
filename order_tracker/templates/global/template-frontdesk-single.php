@@ -15,7 +15,14 @@ if ( ! defined( 'ABSPATH' ) ) {
                <svg class="icon svg-icon-arrow-left"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-arrow-left"></use> </svg>
               <span>Back to Hub</span>
             </a>
-              <reminder v-on:input_value_changed="update_reminder($event)" v-bind:placeholder="'MM dd YYYY hh:mm'" _name="reminder" v-bind:_value="order_data.reminder.date" v-bind:_value_formatted="order_data.reminder.date_formatted" v-bind:_overdue="order_data.reminder.is_overdue"></reminder>
+              <reminder
+              v-on:input_value_changed="update_reminder($event)"
+              v-bind:placeholder="'MM dd YYYY hh:mm'"
+              v-model="order_data.reminder.date"
+              _name="reminder"
+              v-bind:_value="order_data.reminder.date"
+              v-bind:_value_formatted="order_data.reminder.date_formatted"
+              v-bind:_overdue="order_data.reminder.is_overdue"></reminder>
           </div>
 
           <div class="col-6 text-right">
@@ -100,7 +107,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                         </td>
                         <td><p class="leads-block__label">Phone</p></td>
                         <td>
-                          <input-field _name="phone" v-bind:_value="order_data.customer.phone" v-on:input_value_changed="update_order($event, 'customer')">
+                          <input-field _name="phone" v-bind:_value="order_data.customer.phone" v-on:input_value_changed="update_order($event, 'customer')"></input-field>
                         </td>
                       </tr>
                       <tr>

@@ -73,12 +73,6 @@ var Cookie =
    }
 };
 
-function clog(data){
-  if(typeof(THEME_DEBUG) !== 'undefined' && THEME_DEBUG == 'yes'){
-    console.log(data);
-  }
-}
-
 function create_new_order(){
   if('undefined' !== typeof(frontdesk_order_new)){
     frontdesk_order_new.set_prop('visible', true);
@@ -143,6 +137,27 @@ function block(){
 
 function unblock(){
   jQuery('.block-screen').removeClass('shown')
+}
+
+
+function is_boolean(val){
+  switch(typeof(val)){
+    case 'boolean':
+      return val;
+      break;
+    case 'string':
+      if(val.toLowerCase() === 'false'){
+        return false;
+      }
+      if(val.toLowerCase() === 'true'){
+        return true;
+      }
+      return !!parseInt(val);
+      break;
+    case 'number':
+      return !!parseInt(val);
+      break;
+  }
 }
 jQuery(document).on('click', '.mobile-menu-switcher', function(){
   jQuery(this).toggleClass('active');
@@ -525,7 +540,6 @@ var fds_order = {
             vm.changed = false;
             vm.studio_notes_count  = 1;
             vm.enquery_notes_count = 1;
-            vm.order_data_inner = {};
           })
         }
       },
@@ -654,15 +668,39 @@ var fds_order = {
         }
 
         for(var items of this.order_data.order.fee){
-
-          total +=parseFloat(items.price.replace(/[^-|\d]/g, ''));
+         if(items.price){
+           var price =typeof(items.price) == 'number'? items.price.toString(): items.price;
+            total +=parseFloat(price.replace(/[^.|-|\d]/g, ''));
+          }
         }
 
         for(var items in this.order_data.order.addons){
           if(this.order_data.order.addons[items].price){
-            total +=parseFloat(this.order_data.order.addons[items].price.replace(/[^-|\d]/g, ''));
+            var price;
+
+            if('undefined' == typeof(this.order_data.order.addons[items].discount_type) && this.order_data.order.addons[items].discount_type !== 'percent'){
+
+              price = typeof(this.order_data.order.addons[items].price) == 'number'? this.order_data.order.addons[items].price.toString() : this.order_data.order.addons[items].price;
+
+              total += parseFloat(price.replace(/[^-|\d]/g, ''));
+           }
           }
         }
+
+        for(var items in this.order_data.order.addons){
+          if(this.order_data.order.addons[items].price){
+            var price;
+
+            if('undefined' != typeof(this.order_data.order.addons[items].discount_type) && this.order_data.order.addons[items].discount_type == 'percent'){
+
+              price = this.order_data.order.addons[items].price;
+
+              total += total *  (parseFloat(price.replace(/[^-|\d]/g, ''))/100);
+            }
+          }
+        }
+
+        total = total < 0? 0 : total;
 
         return total.toFixed(2);
       },
@@ -756,17 +794,9 @@ var fds_order = {
           dataType: 'json',
           data: {action: 'update_order_meta', data: data},
         })
-
-        .done(function() {
-          console.log("success");
-        })
-
-        .fail(function() {
-          console.log("error");
-        })
-
         .always(function(e) {
-          console.log(e);
+          clog('update_order_meta');
+          clog(e);
         });
 
       },
@@ -779,7 +809,6 @@ var fds_order = {
           this.order_data[key][data.name] = data['val'];
         }else{
           this.order_data[data.name] = data['val'];
-          console.log(strip(this.order_data));
         }
       },
 
@@ -796,7 +825,7 @@ var fds_order = {
 
         this.order_data.reminder.date = data.value;
         this.order_data.reminder.date_formatted = data.value_formatted;
-        this.order_data.reminder.is_overdue = data.overdue;
+        this.order_data.reminder.is_overdue = is_boolean(data.overdue);
       },
 
       /**
@@ -949,6 +978,8 @@ var list_filter_mixin = {
       var items = this.items.filter(item => {
         validated = true;
 
+        var is_overdue = is_boolean(item.data.reminder.is_overdue);
+
         for(var filter_id in vm.filters){
           var filter_val = vm.filters[filter_id].toLowerCase();
 
@@ -964,20 +995,20 @@ var list_filter_mixin = {
 
         // validate by fasttrack
         validated = vm.fasttrack && !item.data.is_fasttrack? false: validated;
-
         validated = vm.only_with_messages && item.data.gallery.comments == 0 ? false: validated;
 
         // validate by due date (if has due date);
         validated = vm.due_date_only && !item.data.reminder.date? false: validated;
 
-        validated = vm.due_date_only && vm.overdue_only && !item.data.reminder.is_overdue? false : validated;
+        validated = vm.due_date_only && vm.overdue_only && !is_overdue? false : validated;
 
         return validated;
       });
 
       //calculate overdue number of elements
-      var _items = items.filter(function(el){
-          return typeof(el.data.reminder.is_overdue) !== 'undefined' && el.data.reminder.is_overdue
+      var _items = items.filter(function(item){
+        var is_overdue = is_boolean(item.data.reminder.is_overdue);
+        return typeof(item.data.reminder.is_overdue) !== 'undefined' && is_overdue;
       });
 
       this._overdue_count = _items.length;
@@ -1468,7 +1499,7 @@ var _filter_values = {
   ],
 };
 
-var order_addons ={
+var _order_addons ={
   'turnaround' : {
     fasttrack: {
       name: 'Fast Track',
@@ -1607,16 +1638,18 @@ var blank_order = {order_id:      '',
     data: {
       order_id:      '',
       name:          '',
-
       address_billing: '',
+      existing_customer: 0,
 
       customer: {
         'date_added': '',
         'phone'     : '',
         'email'     : '',
-        'source'    : '',
+        'source'    : 'Site',
         'brand'     : '',
+        'campaign'  : '',
         'assigned'  : '',
+        'iser_id'   : -1,
       },
 
       messages: {
@@ -1658,7 +1691,9 @@ var blank_order = {order_id:      '',
           discount:  {
             'title': 'Discount',
             'name'   : '',
+            'discount_type'   : '',
             'price'  : 0,
+            'coupon_id'  : -1,
           },
         },
       },
@@ -1718,8 +1753,25 @@ Vue.component('frontdesk-item', {
     },
 
     is_overdue: function(){
-       return  this.info.reminder.is_overdue;
-    }
+      return  is_boolean(this.info.reminder.is_overdue);
+    },
+
+    _stage: function(){
+      var days = this.info.is_fasttrack ? parseInt(tracker_options.turnaround.fasttrack) : parseInt(tracker_options.turnaround.regular);
+
+      var multiplier = days / 5;
+
+      var due_date    = new Date(this.info.due_date.date);
+      var today       = new Date();
+      var diff = days - Math.floor((due_date.getTime() - today.getTime() )/ (1000*60*60*24));
+
+      diff = diff > days ? days : diff;
+      diff = diff/multiplier;
+      diff = diff <= 0 ? 1 : diff;
+      diff = diff > 5? 5 : diff;
+
+      return diff;
+    },
   },
 
   watch:{
@@ -1732,7 +1784,9 @@ Vue.component('frontdesk-item', {
     this.info = this._info;
   },
 
-  mounted: function(){},
+  mounted: function(){
+    var test = this._stage;
+  },
 
   methods: {
     open_order: function(order_id){
@@ -1748,7 +1802,7 @@ Vue.component('frontdesk-item', {
       <svg class="icon svg-icon-fastrack" v-if="is_fasttrack"> <use xmlns:xlink="ttp://www.w3.org/1999/xlink" xlink:href="#svg-icon-fastrack"></use> </svg>
     </div>
     <div class="col-4 text-right">
-      <svg class="icon svg-icon-bell" v-bind:class="{'green': !is_overdue}" v-if="info.reminder.date"><use xmlns:xlink="ttp://www.w3.org/1999/xlink" xlink:href="#svg-icon-bell"></use> </svg>
+      <svg class="icon svg-icon-bell" v-bind:class="{'green': !is_overdue }" v-if="info.reminder.date"><use xmlns:xlink="ttp://www.w3.org/1999/xlink" xlink:href="#svg-icon-bell"></use> </svg>
 
       <i class="icon-with-popup blue">
       <svg class="icon svg-icon-phone" v-bind:class="{'blue': info.phone_count > 0}"> <use xmlns:xlink="ttp://www.w3.org/1999/xlink" xlink:href="#svg-icon-phone"></use> </svg>
@@ -1768,7 +1822,7 @@ Vue.component('frontdesk-item', {
        <svg class="icon svg-icon-due"> <use xmlns:xlink="ttp://www.w3.org/1999/xlink" xlink:href="#svg-icon-due"></use> </svg>
        {{due_date}}
     </span>
-    <div class="col-6" v-bind:class="'stage'+info.stage">
+    <div class="col-6" v-bind:class="'stage'+_stage">
       <div class="order-preview__progress">
         <span></span>
         <span></span>
@@ -3336,14 +3390,16 @@ datepicker_field = Vue.component('reminder', {
   beforeMount: function(){
     this.name = this._name ? this._name : 'datetimepicker';
     this.value = this._value;
-    this.overdue = !!this._overdue;
+    this.overdue = is_boolean(this._overdue);
     this.value_formatted = this._value_formatted && this._value_formatted != 'No Due Date' ? this._value_formatted : '';
   },
+
+  change: function(){},
 
   watch:{
     value_formatted:function(){
       this.$emit('input_value_changed', {value: this.value, value_formatted: this.value_formatted, overdue: this.overdue});
-    }
+    },
   },
 
   mounted: function(){
@@ -3356,7 +3412,8 @@ datepicker_field = Vue.component('reminder', {
 
       onClose:function(dp,$input){
         var now  = new Date();
-        vm.overdue = now > dp? true : false;
+        vm.overdue = now > dp? 1 : 0;
+
         var day      = dp.getDay();
         var month    = dp.getMonth();
         var hours    = dp.getHours();
@@ -3400,6 +3457,10 @@ Vue.component('input-field', {
   props:['_value', '_name', '_readonly', '_placeholder', '_type'],
 
   watch:{
+    _value: function(val){
+      this.value = val;
+    },
+
     value: function(){
       this.$el.classList.remove('error');
     },
@@ -3609,6 +3670,302 @@ Vue.component('input-text-search-product', {
     </div>
   `,
 });
+Vue.component('coupon-field', {
+  data: function () {
+    return {
+      type: (this._type)? this._type : 'text',
+      name:  this._name,
+      value : '',
+      readonly : this._readonly,
+      placeholder : (this._placeholder)? this._placeholder : 'Add',
+      focused: false,
+      price: 0,
+      coupon_id: '' ,
+      coupon_name: '' ,
+      discount_type: '' ,
+    }
+  },
+
+  props:['_value', '_name', '_readonly', '_placeholder', '_type', '_currency'],
+
+  watch:{
+    _value: function(val){
+      this.value = val;
+    },
+    _currency: function(val){
+      this.currency = val;
+    },
+
+    _coupon_id: function(val){
+      this.coupon_id = val;
+    },
+
+    value: function(){
+      this.focused = true;
+      this.$el.classList.remove('error');
+      var vm = this;
+      var search = this.all_coupons.filter(e=>{
+        return vm.value.toLowerCase() == e.name.toLowerCase();
+      });
+
+      if(search.length == 1){
+        vm.value       = search[0].name;
+        vm.coupon_id   = search[0].coupon_id;
+        vm.discount_type   = search[0].discount_type;
+        vm.coupon_name = search[0].name;
+        vm.price       = search[0].price;
+
+        Vue.nextTick(function(){
+          vm.focused = false;
+          vm.$emit('input_value_changed', {name: vm.name, val: vm.get_data()});
+        })
+      }
+
+      if(search.length == 0){
+        vm.coupon_id   = -1;
+        vm.coupon_name = vm.value;
+        vm.price       = 0;
+        vm.discount_type       = '';
+        vm.$emit('input_value_changed', {name: vm.name, val: vm.get_data()});
+      }
+    },
+  },
+
+  beforeMount: function(){
+    this.value = this._value;
+    this.currency = this._currency;
+  },
+
+  computed:{
+    all_coupons: function(){
+      return all_coupons;
+    },
+
+
+    coupons_found: function(){
+      var vm = this;
+      if(vm.value.length >=1 && vm.focused){
+        var c = this.all_coupons.filter(e=> {
+          return e.name.toLowerCase().indexOf(vm.value.toLowerCase()) >=0
+        });
+
+        return c;
+      }
+
+      return [];
+    }
+  },
+
+  mounted: function(){
+    this.$emit('input_value_changed', {name: this.name, val: this.get_data()});
+  },
+
+  methods:{
+    input: function(){
+      // this.focused = true;
+      // if(typeof(this.value) == 'undefined') {
+      //   this.value = jQuery(this.$el).val();
+      // }
+
+      // this.$emit('input_value_changed', {name: this.name, val: this.get_data()});
+    },
+
+    set_value:function(val){
+      this.value = val;
+      this.$emit('input_value_changed', {name: this.name, val: this.get_data()});
+    },
+
+    get_data: function(){
+      return {
+        name:            this.coupon_name,
+        price:           this.price,
+        coupon_id:       this.coupon_id,
+        discount_type:       this.discount_type,
+      }
+    },
+
+    get_price: function(data){
+        switch(data.discount_type){
+          case "fixed_cart":
+            return '-'+ this._currency + data.price;
+            break;
+          case "percent":
+            return '-'+ data.price + '%';
+            break;
+          default:
+            return '-'+ this._currency + data.price;
+            break
+        }
+      return 0;
+    },
+
+    update_coupon: function(coupon){
+      var vm = this;
+      vm.value        = coupon.name;
+      vm.coupon_id    = coupon.coupon_id;
+      vm.coupon_name  = coupon.name;
+      vm.price        = coupon.price;
+      vm.discount_type       = coupon.discount_type;
+
+      Vue.nextTick(function(){
+        vm.focused = false;
+        vm.$emit('input_value_changed', {name: vm.name, val: vm.get_data()});
+      })
+    },
+  },
+
+  template : `
+  <div class="input-holder">
+    <div class="wrapper-input">
+     <input v-bind:type="type"
+      v-on:input="input"
+      v-on:change="input"
+      v-bind:name="name"
+      v-model="value"
+      :placeholder="placeholder"
+      class="":readonly="readonly == 1" autocomplete="off">
+    </div>
+
+    <div class="input-holder__dropdown" v-show="coupons_found.length > 0" ref="dropdown">
+      <ul class="input-holder__list">
+        <li
+          v-for="(coupon , key) in coupons_found"
+          :key="key"
+          v-on:click="update_coupon(coupon)"
+        >
+        <span class="inner">{{coupon.name}} <span class="brand">{{get_price(coupon)}}</span></span></li>
+      </ul>
+    </div>
+   </div>`,
+
+});
+Vue.component('customer_name', {
+  data: function () {
+    return {
+      name: '',
+      value: '',
+      user_id: -1,
+      user_registered: '',
+      email: '',
+      billing: {
+        address_1: '',
+        address_2: '',
+        city: '',
+        company: '',
+        country: '',
+        email: '',
+        first_name: '',
+        last_name: '',
+        phone: '',
+        postcode:'',
+        state: '',
+      },
+      focused: false,
+    }
+  },
+
+  props: ['_name', '_value'],
+
+  watch: {
+    '_name': function(val){
+      this.name = val;
+    },
+
+    '_value': function(val){
+      this.value = val;
+    },
+
+    value: function(val){
+      this.focused = true;
+      this.$el.classList.remove('error');
+    },
+  },
+
+  computed: {
+    all_customers: function(){
+      return all_customers;
+    },
+
+    users_found:function(){
+      var vm = this;
+      if(vm.value.length >=2 && vm.focused){
+        var users = this.all_customers.filter(e=> {
+          return e.name.toLowerCase().indexOf(vm.value.toLowerCase()) >=0 || e.brand.toLowerCase().indexOf(vm.value.toLowerCase()) >=0
+        });
+
+        return users;
+      }
+
+      return [];
+    }
+  },
+
+  beforeMount: function(){
+     this.name = this._name;
+     this.value = this._value;
+  },
+
+  mounted: function(){},
+
+  methods: {
+    input: function(){
+      if(typeof(this.value) == 'undefined') {
+        this.value = '';
+      }
+
+      this.$emit('input_value_changed', this.get_data());
+    },
+
+    get_data: function(){
+      return {
+        customer_name:   this.value,
+        name:            this.name,
+        email:           this.email,
+        billing:         this.billing,
+        user_id:         this.user_id,
+        user_registered: this.user_registered,
+      }
+    },
+
+    update_customer: function(customer){
+      var vm = this;
+      vm.value             = customer.name;
+      vm.user_registered   = customer.user_registered;
+      vm.user_id = customer.user_id;
+      vm.billing = customer.billing;
+      vm.email   = customer.email;
+
+      Vue.nextTick(function(){
+        vm.focused = false;
+        vm.$emit('input_value_changed', vm.get_data());
+      })
+    },
+  },
+
+  template: `<div class="input-holder">
+   <input
+     :name="name"
+     placeholder="Add"
+     autocomplete="off"
+     type="text"
+     class="leads-block__input lg styled"
+     v-model="value"
+     v-on:input="input"
+     v-on:change="input"
+     >
+
+    <div class="input-holder__dropdown" v-if="users_found.length > 0">
+      <ul class="input-holder__list">
+        <li
+          v-for="(user , key) in users_found"
+          :key="key"
+          v-on:click="update_customer(user)"
+        >
+        {{user.name}} <span class="brand">{{user.brand}}</span></li>
+      </ul>
+    </div>
+   </div>`,
+})
 if(document.getElementById('frontdesk_list')){
 
   frontdesk_list = new Vue({
@@ -3676,7 +4033,7 @@ if(document.getElementById('frontdesk_list')){
 
           //calculate overdue number of elements
           var _items = items.filter(function(el){
-              return typeof(el.data.reminder.is_overdue) !== 'undefined' && el.data.reminder.is_overdue
+            return typeof(el.data.reminder.is_overdue) !== 'undefined' && el.data.reminder.is_overdue && el.data.reminder.is_overdue != 'false'
           });
 
           this._overdue_count = _items.length;
@@ -3883,6 +4240,7 @@ if(document.getElementById('filters-frontdesk')){
       },
 
       'overdue_only': function(val){
+        this.due_date_only = val;
         frontdesk_list.update_prop('overdue_only', val);
       },
 
@@ -4032,6 +4390,10 @@ if(document.getElementById('new-frontdesk-order')){
         }
       },
 
+      "order_data.address_billing":function(val){
+         document.getElementsByClassName('add-address-btn')[0].classList.remove('error');
+      },
+
       "order_data.order.addons.turnaround.name": function(val){
         this.order_data.is_fasttrack = (val.toLowerCase() == 'fast track' || val.toLowerCase() == 'fasttrack' )? 1: 0;
       },
@@ -4052,9 +4414,8 @@ if(document.getElementById('new-frontdesk-order')){
 
     methods:{
       add_product: function(data){
+        document.getElementsByClassName('new-order-item')[0].classList.remove('error');
         this.order_data.order.items.push(data);
-
-        console.log(strip(this.order_data.order.items));
       },
 
       add_fee: function(data){
@@ -4110,6 +4471,7 @@ if(document.getElementById('new-frontdesk-order')){
             data: vm.order_data,
           },
         })
+
         .done(function(e) {
           console.log(e);
           vm.order_data.order_id = e.order_id;
@@ -4121,11 +4483,9 @@ if(document.getElementById('new-frontdesk-order')){
           }
 
           items.push(new_item);
-
-
         })
+
         .fail(function() {
-          console.log("error");
         })
         .always(function() {
           unblock();
@@ -4150,8 +4510,8 @@ if(document.getElementById('new-frontdesk-order')){
         };
 
         check = {
-           name:     'Please set customer\'s name',
-          'phone'     : 'Please set customer\'s phone',
+           cusomer_data:     'Please set customer\'s name',
+          // 'phone'     : 'Please set customer\'s phone',
           'email'     : 'Please set customer\'s email',
            order_status: 'Please select an order status',
         };
@@ -4182,108 +4542,96 @@ if(document.getElementById('new-frontdesk-order')){
           document.getElementsByClassName('new-order-item')[0].classList.remove('error');
         }
 
+        if(!this.order_data.address_billing){
+          validated.is_valid = false;
+          validated.messages.push('Add billing address, please');
+          document.getElementsByClassName('add-address-btn')[0].classList.add('error');
+        }else{
+          document.getElementsByClassName('add-address-btn')[0].classList.remove('error');
+        }
+
         return validated;
       },
 
       resert: function(){
-        this.order_data = {
-          order_id:      '',
-          name:          '',
-          address_billing: '',
+        this.order_data = blank_order.data;
+      },
 
-          customer: {
-            'date_added': '',
-            'phone'     : '',
-            'email'     : '',
-            'source'    : '',
-            'brand'     : '',
-            'assigned'  : '',
-          },
+      remove_product: function(key){
+        var items = Object.entries(strip(this.order_data.order.items));
 
-          messages: {
-            enquery: [],
-            studio:[],
-          },
+        items = items.filter(e=>{
+          return e[0] != key;
+        }).map(e=>{
+          return e[1];
+        });
 
-          reminder: {},
+        this.order_data.order.items = items;
+      },
 
-          gallery: {
-            comments: 0,
-            items: [],
-          },
+      remove_fee: function(key){
+        var items = Object.entries(strip(this.order_data.order.fee));
 
-          order:{
-            currency_symbol: '£',
-            date           : '',
-            items: [],
-            fee:[],
-            addons:{
-              turnaround : {
-                'title': 'Turnaround',
-                'name'   : '',
-                'price'  : 0,
-              },
+        items = items.filter(e=>{
+          return e[0] != key;
+        }).map(e=>{
+          return e[1];
+        });
 
-              handling:  {
-                'title': 'Handling',
-                'name'   : '',
-                'price'  : 0,
-              },
-
-              sendvia:  {
-                'title': 'Send Via',
-                'name'   : '',
-                'price'  : 0,
-              },
-
-              discount:  {
-                'title': 'Discount',
-                'name'   : '',
-                'price'  : 0,
-              },
-            },
-          },
-
-          location: {
-            unit: '',
-            comment: '',
-          },
-
-          studio:{
-            creator: '',
-          },
-
-          product_collection:{
-            do_collect: false,
-            address: '',
-            requested:'',
-            scheduled:'',
-            pdf: [],
-          },
-
-          due_date:      {
-            date: '',
-            date_formatted: '',
-            is_overdue: 0,
-          },
-
-          is_fasttrack:  '',
-          message_count: 0,
-          phone_count:   0,
-          stage:         '0',
-          state:         '',
-
-          filters: {
-            campaigns: [],
-            sources:   [],
-            team:      [],
-          },
-        };
+        this.order_data.order.fee = items;
       },
 
       update_order_addon: function(data, key){
         for(var id in data.val){
           this.order_data.order.addons[key][id] = data.val[id];
+        }
+      },
+
+      update_coupon: function(data){
+        this.order_data.order.addons.discount.name      = data.val.name;
+        this.order_data.order.addons.discount.discount_type      = data.val.discount_type;
+        this.order_data.order.addons.discount.coupon_id = data.val.coupon_id;
+        var vm = this;
+
+        switch(data.val.discount_type){
+          case "fixed_cart":
+            this.order_data.order.addons.discount.price     = '-'+ vm.order_data.order.currency_symbol + data.val.price;
+            break;
+          case "percent":
+            this.order_data.order.addons.discount.price     = '-'+ data.val.price + '%';
+            break;
+          default:
+            this.order_data.order.addons.discount.price     = '-'+ vm.order_data.order.currency_symbol + data.val.price;
+            break
+        }
+      },
+
+      update_customer: function(data){
+        if(data.user_id < 0){
+          this.order_data.name = data.customer_name;
+        }else{
+          this.order_data.name = data.customer_name;
+
+         address_fields = Object.entries(data.billing).filter(e=>{
+            if(["last_name", "first_name", "company", "email", "phone"].indexOf(e[0]) >= 0){
+              return false;
+            }
+            return true;
+          }).map(e=>{
+            return e[1];
+          }).join(' ');
+
+          this.order_data.address_billing = address_fields? address_fields : this.order_data.address_billing
+
+          this.order_data.customer.email = data.email ? data.email : this.order_data.customer.email;
+
+          this.order_data.customer.phone = data.billing.phone? data.billing.phone: this.order_data.customer.phone;
+
+          this.order_data.customer.brand = data.billing.company? data.billing.company : this.order_data.customer.brand;
+
+          this.order_data.customer.user_id = data.user_id? data.user_id : this.order_data.customer.user_id;
+
+          this.order_data.customer.billing = data.billing;
         }
       },
     },
@@ -4671,6 +5019,8 @@ if(document.getElementById('add-address-billing')){
 
        frontdesk_order_new.update_order({name: 'address_billing', val: item.join(', ')}, 'core');
 
+       frontdesk_order_new.update_order({name: 'billing', val: item}, 'customer');
+
         this.visible = false;
       },
 
@@ -4854,7 +5204,6 @@ if(document.getElementById('studio-vue-app')){
       },
 
       update_item_data: function(data){
-        console.log(data);
         this.items[data.index].data = data.order_data;
       },
 
@@ -4879,44 +5228,4 @@ if(document.getElementById('studio-vue-app')){
     },
   });
 }
-// let dropArea = document.getElementById('drop-area')
-// dropArea.addEventListener('dragenter', handlerFunction, false)
-// dropArea.addEventListener('dragleave', handlerFunction, false)
-// dropArea.addEventListener('dragover', handlerFunction, false)
-// dropArea.addEventListener('drop', handlerFunction, false);
-
-// ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-//   dropArea.addEventListener(eventName, preventDefaults, false)
-// })
-
-// function preventDefaults (e) {
-//   e.preventDefault()
-//   e.stopPropagation()
-// }
-
-// ['dragenter', 'dragover'].forEach(eventName => {
-//   dropArea.addEventListener(eventName, highlight, false)
-// })
-// ;['dragleave', 'drop'].forEach(eventName => {
-//   dropArea.addEventListener(eventName, unhighlight, false)
-// })
-// function highlight(e) {
-//   dropArea.classList.add('highlight')
-// }
-// function unhighlight(e) {
-//   dropArea.classList.remove('highlight')
-// }
-
-
-// function handlerFunction(){}
-
-// dropArea.addEventListener('drop', handleDrop, false)
-
-// function handleDrop(e) {
-//   let dt = e.dataTransfer
-//   let files = dt.files
-
-//   console.log(files);
-//   // handleFiles(files)
-// }
 ctime('vue script', 'green');

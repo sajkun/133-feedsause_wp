@@ -55,6 +55,8 @@ if(!class_exists('tracker_content_output')){
       print_duh_template_part( 'popup-address-billing' ,'order_tracker/templates/global', array());
 
       print_duh_template_part( 'popup-product' ,'order_tracker/templates/global', array());
+
+      print_duh_template_part( 'popup-fee' ,'order_tracker/templates/global', array());
     }
   }
 }

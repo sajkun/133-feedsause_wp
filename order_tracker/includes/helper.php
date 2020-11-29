@@ -92,15 +92,15 @@ if(!function_exists('get_items_for_tracker')){
 
         break;
       case 'frontdesk':
-        $options = get_option(duh()->slug_options);
+        // $options = get_option(duh()->slug_options);
 
-        $data = array_filter($options['orders'], function($el){
-          return $el['is_frontdesk'] == 'yes';
-        });
+        // $data = array_filter($options['orders'], function($el){
+        //   return $el['is_frontdesk'] == 'yes';
+        // });
 
-        $args['post_status'] = array_values(array_map(function($el){
-                return $el['slug'];
-              }, $data));
+        // $args['post_status'] = array_values(array_map(function($el){
+        //         return $el['slug'];
+        //       }, $data));
         break;
     }
 
@@ -150,10 +150,11 @@ class map_orders_cb{
       'date_added' =>$date_created_customer? $date_created_customer->format("d F Y") .' at '. $date_created_customer->format("H:ia") : false,
       'phone'      => $this->user->get_billing_phone(),
       'email'      => $this->user->get_email(),
-      'source'     => $order->get_meta('_source'),
+      'source'     => $order->get_meta('_source')?: 'Site',
       'brand'      => $order->get_meta('_brand'),
       'assigned'   => $order->get_meta('_assigned_person'),
       'campaign'   => $order->get_meta('_campaign'),
+      'user_id'    => $this->user->get_id(),
     );
 
     $assigned_creator = $order->get_meta('_assigned_creator');
@@ -178,7 +179,7 @@ class map_orders_cb{
         'message_count' => (int)$order->get_meta('_message_count'),
         'phone_count'   => (int)$order->get_meta('_phone_count') ,
 
-        'reminder' => array(
+        'reminder' => $order->get_meta('_reminder')?: array(
           'date'           => '',
           'date_formatted' => '',
           'is_overdue'     => false,
@@ -192,7 +193,7 @@ class map_orders_cb{
 
         'filters'    => array (
           'campaign' =>  $customer_data['campaign']?:  array(),
-          'source'   =>  $customer_data['source']  ?:  array(),
+          'source'   =>  $customer_data['source']  ?:  array('Site'),
           'team'     =>  $team,
         ),
 
@@ -218,8 +219,10 @@ class map_orders_cb{
         'product_collection' => array(
           'do_collect' => !!$order->get_meta('collect-products'),
           'address'      => $order->get_meta('_collect_address'),
-          'requested'    => '',
-          'scheduled'    => '',
+
+          'requested'    => $order->get_meta('_free_collection_date'),
+
+          'scheduled'    => get_field('collection-date', $order->get_id()),
           'pdf'    => array(),
         ),
 
@@ -246,7 +249,7 @@ class map_orders_cb{
     $this->return_product_id    = (int)get_option('wfp_return_product_id');
     $this->order_items = $order->get_items('line_item');
     $this->product_ids = $this->get_product_ids();
-    }
+  }
 
   protected function get_due_date($order){
     $is_fasttrack          = in_array($this->fasttrack_product_id, $this->product_ids);
@@ -679,4 +682,53 @@ function get_count_from_name($name){
 */
 function _wc_price($summ){
   return html_entity_decode(strip_tags(wc_price($summ)));
+}
+
+
+
+function save_order_meta($order){
+  if(!$order){
+    return;
+  }
+  $save = array(
+    '_message_count'    => $_POST['data']['message_count'],
+    '_phone_count'      => $_POST['data']['phone_count'],
+
+    '_source'           => $_POST['data']['customer']['source'],
+    '_brand'            => $_POST['data']['customer']['brand'],
+    '_campaign'          => $_POST['data']['customer']['campaign'],
+
+    '_assigned_person'  => $_POST['data']['customer']['assigned'],
+    '_assigned_creator' => $_POST['data']['studio']['creator'],
+
+    'location'          => $_POST['data']['location']['unit'],
+    'studio-notes'      => $_POST['data']['location']['comment'],
+
+    'collect-products'  => $_POST['data']['product_collection']['do_collect'] == 'false'? 0 : 1,
+
+    '_notes_equery' => isset($_POST['data']['messages']['enquery'])? $_POST['data']['messages']['enquery']:array(),
+    '_notes_studio' => isset($_POST['data']['messages']['studio'])? $_POST['data']['messages']['studio']:array(),
+
+    '_reminder' => isset($_POST['data']['reminder'])? $_POST['data']['reminder']:array(
+      'date' => '',
+      'date_formatted' => '',
+      'is_overdue' => 0,
+    ),
+
+    '_collection_address'      => $_POST['data']['product_collection']['address'],
+    '_free_collection_date'      => $_POST['data']['product_collection']['requested'],
+    'collection-date'          => $_POST['data']['product_collection']['scheduled'],
+  );
+
+  $test = array();
+
+  foreach($save as $meta_key => $meta_value){
+    if($order->meta_exists($meta_key)){
+      $test[$meta_key] = $order->update_meta_data($meta_key, $meta_value);
+    }else{
+      $test[$meta_key] = $order->add_meta_data($meta_key, $meta_value);
+    }
+  }
+
+  return $test;
 }

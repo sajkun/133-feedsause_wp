@@ -147,7 +147,7 @@ class velesh_theme_meta{
         <div class="image-download" >
           <input type="hidden" class="image-id" name="_thumbnail" value="<?php echo $image_id ?>">
           <div class="image-placeholder" <?php echo 'style="max-width:64px"' ?>onclick="load_image(this)">
-            <img src="<?php echo $image[0] ?>" alt="" style="width: 64px; height: auto">
+            <img src="<?php echo $image[0] ?>" alt="" <?php echo 'style="width: 64px; height: auto"' ?>>
           </div>
           <div class="button-holder">
             <a href="javascript:void(0)" class="button submit-add-to-menu left" onclick="load_image(this)">set image</a> &nbsp;
@@ -174,12 +174,12 @@ class velesh_theme_meta{
         <p class="form-field">
 
           <label>Section title:</label>
-          <input type="text" class="large-text" style="width:100%" name="custom_product_ingredients[title]" value="<?php echo isset($o['title'])? $o['title'] : ''; ?>">
+          <input type="text" class="large-text" style=<?php echo'"width:100%" ' ?> name="custom_product_ingredients[title]" value="<?php echo isset($o['title'])? $o['title'] : ''; ?>">
         </p>
         <p class="form-field">
 
           <label>Section comment:</label>
-          <textarea type="text" rows="6" cols="20" class="large-text" style="width:100%; height: 75px" name="custom_product_ingredients[comment]"><?php echo isset($o['comment'])? $o['comment'] : ''; ?></textarea>
+          <textarea type="text" rows="6" cols="20" class="large-text<?php echo'" style="width:100%; height: 75px"'; ?> name="custom_product_ingredients[comment]"><?php echo isset($o['comment'])? $o['comment'] : ''; ?></textarea>
           <i>Wrap marked text into </i><?php echo esc_html('<b>text</b>'); ?> tag</i>
         </p>
       </div>
@@ -198,7 +198,7 @@ class velesh_theme_meta{
             }
             ?>
          <div class="article-block options_group">
-          <div class="article-table2" style="padding:10px">
+          <div class="article-table2" <?php echo'style="padding:10px"'; ?>'>
             <div class="article-table__image image-download">
               <div class="image-download">
                 <input type="hidden" class="image-id" name="custom_product_ingredients[items][<?php echo $key; ?>][image_id]" value="<?php echo $item['image_id'] ?>">
@@ -215,11 +215,11 @@ class velesh_theme_meta{
             <div class="options_group">
               <p class="form-field">
                 <label>Title</label>
-                <input class="fullwidth" type="text" style="width:100%" name="custom_product_ingredients[items][<?php echo $key; ?>][title]" value="<?php echo isset($item['title'])? $item['title']: ''; ?>">
+                <input class="fullwidth" type="text" <?php echo'style="width:100%"'; ?> name="custom_product_ingredients[items][<?php echo $key; ?>][title]" value="<?php echo isset($item['title'])? $item['title']: ''; ?>">
               </p>
               <p class="form-field">
                 <label>Comment</label>
-                <input class="fullwidth" type="text" style="width:100%" name="custom_product_ingredients[items][<?php echo $key; ?>][comment]" value="<?php echo isset($item['comment'])? $item['comment']: ''; ?>">
+                <input class="fullwidth" type="text" <?php echo' style="width:100%"';?>name="custom_product_ingredients[items][<?php echo $key; ?>][comment]" value="<?php echo isset($item['comment'])? $item['comment']: ''; ?>">
               </p>
               <p class="form-field">
                <a href="javascript:void(0)" onclick="remove_banner_block(this)">delete block</a>

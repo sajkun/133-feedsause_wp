@@ -89,11 +89,11 @@ if ( ! defined( 'ABSPATH' ) ) {
               <div class="leads-block__row">
                 <div class="leads-block__name">
 
-                  <input-field
-                    v-bind:_name="'name'"
+                  <customer_name
+                    v-bind:_name="'cusomer_data'"
                     v-bind:_value="order_data.name"
-                    v-bind:class="{'lg styled' : new_order}"
-                    v-on:input_value_changed="update_order($event, 'core')">
+                    v-on:input_value_changed="update_customer($event)"></customer_name>
+                    <div class="spacer-h-20"></div>
 
                   <span class="leads-block__comment">Added {{order_data.customer.date_added}}</span>
                 </div>
@@ -109,9 +109,10 @@ if ( ! defined( 'ABSPATH' ) ) {
                     <td>
                       <input-field
                         _name="phone"
+                        v-model="order_data.customer.phone"
                          v-bind:class="{'styled' : new_order}"
                         v-bind:_value="order_data.customer.phone"
-                        v-on:input_value_changed="update_order($event, 'customer')">
+                        v-on:input_value_changed="update_order($event, 'customer')"></input-field>
                     </td>
                   </tr>
                   <tr>
@@ -123,8 +124,9 @@ if ( ! defined( 'ABSPATH' ) ) {
                       <input-field
                         _name="email"
                         v-bind:class="{'styled' : new_order}"
+                        v-model="order_data.customer.email"
                         v-bind:_value="order_data.customer.email"
-                        v-on:input_value_changed="update_order($event, 'customer')">
+                        v-on:input_value_changed="update_order($event, 'customer')"></input-field>
                     </td>
                   </tr>
                   <tr>
@@ -133,6 +135,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                     </td>
                     <td><p class="leads-block__label">Source</p></td>
                     <td>
+
                       <select-imitation
                        v-bind:class="'fullwidth'"
                         _select_name="source"
@@ -148,13 +151,12 @@ if ( ! defined( 'ABSPATH' ) ) {
                     </td>
                     <td><p class="leads-block__label">Brand</p></td>
                     <td>
-                      <select-imitation
-                        v-bind:class="'fullwidth'"
-                        _select_name="brand"
-                        v-bind:_options="order_brands"
-                        v-bind:_selected="order_data.customer.brand"
-                        v-on:update_list="update_order($event, 'customer')"
-                      ></select-imitation>
+                      <input-field
+                        _name="brand"
+                        v-model="order_data.customer.brand"
+                        v-bind:class="{'styled' : new_order}"
+                        v-bind:_value="order_data.customer.brand"
+                        v-on:input_value_changed="update_order($event, 'customer')"></input-field>
                     </td>
                   </tr>
 
@@ -255,16 +257,16 @@ if ( ! defined( 'ABSPATH' ) ) {
               <a href="#" class="add-button" v-on:click.prevent="shop_popup('fee')">
                 + Fee
               </a>
-              <a href="#" class="add-button" v-on:click.prevent="shop_popup('billing_address')">
+              <a href="#" class="add-button add-address-btn" v-on:click.prevent="shop_popup('billing_address')">
                 + Address
               </a>
             </div><!-- leads-block__row -->
             <div class="hr"></div>
 
             <div class="products-block">
-              <div class="products-block__item" v-for="(item, key) in order_data.order.items" :key="key">
+              <div class="products-block__item" v-for="(item, key) in order_data.order.items" :key="'product_'+key">
                 <div class="products-block__item-head row">
-                  <div class="col-5">
+                  <div class="col-4">
                    <span class="products-block__item-title"> {{item.product_name}}</span>
                   </div>
 
@@ -278,6 +280,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 
                   <div class="col-1 text-right">
                     <span class="trigger " v-on:click="expand_product(key)">[ <span class="trigger__symbol" v-bind:class="{expanded: item.expanded}"></span> ]</span>
+                  </div>
+
+                  <div class="col-1">
+                    <span class="remove-btn" v-on:click="remove_product(key)">-</span>
                   </div>
                 </div>
                 <transition
@@ -304,13 +310,13 @@ if ( ! defined( 'ABSPATH' ) ) {
                 </transition>
               </div>
 
-              <div class="products-block__item" v-for="(item, key) in order_data.order.fee" :key="key">
+              <div class="products-block__item" v-for="(item, key) in order_data.order.fee" :key="'fee_'+key">
                 <div class="products-block__item-head row">
                   <div class="col-4">
                    <span class="products-block__item-title"> {{item.fee_name}}</span>
                   </div>
 
-                  <div class="col-150">
+                  <div class="col-120">
                   </div>
 
                   <div class="col text-left">
@@ -318,6 +324,10 @@ if ( ! defined( 'ABSPATH' ) ) {
                   </div>
 
                   <div class="col-1 text-right">
+                  </div>
+
+                  <div class="col-1">
+                    <span class="remove-btn" v-on:click="remove_fee(key)">-</span>
                   </div>
                 </div>
               </div>
@@ -327,7 +337,7 @@ if ( ! defined( 'ABSPATH' ) ) {
               <table class="leads-block__data">
                 <tbody>
                   <tr  v-for="(addon, addon_key) in order_data.order.addons" >
-                    <td>
+                    <td  class="width-110">
                       <p class="leads-block__label no-margin">{{addon.title}}</p>
                     </td>
                     <td class="width-150">
@@ -340,11 +350,20 @@ if ( ! defined( 'ABSPATH' ) ) {
                          v-on:update_list="update_order_addon($event, addon_key);"
                          ></select-imitation-obj>
 
-                       <input type="text" class="leads-block__input styled" v-if="addon_key == 'discount'"  v-model="order_data.order.addons.discount.name" placeholder="Enter coupon code">
+                       <coupon-field
+                        v-if="addon_key == 'discount'"
+                        :_name="'discount'"
+                        :_value="''"
+                        :_currency="order_data.order.currency_symbol"
+                        :_placeholder="'Enter coupon code'"
+                        v-model="order_data.order.addons.discount.name"
+                        v-on:input_value_changed = 'update_coupon'
+                        v-bind:style="{zIndex: 1}"
+                       ></coupon-field>
                     </td>
                     <td>
                       <p class="leads-block__label"  v-if="addon_key != 'discount'">{{order_data.order.currency_symbol}}{{addon.price}}</p>
-                      <p class="leads-block__label"  v-if="addon_key == 'discount'">{{order_data.order.currency_symbol}}{{order_data.order.addons.discount.price}}</p>
+                      <p class="leads-block__label"  v-if="addon_key == 'discount'">{{order_data.order.addons.discount.price}}</p>
                     </td>
                   </tr>
 
