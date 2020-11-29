@@ -3974,7 +3974,7 @@ if(document.getElementById('frontdesk_list')){
     mixins: [get_set_props, list_filter_mixin],
 
     data: {
-        visible: false,
+        visible: true,
 
         filters: {
           campaigns : 'All Campaigns',
@@ -4068,22 +4068,6 @@ if(document.getElementById('frontdesk_list')){
     methods: {
       debug:function(){
         if(!theme_debug){return;}
-        // console.time('assign')
-        // var items = [];
-
-        // for (var i = 0; i <= 10000; i++) {
-        //   if(i > 47){
-        //     item.data.is_fasttrack = 1;
-        //   }
-
-        //   var item = JSON.parse(JSON.stringify(this.items[0]));
-        //   item.order_id = '00' + i;
-        //   item.data.order_id     = '00' + i;
-        //   items.push(item);
-        // }
-        // this.items = items;
-
-        // console.timeEnd('assign');
       },
 
       /**
@@ -4371,7 +4355,7 @@ if(document.getElementById('new-frontdesk-order')){
     mixins: [get_set_props, animation_mixin, fds_order],
 
     data: {
-      visible: true,
+      visible: false,
       new_order: true,
       item_index: -1,
       order_data: blank_order.data,
@@ -4385,9 +4369,7 @@ if(document.getElementById('new-frontdesk-order')){
 
     watch:{
       visible: function(visible){
-        if(visible){
           this.resert();
-        }
       },
 
       "order_data.address_billing":function(val){
@@ -4472,17 +4454,38 @@ if(document.getElementById('new-frontdesk-order')){
           },
         })
 
-        .done(function(e) {
-          console.log(e);
-          vm.order_data.order_id = e.order_id;
-          var items = frontdesk_list.get_prop('items');
+        .done(function(data) {
+          console.log(data);
 
-          var new_item = {
-            order_id: vm.order_data.order_id,
-            data    : vm.order_data,
+          if(data.order_id > 0){
+            var new_item = {
+              order_id: data.order_id,
+              data    : data.order_data,
+            }
+
+            var items = frontdesk_list.get_prop('items');
+            items.push(new_item);
+
+            Vue.nextTick(function(){
+              frontdesk_list.selected_order_id = data.order_id;
+              var index = frontdesk_list.get_index_of_item_by('order_id', data.order_id);
+              var item = frontdesk_list.get_item_by('order_id', data.order_id);
+
+              const _data = JSON.parse(JSON.stringify(item.data));
+
+              // show order details
+              if(typeof(frontdesk_order) == 'object'){
+                frontdesk_order.update_prop('visible', true);
+                frontdesk_order.update_prop('item_index', index);
+                frontdesk_order.update_prop('order_data', _data);
+              }
+
+              vm.resert();
+              vm.visible = false;
+            })
           }
 
-          items.push(new_item);
+
         })
 
         .fail(function() {
@@ -4554,7 +4557,7 @@ if(document.getElementById('new-frontdesk-order')){
       },
 
       resert: function(){
-        this.order_data = blank_order.data;
+        this.order_data = strip(blank_order.data);
       },
 
       remove_product: function(key){

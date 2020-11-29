@@ -92,26 +92,29 @@ if(!function_exists('get_items_for_tracker')){
 
         break;
       case 'frontdesk':
-        // $options = get_option(duh()->slug_options);
+        $options = get_option(duh()->slug_options);
 
-        // $data = array_filter($options['orders'], function($el){
-        //   return $el['is_frontdesk'] == 'yes';
-        // });
+        $data = array_filter($options['orders'], function($el){
+          return $el['is_frontdesk'] == 'yes';
+        });
 
-        // $args['post_status'] = array_values(array_map(function($el){
-        //         return $el['slug'];
-        //       }, $data));
+        $args['post_status'] = array_values(array_map(function($el){
+                return $el['slug'];
+              }, $data));
         break;
     }
 
     $orders = array_map('map_orders',wc_get_orders($args));
 
-    new map_orders_cb(wc_get_orders($args)[0]);
-
     clog('Get orders: '.round(microtime(true) - $start, 4).' сек.', 'red');
 
     return $orders;
   }
+}
+
+function get_item_for_tracker($order_id){
+  $orders = array_map('map_orders',array(wc_get_order($order_id)));
+  return $orders[0];
 }
 
 class map_orders_cb{

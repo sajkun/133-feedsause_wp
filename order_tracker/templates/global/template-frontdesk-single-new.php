@@ -3,7 +3,7 @@ if ( ! defined( 'ABSPATH' ) ) {
   exit; // Exit if accessed directly
 }
 ?>
-<div class="container-lg single-order" id="new-frontdesk-order" v-show="visible">
+<div class="container-lg single-order" id="new-frontdesk-order" v-if="visible">
   <div class="spacer-h-40"></div>
 
     <!-- ********************************

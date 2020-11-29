@@ -33,7 +33,7 @@ if(!class_exists('tracker_ajax')){
     public static function get_orders_by_dates_cb(){
       $start_date = new DateTime($_POST['data']['_from']);
       $end_date   = new DateTime($_POST['data']['_to']);
-      $orders     = get_items_for_tracker('frontdesk',  $start_date->format('Y-m-d H:i:s'), $end_date->format('Y-m-d H:i:s') );
+      $orders     = get_items_for_tracker('frontdesk',  $start_date->format('Y-m-d H:i:s'), $end_date->format('Y-m-d 23:59:59') );
       wp_send_json(array(
         'orders' => $orders,
         '_POST' => $_POST,
@@ -178,17 +178,19 @@ if(!class_exists('tracker_ajax')){
         }
       }
 
-
       $order->legacy_set_total($total);
 
       save_order_meta($order);
       $order->save_meta_data();
       $order->save();
 
+
+      $data = get_item_for_tracker($order->get_id());
+
       wp_send_json(array(
-        'POST'      => $_POST,
-        'user_id'   => $user_id,
-        'order_id'  => $order->get_id(),
+        'order_data' => $data['data'],
+        'user_id'    => $user_id,
+        'order_id'   => $order->get_id(),
       ));
     }
   }
