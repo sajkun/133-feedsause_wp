@@ -865,3 +865,12 @@ border: 1px solid  #000;
 #extra_data:checked ~ .extra_data{
   display: block;
 }
+
+#dropbox:checked ~ .duh-tabs [for="dropbox"]{
+  background: #fff;
+  border-bottom-color:#fff;
+}
+
+#dropbox:checked ~ .dropbox{
+  display: block;
+}

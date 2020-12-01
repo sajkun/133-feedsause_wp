@@ -13,15 +13,18 @@ if ( ! defined( 'ABSPATH' ) ) {
             <img src="<?php echo THEME_URL ?>/order_tracker/assets/images/beta.png" alt="">
           </a>
           <nav class="navigation">
+            <?php if ($home_url): ?>
             <a href="<?php echo $home_url; ?>" class="navigation__item frontdesk-link">
               <svg class="icon svg-icon-frdk"> <use xmlns:xlink="ttp://www.w3.org/1999/xlink" xlink:href="#svg-icon-frdk"></use> </svg>
               <span>Frontdesk</span>
             </a>
-
-            <a href="<?php echo $home_url; ?>#studio" class="navigation__item studio-link">
+            <?php endif ?>
+            <?php if ($studio_url): ?>
+            <a href="<?php echo $studio_url; ?>#studio" class="navigation__item studio-link">
               <svg class="icon svg-icon-frdk"> <use xmlns:xlink="ttp://www.w3.org/1999/xlink" xlink:href="#svg-icon-frdk"></use> </svg>
               <span>Studio</span>
             </a>
+            <?php endif ?>
           </nav>
         </div>
       </div><!-- col-md-6 -->

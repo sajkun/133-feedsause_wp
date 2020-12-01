@@ -28,12 +28,21 @@ if ( ! defined( 'ABSPATH' ) ) {
     **********************************-->
     <div class="duh-page-settings-content general">
       <h3> Tracker page: </h3>
-
       <select name="<?php echo $slug ?>[tracker_page]">
         <?php foreach ($pages as $key => $p): ?>
           <option
             value="<?php echo $p->ID ?>"
-            <?php echo $p->ID == $options['tracker_page']? 'checked="checked"': ''; ?>
+            <?php echo isset($options['tracker_page']) && $p->ID == (int)$options['tracker_page']? 'selected="selected"': ''; ?>
+            ><?php echo $p->post_title ?></option>
+        <?php endforeach ?>
+      </select>
+
+      <h3> Studio page: </h3>
+      <select name="<?php echo $slug ?>[studio_page]">
+        <?php foreach ($pages as $key => $p): ?>
+          <option
+            value="<?php echo $p->ID ?>"
+            <?php echo isset($options['studio_page']) && $p->ID == (int)$options['studio_page']? 'selected="selected"': ''; ?>
             ><?php echo $p->post_title ?></option>
         <?php endforeach ?>
       </select>
@@ -179,6 +188,21 @@ if ( ! defined( 'ABSPATH' ) ) {
     </div><!-- extra_data -->
   <!-- *******************************
       campaigns, brands, sourses
+      END
+    **********************************-->
+
+  <!-- *******************************
+      dropbox
+    **********************************-->
+    <div class="duh-page-settings-content dropbox">
+      <h3>Access token</h3>
+      <input type="text" class="fullwidth" name="<?php echo $slug?>[dropbox][token]" value="<?php echo isset( $options['dropbox']['token'])? $options['dropbox']['token'] : ''; ?>">
+
+      <div class="spacer-h-20"></div>
+      <input type="submit" value="save" class="btn btn-primary">
+    </div>
+  <!-- *******************************
+      dropbox
       END
     **********************************-->
 

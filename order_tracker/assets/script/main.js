@@ -171,19 +171,34 @@ jQuery(document).on('click', '.site-container', function(e){
   }
 })
 
-jQuery('.navigation__item').click(function(e) {
-  e.preventDefault();
+// jQuery('.navigation__item').click(function(e) {
+//   e.preventDefault();
 
-  var href = jQuery(this).attr('href')
+//   var href = jQuery(this).attr('href')
 
-  if(history.pushState) {
-      history.pushState(null, null, href);
-  }
-  else {
-      location.hash = target;
-  }
-  jQuery(this).addClass('active').siblings('a').removeClass('active');
-});
+//   if(history.pushState) {
+//       history.pushState(null, null, href);
+//   }
+//   else {
+//       location.hash = target;
+//   }
+//   jQuery(this).addClass('active').siblings('a').removeClass('active');
+
+//   // if(location.hash == '#studio'){
+//   //   frontdesk_list.visible = false;
+//   //   filters.visible = false;
+//   //   frontdesk_order.visible = false;
+//   //   frontdesk_order_new.visible = false;
+
+//   //   studio_app.visible.filters = true;
+//   //   studio_app.visible.columns = true;
+//   // }else{
+//   //   filters.visible = true;
+//   //   frontdesk_list.visible = true;
+//   //   studio_app.visible.filters = false;
+//   //   studio_app.visible.columns = false;
+//   // }
+// });
 
 jQuery(document).ready(function(){
   if(location.hash == '#studio'){
@@ -192,6 +207,20 @@ jQuery(document).ready(function(){
   }else{
     jQuery('.frontdesk-link').addClass('active');
   }
+
+  // if(location.hash == '#studio'){
+  //   frontdesk_list.visible = false;
+  //   filters.visible = false;
+  //   frontdesk_order.visible = false;
+  //   frontdesk_order_new.visible = false;
+  //   studio_app.visible.filters = true;
+  //   studio_app.visible.columns = true;
+  // }else{
+  //   filters.visible = true;
+  //   frontdesk_list.visible = true;
+  //   studio_app.visible.filters = false;
+  //   studio_app.visible.columns = false;
+  // }
 })
 jQuery(document).ready(function(){
   init_date_range();
@@ -302,14 +331,26 @@ jQuery(document).on('get_order_by_date', function(e, data){
     dataType: 'json',
     data: {action: 'get_orders_by_dates', data: data},
   })
+
   .done(function(data) {
-    frontdesk_list.items = data.orders;
+    if('undefined' !== typeof(frontdesk_list)){
+      frontdesk_list.items = strip(data.orders);
+    }
+    if('undefined' !== typeof(studio_app)){
+      studio_app.items = strip(data.orders);
+      studio_app.filter_values = strip(data.filters);
+    }
+
+    if('undefined' !== typeof(filters)){
+      filters.filter_values = strip(data.filters);
+      filters.init_selects();
+    }
   })
   .fail(function(e) {
     alert("Request Failed");
   })
   .always(function(e) {
-    clog(e);
+    clog(strip(e));
     ctime('list of orders')
     elog();
     unblock();
@@ -778,6 +819,7 @@ var fds_order = {
       exec_save:function(){
         this.do_save = true;
         this.exec_save_wordpress();
+        this.upload_pdf();
       },
 
       exec_save_vue: function(){
@@ -986,7 +1028,6 @@ var list_filter_mixin = {
           if(filter_val.indexOf('all') >= 0){
             continue;
           }
-
           // all array values to lowercase
           var _filters = item.data.filters[filter_id].map(v => v.toLowerCase())
 
@@ -995,7 +1036,28 @@ var list_filter_mixin = {
 
         // validate by fasttrack
         validated = vm.fasttrack && !item.data.is_fasttrack? false: validated;
-        validated = vm.only_with_messages && item.data.gallery.comments == 0 ? false: validated;
+
+
+        // get comments count
+        var comments_count;
+        var comments_data = strip(item.data.wfp_images);
+
+        if(typeof(comments_data) == 'object'){
+          comments_data = Object.values(comments_data);
+        }
+
+        if(!comments_data){
+          comments_count =  0;
+        }else{
+          comments_count = comments_data.filter(e=>{
+            return typeof(e.request) != 'undefined';
+          }).map(
+          e=>{return e.request.length}
+          ).reduce((a, b) => a + b, 0);
+        }
+
+
+        validated = vm.only_with_messages && comments_count == 0 ? false: validated;
 
         // validate by due date (if has due date);
         validated = vm.due_date_only && !item.data.reminder.date? false: validated;
@@ -1111,474 +1173,48 @@ var list_filter_mixin = {
     },
   }
 }
-
-var _frondtdesk_items = [
-  { order_id:      '001',
-    data: {
-      order_id:      '001',
-      name:          'John Doe',
-      created_order: false,
-
-      customer: {
-        'date_added': '',
-        'phone'     : '07741426253',
-        'email'     : 'john@mail.com',
-        'source'    : 'instagram',
-        'brand'     : 'Pepsi',
-        'assigned'  : 'Ivan Ivanov',
-      },
-
-      messages: {
-        enquery: [],
-        studio:[
-         {
-          user_name: 'tester',
-          date: '2020-09-31 13:00:00',
-          text: 'lorem ipsum 1',
-          is_manager: 'no',
-          done: 'no',
-          show: 1,
-         },
-         {
-          user_name: 'tester',
-          date: '2020-09-31 13:00:00',
-          text: 'lorem ipsum 2',
-          is_manager: 'no',
-          done: 'no',
-          show: 1,
-         },
-         {
-          user_name: 'tester',
-          date: '2020-09-31 13:00:00',
-          text: 'lorem ipsum 3',
-          is_manager: 'no',
-          done: 'no',
-          show: 1,
-         },
-        ],
-      },
-
-      reminder: {
-        date: '',
-        date_formatted: '',
-        is_overdue: false,
-      },
-
-      gallery: {
-        comments: 2,
-        file_uploaded: {
-        },
-        comments_data: [
-          {
-            author   : 'Test Author',
-            date     : '2020-10-02 12:00:00',
-            text     : 'Lorem upsum sit',
-            image_id : '1',
-          },
-          {
-            author   : 'El Magnifico',
-            date     : '2020-09-02 12:00:00',
-            text     : 'Carramba',
-            image_id : '1',
-          },
-          {
-            author   : 'El Magnifico',
-            date     : '2020-09-02 16:00:00',
-            text     : 'Carramba',
-            image_id : '1',
-          },
-        ],
-        items: [
-          'assets/images/c/img1.png',
-          'assets/images/c/img2.png',
-          'assets/images/c/img3.png',
-        ],
-      },
-
-      order:{
-        currency_symbol: '£',
-        date           : '23 October 2019 at 12:15pm',
-        items: [
-          {
-            title: 'Best product ever',
-            item_id: '',
-            product_name : 'Swatch',
-            image_count  : '3 images',
-            price        : '75',
-            sizes        :  ['Portarait', 'Landscape'],
-            notes        : 'Lorem Ipsum sit dolor',
-          },
-        ],
-        fee:[],
-
-        addons:{
-          turnaround : {
-            'title': 'Turnaround',
-            'name'   : 'Fast Track',
-            'price'  : 45,
-          },
-
-          handling:  {
-            'title': 'Handling',
-            'name'   : 'Return Products',
-            'price'  : 15,
-          },
-
-          sendvia:  {
-            'title': 'Send Via',
-            'name'   : 'Free Collection',
-            'price'  : 0,
-          },
-
-          discount:  {
-            'title': 'Discount',
-            'name'   : '',
-            'price'  : 0,
-          },
-        },
-      },
-
-      location: {
-        unit: 'a1',
-        comment: '',
-      },
-
-      studio:{
-        creator: '',
-      },
-
-      product_collection:{
-        do_collect: true,
-        address: '257 Park avenue Southall UB1 3AP',
-        requested:'24 October 2020',
-        scheduled:'2020-11-30 00:00:00',
-        pdf: [],
-      },
-
-      due_date:      {
-        date: '2020-11-16 13:00:00',
-        date_formatted: '31 Dec 2020',
-        is_overdue: 1,
-      },
-
-      is_fasttrack:  '',
-      message_count: 1,
-      phone_count:   0,
-      stage:         '1',
-      state:         'income',
-
-      filters: {
-        campaigns: ['camp 1'],
-        sources:   ['instagram'],
-        team:      ['Omar Chaundry'],
-      },
-  } },
-
-  { order_id:      '002',
-    data: {
-      order_id:      '002',
-      created_order: false,
-      name:          'Benny Benassy',
-
-      reminder: {},
-
-      customer: {
-        'date_added': '23 October 2019 at 12:15pm',
-        'phone'     : '123123',
-        'email'     : 'benny@mail.com',
-        'source'    : 'site',
-        'brand'     : 'Pepsi',
-        'assigned'  : 'Omar Chaundry',
-      },
-
-      studio:{
-        creator: '',
-      },
-
-      order:{
-        currency_symbol: '£',
-        date           : '',
-        items: [],
-        fee:[],
-        addons:{
-          turnaround : {
-            'title': 'Turnaround',
-            'name'   : 'Fast Track',
-            'price'  : 45,
-          },
-
-          handling:  {
-            'title': 'Handling',
-            'name'   : 'Return Products',
-            'price'  : 15,
-          },
-
-          sendvia:  {
-            'title': 'Send Via',
-            'name'   : 'Free Collection',
-            'price'  : 0,
-          },
-
-          discount:  {
-            'title': 'Discount',
-            'name'   : '-',
-            'price'  : 0,
-          },
-        },
-      },
-
-      location: {
-        unit: 'a1',
-        comment: '',
-      },
-
-
-      messages: {
-        enquery: [],
-        studio:[],
-      },
-
-      gallery: {
-        comments: 0,
-        comments_data: [],
-        items: [
-          'assets/images/c/img1.png',
-          'assets/images/c/img2.png',
-          'assets/images/c/img3.png',
-          'assets/images/c/img2.png',
-          'assets/images/c/img1.png',
-        ],
-      },
-
-      due_date:      {
-        date: '2020-12-31 13:00:00',
-        date_formatted: '12 Dec 2020',
-        is_overdue: 0,
-      },
-
-      product_collection:{
-        do_collect: true,
-        address: '257 Park avenue Southall UB1 3AP',
-        requested:'24 October 2020',
-        scheduled:'2020-11-30 00:00:00',
-        pdf: [],
-      },
-
-      is_fasttrack:   1,
-      message_count:  2,
-      phone_count:    1,
-      stage:         '3',
-      state:         'in-progress',
-      filters: {
-        campaigns: [],
-        sources:   ['site'],
-        team:      ['Omar Chaundry'],
-      },
-  } },
-
-  { order_id:      '003',
-    created_order: false,
-    data: {
-      order_id:      '003',
-      name:          'Old Guy',
-      customer: {
-        'date_added': '',
-        'phone'     : '33333',
-        'email'     : 'oldy@mail.com',
-        'source'    : 'site',
-        'brand'     : 'Pepsi',
-        'assigned'  : 'Omar Chaundry',
-      },
-
-      reminder: {},
-
-      product_collection:{
-        do_collect: true,
-        address: '257 Park avenue Southall UB1 3AP',
-        requested:'24 October 2020',
-        scheduled:'2020-11-30 00:00:00',
-        pdf: [],
-      },
-
-      order:{
-        currency_symbol: '£',
-        date           : '',
-        items: [],
-        fee:[],
-        addons:{
-          turnaround : {
-            'title': 'Turnaround',
-            'name'   : 'Fast Track',
-            'price'  : 45,
-          },
-
-          handling:  {
-            'title': 'Handling',
-            'name'   : 'Return Products',
-            'price'  : 15,
-          },
-
-          sendvia:  {
-            'title': 'Send Via',
-            'name'   : 'Free Collection',
-            'price'  : 0,
-          },
-
-          discount:  {
-            'title': 'Discount',
-            'name'   : '',
-            'price'  : 0,
-          },
-        },
-      },
-
-      location: {
-        unit: 'a1',
-        comment: '',
-      },
-
-      gallery: {
-        comments: 0,
-        comments_data: [],
-        items: [
-          'assets/images/c/img1.png',
-          'assets/images/c/img2.png',
-          'assets/images/c/img3.png',
-        ],
-      },
-
-      studio:{
-        creator: '',
-      },
-
-      messages: {
-        enquery: [],
-        studio:[],
-      },
-
-      due_date:      {
-        date: '',
-        date_formatted: 'No Due Date',
-        is_overdue: 0,
-      },
-
-      is_fasttrack:   0,
-      message_count:  0,
-      phone_count:    1,
-      stage:         '3',
-      state:         'in-progress',
-      filters: {
-        campaigns: [],
-        sources:   ['site'],
-        team:      ['Vyacheslav kuleshov'],
-      },
-  } },
-];
-
-
-var _filter_values = {
-  campaigns : [
-   'All Campaigns',
-   'camp 1',
-   'camp 2',
-   'camp 3',
-  ],
-  sources   : [
-    'All Sources',
-    'site',
-    'walk in',
-    'instagram',
-  ],
-
-  team      : [
-    'All Team',
-    'Omar Chaundry',
-    'Vyacheslav kuleshov',
-    'Ivan Ivanov',
-    'Jonny Good',
-  ],
-};
-
-var _order_addons ={
-  'turnaround' : {
-    fasttrack: {
-      name: 'Fast Track',
-      price: 45,
-    },
-    regular: {
-      name: 'Standart',
-      price: 0,
-    },
+var upload_pdf_mixin = {
+  data:{
+    file_name: '',
+    files : '',
   },
 
-  'handling'   : {
-    'return' : {
-      name: 'Return Products',
-      price: 15,
-    },
-    regular: {
-      name: 'Hold Product',
-      price: 0,
-    },
-  },
-
-  'sendvia'    : {
-    free: {
-      name: 'Free Collection',
-      price: 0,
-    },
-    payed: {
-      name: 'Fast Collection',
-      price: 20,
-    }
-  },
-}
-
-_available_products = {
-  swatch : {
-    name: 'Swatch',
-    variations: {
-      101: {
-        variation_id: 101,
-        images: 3,
-        price: 30,
-      },
-      102: {
-        variation_id: 102,
-        images: 6,
-        price: 50,
-      },
-      103: {
-        variation_id: 103,
-        images: 9,
-        price: 80,
-      },
+  methods:{
+    update_pdf: function(event){
+      for(var file of event.target.files){
+        this.file_name = file.name;
+        this.files = file;
+      }
     },
 
-    free_product_id: 104,
-  },
-  senses : {
-    name: 'Senses',
-    variations: {
-     201: {
-        variation_id: 201,
-        images: 3,
-        price: 30,
-      },
-      202: {
-        variation_id: 202,
-        images: 6,
-        price: 50,
-      },
-      203: {
-        variation_id: 203,
-        images: 9,
-        price: 80,
-      },
-    },
+    upload_pdf:function(){
+     var vm = this;
+     if(!vm.files){
+       return;
+     }
 
-    free_product_id: 204,
-  },
+     var fd   = new FormData();
+      fd.append('pdf', vm.files);
+      fd.append('action', 'upload_pdf');
+      fd.append('order_id', vm.order_data.order_id);
+
+      jQuery.ajax({
+        url: WP_URLS.ajax,
+        type: 'POST',
+        processData: false,
+        contentType: false,
+        data: fd,
+      })
+
+      .success(function(e) {
+        var item = frontdesk_list.get_item_by('order_id', vm.order_data.order_id);
+        item.data.product_collection.pdf.push(e.pdf.file_loaded.url);
+      })
+      .always(function(){
+        vm.files = '';
+      });
+    },
+  }
 }
 var frontdesk_list,
     frontdesk_order,
@@ -1733,7 +1369,6 @@ var blank_order = {order_id:      '',
         team:      [],
       },
   } };
-
 Vue.component('frontdesk-item', {
   data: function () {
     return {
@@ -1992,11 +1627,24 @@ Vue.component('studio-item', {
 
     is_overdue: function(){
        return  this.info.reminder.is_overdue;
-    }
+    },
+
+    comments_count: function(){
+      if(!this.info.wfp_images){
+        return 0;
+      }
+
+      var count = this.info.wfp_images.filter(e=>{
+        return typeof(e.request) != 'undefined';
+      }).map(
+      e=>{return e.request.length}
+      ).reduce((a, b) => a + b, 0);
+
+      return count;
+    },
   },
 
   mounted: function(){
-
   },
 
   methods: {
@@ -2015,7 +1663,7 @@ Vue.component('studio-item', {
     <div class="col-4 text-right">
       <svg class="icon svg-icon-bell" v-bind:class="{'green': !is_overdue}" v-if="info.reminder.date"><use xmlns:xlink="ttp://www.w3.org/1999/xlink" xlink:href="#svg-icon-bell"></use> </svg>
 
-      <i class="icon-with-popup" v-if="info.gallery.comments > 0">
+      <i class="icon-with-popup" v-if="comments_count > 0">
       <svg class="icon svg-icon-comment"> <use xmlns:xlink="ttp://www.w3.org/1999/xlink" xlink:href="#svg-icon-comment"></use> </svg>
         <span class="counter" v-if="info.gallery.comments > 0">{{info.gallery.comments}}</span>
       </i>
@@ -2157,7 +1805,7 @@ Vue.component('studio-column', {
       @wheel="scroll_items(slug)"
       @scroll="scroll_items_emit(slug)"
     >
-  <draggable :move="checkMove" :list="items_formatted" group="slug" @end="end_drag"><studio-item v-for="item in items_formatted" v-bind:_info="item.data"  v-bind:key="item.data.order_id" v-on:open_order_el_cb="open_order_col_cb"></studio-item></draggable>  </div> </div>`,
+  <draggable :move="checkMove" :list="items_formatted" group="slug" @end="end_drag"><studio-item v-for="item in items_formatted" v-bind:_info="item.data"  v-bind:key="'studio_item_'+item.data.order_id" v-on:open_order_el_cb="open_order_col_cb"></studio-item></draggable>  </div> </div>`,
 })
 Vue.component('single-studio-content', {
   data: function(){
@@ -2197,6 +1845,13 @@ Vue.component('single-studio-content', {
          }
       }
       return notes_c;
+    },
+
+    turnaround: function(){
+      data = this.order_data.order.addons.filter(e=>{
+        return e.title == 'Turnaround';
+      });
+      return  'undefined' !== typeof(data[0])? data[0].name: 'Not defined';
     },
 
     /**
@@ -2292,6 +1947,12 @@ Vue.component('single-studio-content', {
     * @return integer or '-' if no or 0 photos
     */
     number_of_photos: function(){
+      var already_set = this.order_data.wfp_images.length;
+
+      return Math.max(this.number_of_photos_bought, already_set);
+    },
+
+    number_of_photos_bought: function(){
       var items = this.order_data.order.items;
 
       var count = Object.values(items).map(e => {return parseInt(e.image_count)});
@@ -2305,8 +1966,68 @@ Vue.component('single-studio-content', {
     * @return integer or '-' if no or 0 comments
     */
     number_of_comments: function(){
-      return this.order_data.gallery.comments !== 0 ? this.order_data.gallery.comments : '-';
+      if(!this.order_data.wfp_images){
+        return 0;
+      }
+
+      return this.order_data.wfp_images.filter(e=>{
+        return 'undefined' != typeof(e.request);
+      }).map(e=>{
+        return e.request.length;
+      }).reduce((a, b) => a + b, 0);
     },
+
+    files_uploaded: function(){
+      var files = [];
+      for(var i = 0; i < this.number_of_photos; i++){
+        files.push([]);
+      }
+
+      if(this.order_data.wfp_images){
+        for(image_id in this.order_data.wfp_images){
+          var image = this.order_data.wfp_images[image_id];
+          /**
+          * check if an array of images is set
+          */
+          if(typeof(image.files_uploaded) == 'undefined' && is_boolean(image.archive_url)){
+            var file = {
+                          name: typeof(image.name) != 'undefined'? image.name : 'Old version image',
+                          size: typeof(image.size) != 'undefined'? image.size : '',
+                          request: typeof(image.request)       != 'undefined'? image.request : '',
+                          path: typeof(image.dropbox_path)     != 'undefined'? image.dropbox_path : '',
+                          image_url: typeof(image.archive_url) != 'undefined'? image.archive_url : '',
+                        };
+            files[image_id].push(file);
+          }else if(typeof(image.files_uploaded) == 'undefined'){
+            file = [];
+          }else{
+            file = [];
+            if(typeof(image.files_uploaded) === 'object'){
+              var images = Object.values(image.files_uploaded);
+            }else{
+              var images = image.files_uploaded;
+            }
+
+            for(var image of images){
+              var file = {
+                      name: typeof(image.name) != 'undefined'? image.name : 'Old version image',
+                      size: typeof(image.size) != 'undefined'? image.size : '',
+                      path: typeof(image.path) != 'undefined'? image.path : '',
+                      image_url: typeof(image.image_url) != 'undefined'? image.image_url : '',
+                      request  : typeof(image.request)   != 'undefined'? image.request : '',
+                    };
+              if(image.image_url){
+               files[image_id].push(file);
+              }
+            }
+          }
+        }
+      }
+
+      console.log(strip(files));
+
+      return files;
+    }
   },
 
   watch: {
@@ -2416,11 +2137,19 @@ Vue.component('single-studio-content', {
     * gets comments for current image from all comments
     */
     get_comments_for_image: function(id){
-      var comments = this.order_data.gallery.comments_data;
+      if('undefined' !== typeof(this.order_data.wfp_images[id]) && 'undefined' !== typeof(this.order_data.wfp_images[id].request)){
+        var comments = this.order_data.wfp_images[id].request;
+      }else{
+        return [];
+      }
 
-      var result = comments.filter(
+      var result = comments.map(
         e => {
-          return e.image_id == id;
+          return {
+            author: this.order_data.name,
+            date: e.date,
+            text: e.text,
+          };
         }
       );
 
@@ -2428,14 +2157,15 @@ Vue.component('single-studio-content', {
     },
 
     show_image_popup: function(data){
+      jQuery('.image-preview-popup__inner').removeAttr('style');
+      jQuery('.image-preview-popup__inner').removeClass('loaded');
       jQuery('.image-preview-popup__inner').find('img').remove();
       jQuery('.image-preview-popup__inner').append(data.img);
       this.show_popup_preview = true;
 
       jQuery('.image-preview-popup__inner').find('img').on('load', function(){
-        jQuery('.image-preview-popup__inner').removeAttr('style');
+       jQuery('.image-preview-popup__inner').addClass('loaded');
         var width = jQuery('.image-preview-popup__inner').find('img').width();
-
         var height = jQuery('.image-preview-popup__inner').find('img').height();
 
         jQuery('.image-preview-popup__inner').width(width);
@@ -2447,11 +2177,19 @@ Vue.component('single-studio-content', {
     },
 
     update_files: function(data){
-      this.files_to_load[data.number] = data.files;
+      this.files_to_load[data.item_id] = data.files;
+      var count = 0;
+
+      for(var i in this.files_to_load){
+        count += this.files_to_load[i].length;
+      }
+
+      if(count === 0){
+        this.update_wfp_meta();
+      }
     },
 
     exec_upload: function(){
-
       var folder_name = 'order_' + this.order_data.order_id;
 
       for(var folder in this.files_to_load){
@@ -2462,15 +2200,12 @@ Vue.component('single-studio-content', {
       }
     },
 
-
     upload_file: function(path, file,folder_id){
-
       var parent = this.$children.filter(
         e => {
-          return e.number == parseInt(folder_id);
+          return e.item_id == parseInt(folder_id);
         }
       );
-
 
       var item = parent[0].$children.filter(
         e => {
@@ -2495,28 +2230,25 @@ Vue.component('single-studio-content', {
         if (this.readyState === 4) {
           var data = JSON.parse(this.responseText);
 
-
           parent[0].files_uploaded.push({
             name: data.name,
             size: data.size,
             path: data.path_display,
           });
 
-
           Vue.nextTick(function(){
-
             var parent = vm.$children.filter(
               e => {
-                return e.number == parseInt(folder_id);
+                return e.item_id == parseInt(folder_id);
               }
             );
-
 
             var item = parent[0].$children.filter(
               e => {
                 return e.image_id == file.image_id;
               }
             );
+
 
             item = item[0];
             item.delete_image();
@@ -2525,7 +2257,7 @@ Vue.component('single-studio-content', {
       });
 
       xhr.open("POST", "https://content.dropboxapi.com/2/files/upload");
-      xhr.setRequestHeader("authorization", "Bearer 2NltTQ2WBRAAAAAAAAAAAUU1TE3jRd6MJg-r4KRUils_Nflevk4lLOrathWOF-0Z");
+      xhr.setRequestHeader("authorization", "Bearer "+ dropbox.token);
       xhr.setRequestHeader("Dropbox-API-Arg", data);
       xhr.setRequestHeader("content-type", "application/octet-stream");
 
@@ -2536,6 +2268,80 @@ Vue.component('single-studio-content', {
 
       xhr.send(file);
     },
+
+    update_wfp_meta: function(){
+      var vm = this;
+      var meta = this.$children.map(el => {
+        var file_uploaded = el.files_uploaded.map(e=>{
+          var url;
+          if('undefined' !== e.image_url && e.image_url){
+            url = e.image_url;
+          }else if(e.path){
+            url = vm.show_image_loaded(e.path);
+          }
+
+          return {
+            name: e.name,
+            size: e.size,
+            path: e.path,
+            image_url: url,
+          };
+        });
+
+        var meta = {
+          id              :  el.item_id,
+          files_uploaded  :  file_uploaded,
+          request         :  el.comments,
+          was_downloaded  : 'undefined' !== typeof(el.was_downloaded) ?  el.was_downloaded : 0,
+          is_active       : 1,
+        };
+
+        return meta;
+      })
+
+      jQuery.ajax({
+        url: WP_URLS.ajax,
+        type: 'POST',
+        dataType: 'json',
+        data: {
+          action: 'update_order_images',
+          order_id: this.order_data.order_id,
+          meta: meta,
+          limit: this.number_of_photos_bought,
+        },
+      })
+      .done(function() {
+      })
+      .fail(function() {
+      })
+      .always(function(e) {
+        console.log(e);
+      });
+    },
+
+    show_image_loaded: function(dropbox_path){
+
+      var data = JSON.stringify({
+        "path": dropbox_path
+      });
+
+      var xhr = new XMLHttpRequest();
+
+      xhr.addEventListener("readystatechange", function () {
+        if (this.readyState === 4) {
+          console.log(this.responseText);
+        }
+      });
+
+      xhr.open("POST", "https://api.dropboxapi.com/2/files/get_temporary_link", false);
+      xhr.setRequestHeader("authorization", "Bearer "+ dropbox.token);
+      xhr.setRequestHeader("content-type", "application/json");
+      xhr.setRequestHeader("cache-control", "no-cache");
+      xhr.send(data);
+
+      var response = JSON.parse(xhr.responseText);
+      return response.link;
+    },
   },
 
   template: '#studio-single-content',
@@ -2544,6 +2350,7 @@ Vue.component('upload-item', {
   data: function(){
     return {
       number         : '',
+      item_id             : '',
       state          : this._state,
       comments       : [],
       files          : [],
@@ -2553,9 +2360,11 @@ Vue.component('upload-item', {
   },
 
   props : [
-  '_number',
-  '_state',
-  '_comments',
+    '_item_id',
+    '_number',
+    '_state',
+    '_comments',
+    '_files_uploaded',
   ],
 
   computed:{
@@ -2622,16 +2431,24 @@ Vue.component('upload-item', {
 
       return files;
     },
+
+    this_state: function(){
+      console.log(this.files_uploaded);
+      return 'Upload';
+    },
   },
 
   beforeMount: function(){
     this.number =  this._number < 10? '0' + this._number : this._number;
     this.comments = this._comments? this._comments : [];
+    this.files_uploaded = this._files_uploaded;
+    this.item_id = this._item_id;
   },
 
   mounted: function(){
     this.init_drop_area();
     var vm = this;
+
 
     /*
     * add event listener that will hide view comments state
@@ -2646,14 +2463,24 @@ Vue.component('upload-item', {
 
   watch :  {
     _number: function(val){
+      clog(val);
       this.number =  val < 10? '0'+val: val;
+    },
+
+    _item_id: function(val){
+      clog(val);
+      this.item_id = val;
+    },
+
+    _files_uploaded: function(val){
+      this.files_uploaded = val;
     },
 
     show_comments: function(show){
     },
 
     files: function(){
-      this.$emit('file_changed', {files: this.files, number: this.number});
+      this.$emit('file_changed', {files: this.files, number: this.number, item_id:this.item_id});
     },
   },
 
@@ -2680,13 +2507,13 @@ Vue.component('upload-item', {
     },
 
     delete_image_loaded: function(data){
-
       var file_id = this.files_uploaded.findIndex(e=>{
         return e.path == data.dropbox_path
       });
 
       this.files_uploaded.splice(file_id, 1);
       this.delete_in_dropbox(data.dropbox_path);
+      this.$parent.update_wfp_meta();
     },
 
     delete_in_dropbox:function(path){
@@ -2703,7 +2530,7 @@ Vue.component('upload-item', {
       });
 
       xhr.open("POST", "https://api.dropboxapi.com/2/files/delete_v2");
-      xhr.setRequestHeader("authorization", "Bearer 2NltTQ2WBRAAAAAAAAAAAUU1TE3jRd6MJg-r4KRUils_Nflevk4lLOrathWOF-0Z");
+      xhr.setRequestHeader("authorization", "Bearer " + dropbox.token);
       xhr.setRequestHeader("content-type", "application/json");
       xhr.setRequestHeader("cache-control", "no-cache");
 
@@ -2788,7 +2615,13 @@ Vue.component('upload-item', {
     },
 
     show_image_loaded: function(data){
-      console.log(data);
+
+      if(data.image_url){
+        var img = "<img src='"+data.image_url+"'>"
+        this.$emit('show_image',{img: img});
+        return;
+      }
+
       var data = JSON.stringify({
         "path": data.dropbox_path
       });
@@ -2802,7 +2635,7 @@ Vue.component('upload-item', {
       });
 
       xhr.open("POST", "https://api.dropboxapi.com/2/files/get_temporary_link", false);
-      xhr.setRequestHeader("authorization", "Bearer 2NltTQ2WBRAAAAAAAAAAAUU1TE3jRd6MJg-r4KRUils_Nflevk4lLOrathWOF-0Z");
+      xhr.setRequestHeader("authorization", "Bearer "+ dropbox.token);
       xhr.setRequestHeader("content-type", "application/json");
       xhr.setRequestHeader("cache-control", "no-cache");
       xhr.send(data);
@@ -2832,7 +2665,7 @@ Vue.component('upload-item', {
       <div class="upload-item__header">
         <div class="upload-item__state">
           <span class="number">{{number}} </span>
-          <span class="state upload">Upload </span>
+          <span class="state upload">{{this_state}} </span>
         </div>
         <div class="upload-item__comments "
           v-bind:class="{cup: has_comment , active: exec_show_comments}"
@@ -2846,8 +2679,8 @@ Vue.component('upload-item', {
       <div class="upload-item__body">
         <div class="upload-item__drop-area" v-show=" !exec_show_comments " ref="drop_area">
           <div class="download-cta">
-            <img src="assets/images/load.png"  class="multiple-image" alt="">
-            <img src="assets/images/load_blank.png" class="single-image" alt="">
+            <img src="`+tracker_url[0]+`/assets/images/load.png"  class="multiple-image" alt="">
+            <img src="`+tracker_url[0]+`/assets/images/load_blank.png" class="single-image" alt="">
             <span class="download-cta__text">
               <b>Drop your images here</b>
               or
@@ -2878,6 +2711,7 @@ Vue.component('upload-item', {
           :_name = 'file.name'
           :_size = 'file.size'
           :_dropbox_path = 'file.path'
+          :_image_url    = 'file.image_url'
           v-on:show_image_loaded_trigger = 'show_image_loaded'
           v-on:delete_image_loaded_trigger = 'delete_image_loaded'
           >
@@ -3044,7 +2878,7 @@ Vue.component('ready-item-image', {
     },
 
     show_image: function(){
-      this.$emit('show_image_loaded_trigger', {dropbox_path: this.dropbox_path});
+      this.$emit('show_image_loaded_trigger', {dropbox_path: this.dropbox_path, image_url: this.image_url});
     },
 
 
@@ -4194,6 +4028,8 @@ if(document.getElementById('filters-frontdesk')){
 
       overdue_count: 0,
 
+      mode: 'frontdesk',
+
       visible: true,
     },
 
@@ -4260,9 +4096,7 @@ if(document.getElementById('filters-frontdesk')){
       var vm = this;
 
       // initializes all select elements
-      for(var select_name in vm.filters){
-         vm.init_select(select_name);
-      }
+      vm.init_selects();
     },
 
     methods: {
@@ -4285,6 +4119,13 @@ if(document.getElementById('filters-frontdesk')){
         }
       },
 
+      init_selects: function(){
+        var vm = this;
+        for(var select_name in vm.filters){
+           vm.init_select(select_name);
+        }
+      },
+
       // callback for child select imitation emit
       run_filter_list: function(data){
         this.filters[data.name] = data.val;
@@ -4296,7 +4137,7 @@ if(document.getElementById('single-frontdesk-order')){
   frontdesk_order = new Vue({
     el : '#single-frontdesk-order',
 
-    mixins: [get_set_props, animation_mixin, fds_order],
+    mixins: [get_set_props, animation_mixin, fds_order, upload_pdf_mixin],
 
     data: {
       new_order: false,
@@ -4316,7 +4157,36 @@ if(document.getElementById('single-frontdesk-order')){
       },
     },
 
+    computed:{
+      get_count_reviews:function(){
+          if(!this.order_data.wfp_images){
+            return 0;
+          }
+         return this.order_data.wfp_images.filter(e=>{
+            return 'undefined' != typeof(e.request);
+          }).map(e=>{
+            return e.request.length;
+          }).reduce((a, b) => a + b, 0);
+      },
+    },
+
     methods:{
+
+      get_image_url(image){
+        if('undefined' !== typeof(image.archive_url)){
+          return image.archive_url;
+        }
+        if('undefined' !== typeof(image.files_uploaded)){
+         var img = image.files_uploaded.filter(e=>{
+            return 'undefined' !== e['image_url'] && e['image_url'];
+          })
+
+         return img[0].image_url;
+        }
+        return '';
+      },
+
+
 
       /**
       * hides single element and shows order_list and filters
@@ -4327,6 +4197,7 @@ if(document.getElementById('single-frontdesk-order')){
         if(vm.do_save){
           vm.exec_save_vue();
           vm.exec_save_wordpress();
+          vm.upload_pdf();
         }
 
         Vue.nextTick(function(){
@@ -4352,7 +4223,7 @@ if(document.getElementById('new-frontdesk-order')){
   frontdesk_order_new = new Vue({
     el : '#new-frontdesk-order',
 
-    mixins: [get_set_props, animation_mixin, fds_order],
+    mixins: [get_set_props, animation_mixin, fds_order, upload_pdf_mixin],
 
     data: {
       visible: false,
@@ -4457,6 +4328,11 @@ if(document.getElementById('new-frontdesk-order')){
         .done(function(data) {
           console.log(data);
 
+          if(typeof(data.data) !=='undefined'){
+            alert(data.data.error);
+            return;
+          }
+
           if(data.order_id > 0){
             var new_item = {
               order_id: data.order_id,
@@ -4484,11 +4360,10 @@ if(document.getElementById('new-frontdesk-order')){
               vm.visible = false;
             })
           }
-
-
         })
 
-        .fail(function() {
+        .fail(function(e) {
+          console.log(e);
         })
         .always(function() {
           unblock();
@@ -4972,9 +4847,9 @@ if(document.getElementById('add-address-billing')){
         countries: ["United Kingdon", 'Ireland'],
         country: 'United Kingdon',
         city: '',
-        line_1: '',
-        line_2: '',
-        zip: '',
+        address_1: '',
+        address_2: '',
+        postcode: '',
         company: '',
       };
     },
@@ -4983,9 +4858,9 @@ if(document.getElementById('add-address-billing')){
       visible:function(){
         this.country  = 'United Kingdon';
         this.city  = '';
-        this.line_1  = '';
-        this.line_2  = '';
-        this.zip  = '';
+        this.address_1  = '';
+        this.address_2  = '';
+        this.postcode  = '';
         this.company  = '';
       }
     },
@@ -5005,22 +4880,22 @@ if(document.getElementById('add-address-billing')){
 
         var _keys = [
           'country',
-          'zip',
+          'postcode',
           'city',
-          'line_1',
-          'line_2',
+          'address_1',
+          'address_2',
           'company',
         ];
 
-        var item = [];
+        var item = {};
 
         for(var id of _keys){
           if(this[id]){
-            item.push(this[id]);
+            item[id] = this[id];
           }
         }
 
-       frontdesk_order_new.update_order({name: 'address_billing', val: item.join(', ')}, 'core');
+       frontdesk_order_new.update_order({name: 'address_billing', val: Object.values(item).join(', ')}, 'core');
 
        frontdesk_order_new.update_order({name: 'billing', val: item}, 'customer');
 
@@ -5036,8 +4911,8 @@ if(document.getElementById('add-address-billing')){
       validate: function(){
         var check = {
           city:    'Enter a City or Town please',
-          line_1:  'Enter an address please',
-          zip:     'Enter postal code please',
+          address_1:  'Enter an address please',
+          postcode:     'Enter postal code please',
           company: 'Enter your company name please',
         }
 
@@ -5072,12 +4947,14 @@ if(document.getElementById('studio-vue-app')){
       only_with_messages: false,
       fasttrack: false,
 
-      items: frondtdesk_items,
-      columns_data : frondtdesk_columns_data,
+      items:         studio_items,
+      columns_data : studio_columns_data,
 
       filters: {
-        team      : 'All Creators',
+        team      : 'All Team',
       },
+
+      filter_values: filter_values,
     },
 
     computed: {
@@ -5085,17 +4962,33 @@ if(document.getElementById('studio-vue-app')){
         var comments_count = 0;
         var items = this.items;
 
-        var _items = Object.values(items)
-                      .map(function(e){
-                        return e.data.gallery.comments;
-                      })
-                      .filter(e => { return e > 0});
+        // var _items = Object.values(items)
+        //               .map(function(e){
+        //                 return e.data.gallery.comments;
+        //               })
+        //               .filter(e => { return e > 0});
 
-        return _items.length;
-      },
+        var __items = Object.values(items).filter(e=>{
+          if(!e.data.wfp_images){
+            return false;
+          }
 
-      filter_values: function(){
-        return filter_values;
+          var data = strip(e.data.wfp_images);
+
+          if(typeof(data) == 'object'){
+            data = Object.values(data);
+          }
+
+          var count = data.filter(e=>{
+            return typeof(e.request) != 'undefined';
+          }).map(
+          e=>{return e.request.length}
+          ).reduce((a, b) => a + b, 0);
+
+          return count > 0;
+        });
+
+        return __items.length;
       },
 
       icons_selects: function(){
@@ -5107,39 +5000,17 @@ if(document.getElementById('studio-vue-app')){
       },
     },
 
-    watch: {},
+    watch: {
+      filter_values: function(val){
+        this.$refs.team[0].set_value('options', val.team);
+        this.$refs.team[0].set_value('selected', val.team[0]);
+      },
+    },
 
     beforeMount: function(){
-      // console.time('assign');
-      // var items = [];
-
-      // for (var i = 0; i <= 10000; i++) {
-      //   if(i > 47){
-      //     item.data.is_fasttrack = 1;
-      //   }
-
-      //   var item = JSON.parse(JSON.stringify(this.items[0]));
-      //   item.order_id = '00' + i;
-      //   item.data.order_id     = '00' + i;
-      //   items.push(item);
-      // }
-      // this.items = items;
-
-      // console.timeEnd('assign');
     },
 
-    mounted: function(){
-      const data = JSON.parse(JSON.stringify(this.items[0].data));
-      var vm = this;
-      Vue.nextTick(function(){
-        vm.$refs.detailed_view.order_data = data;
-        vm.$refs.detailed_view.visible = true;
-
-        vm.visible.filters = false;
-        vm.visible.columns = false;
-
-      })
-    },
+    mounted: function(){},
 
     methods:{
       /**
@@ -5178,8 +5049,7 @@ if(document.getElementById('studio-vue-app')){
       open_order: function(_data){
         var item = this.get_item_by('order_id', _data.order_id);
         var item_index = this.get_index_of_item_by('order_id', _data.order_id);
-        const data = JSON.parse(JSON.stringify(item.data));
-
+        const data = strip(item.data);
 
         this.$refs.detailed_view.order_data = data;
         this.$refs.detailed_view.item_index = item_index;

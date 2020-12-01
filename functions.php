@@ -45,6 +45,7 @@ class velesh_init_theme{
     if( $this->is_request( 'frontend' )){
       $this->include_frontend();
       add_action('wp_head', array('theme_construct_page', 'init'));
+      add_action('template_redirect', array('tracker_content_constructor', 'init'));
     }
 
     if( $this->is_request( 'admin' )){
@@ -235,9 +236,8 @@ class velesh_init_theme{
       include_once(THEME_PATH.'/includes/class-menu-edit.php');
       $menu_image = new custom_edit_menu_image();
     }
-
     include_php_from_dir(THEME_PATH.'/includes/');
-
+    include_once(THEME_PATH.'/order_tracker/includes/tracker.php');
     include_php_from_dir(THEME_PATH.'/order_tracker/includes/');
   }
 
@@ -260,7 +260,7 @@ class velesh_init_theme{
 
     // add_action('wp_enqueue_scripts', array($this,'merge_all_scripts'), 9999);
 
-    add_action('wp_enqueue_scripts', array($this,'merge_all_styles'), 9995);
+    // add_action('wp_enqueue_scripts', array($this,'merge_all_styles'), 9995);
 
     add_action('do_theme_after_head', array($this,'print_theme_inline_styles'), 9999);
 

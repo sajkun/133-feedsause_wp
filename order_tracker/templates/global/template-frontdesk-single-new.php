@@ -454,12 +454,22 @@ if ( ! defined( 'ABSPATH' ) ) {
                          ></datepicker-styled>
                     </td>
                   </tr>
+                  <tr v-for="pdf, key in order_data.product_collection.pdf" :key ="'pdf_'+key">
+                    <td colspan="2">
+                      <a href="" class="pdf-link">
+                        <img src="<?php echo THEME_URL ?>/order_tracker/assets/images/pdf.png" alt="">
+                      </a>
+                    </td>
+                  </tr>
                   <tr>
                     <td class="width-150">
+                      <p class="leads-block__text no-margin">{{file_name}}</p>
                     </td>
-                    <td class="width-250 text-right">
-                      <a href="#" class="add-button"><svg class="icon svg-icon-upload"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-upload"></use> </svg> Upload PDF</a>
-                    </td>
+                      <td class="width-250 text-right">
+                        <label class="add-button"><svg class="icon svg-icon-upload"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-upload"></use> </svg> Upload PDF
+                          <input type="file" v-on:change="update_pdf" ref="upload_pdf_input">
+                        </label>
+                      </td>
                   </tr>
                 </tbody>
               </table>

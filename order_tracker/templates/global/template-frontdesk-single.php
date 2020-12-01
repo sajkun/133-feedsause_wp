@@ -224,7 +224,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                 <div class="hr"></div>
 
                 <div class="products-block">
-                  <div class="products-block__item" v-for="(item, key) in order_data.order.items" :key="key">
+                  <div class="products-block__item" v-for="(item, key) in order_data.order.items" :key="'product_'+key">
                     <div class="products-block__item-head row">
                       <div class="col-5">
                        <span class="products-block__item-title"> {{item.product_name}}</span>
@@ -288,13 +288,13 @@ if ( ! defined( 'ABSPATH' ) ) {
                 <div class="leads-block__row">
                   <table class="leads-block__data">
                     <tbody>
-                      <tr v-for="(addon, addon_key) in order_data.order.addons">
+                      <tr v-for="(addon, addon_key) in order_data.order.addons" :key="'addon_'+addon_key">
                         <td class="td-5">
                           <p class="leads-block__label no-margin">{{addon.title}}</p>
                         </td>
                         <td class="width-100">
-                          <p class="leads-block__text no-margin" v-if="addon.name!='Fast Track'">{{addon.name}}</p>
-                          <div class="tag-fasttrack" v-if="addon.name =='Fast Track'">
+                          <p class="leads-block__text no-margin" v-if="addon.name!='Fasttrack'">{{addon.name}}</p>
+                          <div class="tag-fasttrack" v-if="addon.name =='Fasttrack'">
                             <svg class="icon svg-icon-fastrack2"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-fastrack2"></use> </svg>
                             <span>fast track</span>
                         </td>
@@ -389,11 +389,21 @@ if ( ! defined( 'ABSPATH' ) ) {
                              ></datepicker-styled>
                         </td>
                       </tr>
-                      <tr>
+                      <tr v-for="url, key in order_data.product_collection.pdf" :key ="'pdf_'+key">
+                        <td colspan="2">
+                          <a :href="url" class="pdf-link" target="_blank">
+                            <img src="<?php echo THEME_URL ?>/order_tracker/assets/images/pdf.png" alt="">
+                          </a>
+                        </td>
+                      </tr>
+                      <tr v-if="order_data.product_collection.pdf.length == 0">
                         <td class="width-150">
+                           <p class="leads-block__text no-margin">{{file_name}}</p>
                         </td>
                         <td class="width-250 text-right">
-                          <a href="#" class="add-button"><svg class="icon svg-icon-upload"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-upload"></use> </svg> Upload PDF</a>
+                          <label class="add-button"><svg class="icon svg-icon-upload"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-upload"></use> </svg> Upload PDF
+                            <input type="file" v-on:change="update_pdf" ref="upload_pdf_input">
+                          </label>
                         </td>
                       </tr>
                     </tbody>
@@ -533,15 +543,15 @@ if ( ! defined( 'ABSPATH' ) ) {
               <h2 class="leads-block__title">
                 <svg class="icon svg-icon-gallery"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-gallery"></use> </svg>
                 Gallery
-                <span class="float-right">{{order_data.gallery.comments}} Reviews</span>
+                <span class="float-right">{{get_count_reviews}} Reviews</span>
               </h2>
               <div class="hr"></div>
 
               <div class="leads-block__row">
                 <div class="row gutters-20-15 justify-between">
-                  <div class="col-4" v-for="(url, key) in order_data.gallery.items" :key="key">
+                  <div class="col-4" v-for="(image, key) in order_data.wfp_images" :key="key">
                     <div class="gallery-item">
-                      <img :src="url" alt="">
+                      <img :src="get_image_url(image)" alt="">
                     </div>
                     <div class="spacer-h-20"></div>
                   </div><!-- col-4 -->

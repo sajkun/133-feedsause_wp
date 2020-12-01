@@ -38,12 +38,12 @@ if ( ! defined( 'ABSPATH' ) ) {
       <div class="spacer-h-20"></div>
 
       <div class="clearfix">
-        <input type="text" class="popup-inner__field" placeholder="Address line 1" v-model="line_1" ref="line_1">
+        <input type="text" class="popup-inner__field" placeholder="Address line 1" v-model="address_1" ref="address_1">
       </div>
       <div class="spacer-h-20"></div>
 
       <div class="clearfix">
-        <input type="text" class="popup-inner__field" placeholder="Address line 2" v-model="line_2" ref="line_2">
+        <input type="text" class="popup-inner__field" placeholder="Address line 2" v-model="address_2" ref="address_2">
       </div>
       <div class="spacer-h-20"></div>
 
@@ -53,7 +53,7 @@ if ( ! defined( 'ABSPATH' ) ) {
       <div class="spacer-h-20"></div>
 
       <div class="clearfix">
-        <input type="text" class="popup-inner__field" placeholder="Postal code" v-model="zip" ref="zip">
+        <input type="text" class="popup-inner__field" placeholder="Postal code" v-model="postcode" ref="postcode">
       </div>
       <div class="spacer-h-20"></div>
 

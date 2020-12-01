@@ -31,6 +31,16 @@ if(!class_exists('theme_order_tracker')){
       });
       usort($frondtdesk_columns_data, 'sort_by_order');
 
+
+
+      /**
+      * column data for studio
+      */
+      $studio_columns_data = array_filter($options['orders'], function($el){
+        return $el['is_studio'] == 'yes';
+      });
+      usort($studio_columns_data, 'sort_by_order');
+
       /**
       * order statuses for frondesk
       */
@@ -99,7 +109,7 @@ if(!class_exists('theme_order_tracker')){
         $args_customers = array(
           'limit'          => -1,
           'posts_per_page' => -1,
-          'role__in'       =>array('customer'),
+          // 'role__in'       =>array('customer'),
         );
 
         $all_customers = array_map(function($el){
@@ -246,39 +256,7 @@ if(!class_exists('theme_order_tracker')){
        * get elements filtered
        */
 
-       $filter_values = array(
-         'campaign' => array(),
-         'source'   => array(),
-         'team'      => array(),
-       );
-
-       $grab_filter = array(
-         'campaign' => ['customer.campaigns'],
-         'source'   => ['customer.source'],
-         'team'     => ['customer.assigned', 'studio.creator'],
-       );
-
-       foreach ($grab_filter as $filter_key => $filter_sources) {
-         $filter_values[$filter_key] = array();
-
-         foreach ($filter_sources as $key => $source) {
-           $path = array_fill(0, count($orders), $source);
-           $temp = array_map(function($el,  $data){
-              $path = explode('.',$data);
-              return isset($el['data'][$path[0]][$path[1]]) ? $el['data'][$path[0]][$path[1]] : '';
-            },$orders, $path);
-
-            $temp = array_unique($temp);
-            $filter_values[$filter_key] = array_merge($filter_values[$filter_key], $temp);
-         }
-
-          $filter_values[$filter_key] = array_filter($filter_values[$filter_key], function($el){
-            return !empty($el);
-          } );
-
-          $filter_values[$filter_key] = $filter_values[$filter_key]?: array();
-          array_unshift($filter_values[$filter_key], 'All '.$filter_key);
-       }
+       $filter_values = get_filter_data($orders);
 
        /**
        * get all available coupons
@@ -311,8 +289,10 @@ if(!class_exists('theme_order_tracker')){
        * create array of all data to print
        */
       $data = array(
+        'tracker_url'             => array(THEME_URL. '/order_tracker/'),
         'theme_debug'             => THEME_DEBUG? 1: 0,
         'all_users'               => $users,
+        'dropbox'                 => $options['dropbox'],
         'all_customers'           => $all_customers,
         'available_products'      => array_combine($available_products_keys, $available_products),
         'filter_values'           => $filter_values,
@@ -322,12 +302,16 @@ if(!class_exists('theme_order_tracker')){
         'all_coupons'             => $coupons,
         'order_addons'            => $order_addons,
         'frondtdesk_columns_data' => $frondtdesk_columns_data,
+        'studio_columns_data'     => $studio_columns_data,
         'order_statuses'          => $order_statuses_frontdesk,
         'frondtdesk_items'        => $orders,
+        'studio_items'            => $orders,
         'WP_URLS'                 => $urls,
         'tracker_options'         => $options,
         'logged_in_user'          => array('name'=>$user->display_name, 'user_id'=> $user->ID),
       );
+
+      clog($data);
 
       foreach ($data as $name => $value) {
         print_javascript_data($name, $value);
@@ -367,9 +351,10 @@ if(!class_exists('theme_order_tracker')){
         ));
 
         $tabs = array(
-          'general'   => 'General',
-          'orders'    => 'Order Settings',
+          'general'    => 'General',
+          'orders'     => 'Order Settings',
           'extra_data' => 'Extra Data',
+          'dropbox'    => 'Dropbox',
         );
 
         $order_statuses = isset($o['orders'])? $o['orders'] : wc_get_order_statuses();
@@ -410,7 +395,7 @@ if(!class_exists('theme_order_tracker')){
       $o = get_option($this->slug_options);
       $obj = get_queried_object_id();
 
-      if ($o['tracker_page'] == get_queried_object_id()) {
+      if ($o['tracker_page'] == get_queried_object_id() || $o['studio_page'] == get_queried_object_id() ) {
         return THEME_PATH . '/order_tracker/template.php';
       }
 
@@ -421,8 +406,8 @@ if(!class_exists('theme_order_tracker')){
   global $theme_order_tracker;
   $theme_order_tracker = new theme_order_tracker();
 
-  function duh(){
-    global $theme_order_tracker;
-    return $theme_order_tracker;
-  }
+}
+function duh(){
+  global $theme_order_tracker;
+  return $theme_order_tracker;
 }
