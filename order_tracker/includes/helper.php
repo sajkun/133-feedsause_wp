@@ -66,17 +66,24 @@ if(!function_exists('get_items_for_tracker')){
   * gets order parsed data for frontdesk
   *
   * @param type - string frontdesk || studio
-  * @param $date - date
+  * @param $date_start - date
+  * @param $date_end - date
+  * @param $include_ids -  array of ids order ids to include
   *
   * @return array
   */
-  function get_items_for_tracker($type = 'frontdesk', $date_start = false, $date_end = false ){
+  function get_items_for_tracker($type = 'frontdesk', $date_start = false, $date_end = false , $include_ids = false){
 
     $start = microtime(true);
     $args = array(
       'type' =>  'shop_order',
       'limit' => -1,
     );
+
+    if($include_ids){
+      $args['post__in'] = $include_ids;
+      $args['include']  = $include_ids;
+    }
 
     if($date_start){
       $args['date_after'] = $date_start;

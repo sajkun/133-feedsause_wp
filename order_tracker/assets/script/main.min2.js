@@ -1238,8 +1238,7 @@ var upload_item_mixin = {
       clog(strip(this.files));
 
       var wfp_data =(this.$parent.order_data.wfp_images)? strip(this.$parent.order_data.wfp_images[this.item_id]) : [];
-
-      wfp_data = (this.$parent.order_data.wfp_image_single)? strip(this.$parent.order_data.wfp_image_single) : [];
+      wfp_data = (this.$parent.order_data.wfp_image_single)? strip(this.$parent.order_data.wfp_image_single) : wfp_data;
 
       clog('wfp_data: ' , 'blue');
       clog(wfp_data);
@@ -1269,9 +1268,19 @@ var upload_item_mixin = {
     },
 
     is_downloaded: function(){
+
+      if(typeof(this.$parent.order_data.wfp_images[this.item_id]) == 'undefined'){
+        return false;
+      }
+
+      if(!this.$parent.order_data.wfp_images[this.item_id]){
+        return false;
+      }
+
       var wfp_data = strip(this.$parent.order_data.wfp_images[this.item_id]);
 
       return wfp_data.was_downloaded == 1;
+
     },
   },
 
@@ -1292,7 +1301,8 @@ var frontdesk_list,
     popup_address,
     studio_app,
     list_filter_mixin,
-    popup_address_billing
+    popup_address_billing,
+    search_field
 ;
 
 /***********************
@@ -5696,6 +5706,157 @@ if(document.getElementById('add-address-billing')){
         return validated;
       },
     }
+  })
+}
+if(document.getElementById('search-field')){
+  search_field = new Vue({
+    'el' : '#search-field',
+     data: {
+       value: '',
+       focused: false,
+       user_id: -1,
+     },
+
+     watch: {
+      value: function(val){
+        this.focused = true;
+        var vm = this;
+
+        var search = this.all_customers.filter(e=>{
+          return vm.value.toLowerCase() == e.name.toLowerCase();
+        });
+
+        if(search.length == 1){
+          vm.value   = search[0].name;
+          vm.user_id = search[0].user_id;
+
+          Vue.nextTick(function(){
+            vm.focused = false;
+          })
+        }
+      },
+     },
+
+     computed:{
+       all_customers: function(){
+        return all_customers;
+       },
+
+       _users_found: function(){
+        var vm = this;
+
+        if(vm.value.length >=2){
+          var users = this.all_customers.filter(e=> {
+
+            return (e.name.toLowerCase().indexOf(vm.value.toLowerCase()) >=0 || e.name.toLowerCase() == vm.value.toLowerCase())
+
+             || e.brand.toLowerCase().indexOf(vm.value.toLowerCase()) >=0
+          });
+
+          return users;
+        }
+
+        return [];
+       },
+
+       users_found:function(){
+         return this.focused? this._users_found : []
+       }
+     },
+
+     mounted: function(){
+      this.$refs.dropdown.classList.remove('visuallyhidden');
+     },
+
+     methods:{
+
+      exec_search: function(){
+
+        this.focused = false;
+
+        if(this.value.length < 2){
+          alert('Enter some text to search, please');
+          return;
+        }
+
+        if(this._users_found.length == 0 && this.user_id < 0){
+          alert('No Customers found, please try another request');
+          return;
+        }
+        block();
+
+        slog('Search order by user', 'blue');
+        clog(this.get_data());
+
+        jQuery.ajax({
+          url: WP_URLS.ajax,
+          type: 'POST',
+          dataType: 'json',
+          data: {action: 'get_orders_by_user', data: this.get_data()},
+        })
+        .done(function(e) {
+          clog('response', 'green')
+
+
+          if('undefined' != typeof(frontdesk_list)) {
+            frontdesk_list.visible = true;
+            filters.visible = true;
+            frontdesk_order_new.visible = false;
+            frontdesk_order.visible = false;
+
+            Vue.nextTick(function(){
+              frontdesk_list.items = e.items;
+              filters.filter_values = e.filters;
+            })
+          }
+
+          if('undefined' != typeof(studio_app)) {
+            studio_app.visible.columns = true;
+            studio_app.visible.filters = true;
+            studio_app.$refs.detailed_view.visible = false;
+
+            Vue.nextTick(function(){
+              studio_app.items = e.items;
+              studio_app.filter_values = e.filters;
+            })
+          }
+
+
+        })
+        .fail(function(e) {
+          alert('Search Failed');
+        })
+        .always(function() {
+          unblock();
+          elog();
+        });
+
+      },
+
+      get_data: function(){
+        return {
+          customer_name:   this.value,
+          user_id:         this.user_id,
+          users_found:     this._users_found,
+        }
+      },
+
+      input: function(){
+        if(typeof(this.value) == 'undefined') {
+          this.value = '';
+        }
+      },
+
+      update_customer: function(customer){
+        var vm = this;
+        vm.value   = customer.name;
+        vm.user_id = customer.user_id;
+
+        Vue.nextTick(function(){
+          vm.focused = false;
+        })
+      },
+     },
   })
 }
 if(document.getElementById('studio-vue-app')){

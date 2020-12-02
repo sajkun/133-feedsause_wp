@@ -22,7 +22,12 @@ if(!class_exists('tracker_ajax')){
       //updates data about images
       add_action('wp_ajax_update_order_images', array($this, 'update_images_cb'));
 
+      // save notes meta
       add_action('wp_ajax_save_notes', array($this, 'save_notes_cb'));
+
+      // get users by customer
+      add_action('wp_ajax_get_orders_by_user', array($this, 'get_orders_by_user_cb'));
+
     }
 
     /**
@@ -193,7 +198,7 @@ if(!class_exists('tracker_ajax')){
       if(isset($_POST['data']['order']['items'])){
         foreach ($_POST['data']['order']['items'] as $data) {
           $product = wc_get_product((int)$data['product_id']);
-          $total += $product->get_regular_price();
+          $total  = ($product->get_regular_price()) ? $total  + $product->get_regular_price(): $total ;
 
           $item = new WC_Order_Item_Product();
           $item->set_props(array(
@@ -312,6 +317,9 @@ if(!class_exists('tracker_ajax')){
       wp_send_json( $file );
     }
 
+    /**
+    * undates uloaded images meta
+    */
     public static function update_images_cb(){
 
       $order_id = (int)$_POST['order_id'];
@@ -334,6 +342,41 @@ if(!class_exists('tracker_ajax')){
         'meta'   => $meta,
         'update' => $update,
         'add'    => $add,
+      ));
+    }
+
+    /**
+    * get order by passed user
+    */
+    public static function get_orders_by_user_cb(){
+
+
+      if($_POST['data']['user_id'] >= 0){
+        $args = array(
+          'numberposts' => -1,
+          'customer_id'  => $_POST['data']['user_id'],
+        );
+
+        $items = array_map('map_orders',wc_get_orders($args));
+      }else{
+        $user_ids = array_map( function($el){
+          return $el['user_id'];
+        },$_POST['data']['users_found']);
+
+        $args = array(
+          'numberposts' => -1,
+          'customer_id'  => $user_ids,
+        );
+
+        $items = array_map('map_orders',wc_get_orders($args));
+      }
+
+      $filters = get_filter_data($items);
+
+      wp_send_json( array(
+         'items'  => $items,
+         'filters' => $filters,
+         'post' => $_POST,
       ));
     }
   }

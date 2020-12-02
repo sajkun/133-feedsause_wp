@@ -6304,6 +6304,8 @@ html {
 .site-header {
   background-color: #ffffff;
   border-bottom: 1px solid #e0e8f9;
+  position: relative;
+  z-index: 100;
 }
 
 .site-header .row-h-80 {
@@ -6583,6 +6585,10 @@ html {
 
 .curent-user__name span {
   text-transform: capitalize;
+}
+
+#search-field .input-holder__dropdown {
+  margin-top: 20px;
 }
 
 .gutters-5 {
