@@ -10,13 +10,16 @@ if(!class_exists('tracker_content_output')){
     * prints header of page
     */
     public static function print_header(){
+
       $options = get_option(duh()->slug_options);
       $user    = wp_get_current_user();
 
       $args = array(
         'home_url'   => (isset($options['tracker_page']))? get_permalink($options['tracker_page']) : false,
+
         'studio_url' => (isset($options['studio_page']))? get_permalink($options['studio_page']) : false,
         'name'       => $user->display_name,
+        'is_studio'  => get_queried_object_id() === (int)$options['studio_page'],
         'avatar_url' => get_avatar_url($user),
       );
 

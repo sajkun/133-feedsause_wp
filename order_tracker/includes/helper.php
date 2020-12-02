@@ -198,7 +198,13 @@ if(!class_exists('map_orders_cb')){
       // $pdf = !!$attachment_id?  array(wp_get_attachment_url((int)$attachment_id)) : array();
 
       $pdf = array();
+      $wfp_images = $order->get_meta('_wfp_image');
 
+      if($wfp_images){
+        $wfp_images = array_filter($order->get_meta('_wfp_image'), function($el){
+          return !isset($el['was_bought']);
+        });
+      }
 
       return array(
         'order_id' =>  $this->order_id,
@@ -206,7 +212,8 @@ if(!class_exists('map_orders_cb')){
           'order_id'      => $this->order_id,
           'name'          => $this->user->get_display_name(),
           'created_order' => $order->get_meta('_is_created_order'),
-          'wfp_images'    => $order->get_meta('_wfp_image'),
+          'wfp_images'      =>  $wfp_images,
+          'wfp_image_single' => $order->get_meta('_wfp_image_single'),
 
           'order_status'  => 'wc-'.$order->get_status(),
           'is_fasttrack'  => $is_fasttrack,

@@ -254,7 +254,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                           <div class="col-5">Product</div>
                           <div class="col-7">{{item.title}}</div>
                         </div>
-                        <div class="row no-gutters">
+                        <div class="row no-gutters" v-if="item.sizes">
                           <div class="col-5">Sizes</div>
                           <div class="col-7">{{item.sizes.join(', ')}}</div>
                         </div>
@@ -470,43 +470,44 @@ if ( ! defined( 'ABSPATH' ) ) {
 
                <h2 class="leads-block__title">Studio Notes</h2>
 
-               <div class="spacer-h-20"></div>
-                  <div class="leads-block__row">
-                    <p class="no-notes" v-if="computed_studio_notes.length === 0">No notes there yet</p>
-                    <div v-for="note,key in computed_studio_notes" class="note-block">
-                      <div class="note-block__header clearfix">
-                        <span class="name">{{note.user_name}}</span>
-                        <span class="date">{{note.date}}</span>
+                <div class="spacer-h-20"></div>
+                <div class="leads-block__row">
+                  <p class="no-notes" v-if="computed_studio_notes.length === 0">No notes there yet</p>
+                  <div v-for="note,key in computed_studio_notes" class="note-block">
+                    <div class="note-block__header clearfix">
+                      <span class="name">{{note.user_name}}</span>
+                      <span class="date">{{note.date}}</span>
 
-                        <i class="remove-note-icon"  v-on:click="delete_note('studio', note.text, note.date)">
-                          <svg class="icon svg-icon-trash"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-trash"></use></svg>
-                        </i>
-                      </div>
-
-                      <div class="note-block__body" v-bind:class="{'manager-note': note.is_manager == 'yes'}">
-                       <span class="inner">{{note.text}}</span>
-                       <i class="icon-manager-done" v-on:click="mark_note_done(note.key, 'no')" v-if="note.is_manager == 'yes' && note.done =='yes'"></i>
-
-                        <i class="icon-manager-done not" v-on:click="mark_note_done(note.key, 'yes')" v-if="note.is_manager == 'yes' && note.done !='yes'"></i>
-                      </div>
+                      <i class="remove-note-icon"  v-on:click="delete_note('studio', note.text, note.date)">
+                        <svg class="icon svg-icon-trash"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-trash"></use></svg>
+                      </i>
                     </div>
 
-                    <span class="note-block__show-more" v-on:click="studio_notes_count = order_data.messages.studio.length + 9999" v-if="studio_notes_count < computed_studio_notes_count"> <i class="icon"></i> Show {{this.order_data.messages.studio.length - 1}} more</span>
-                    <div class="spacer-h-20"></div>
+                    <div class="note-block__body" v-bind:class="{'manager-note': note.is_manager == 'yes'}">
+                     <span class="inner">{{note.text}}</span>
+                     <i class="icon-manager-done" v-on:click="mark_note_done(note.key, 'no')" v-if="note.is_manager == 'yes' && note.done =='yes'"></i>
+
+                      <i class="icon-manager-done not" v-on:click="mark_note_done(note.key, 'yes')" v-if="note.is_manager == 'yes' && note.done !='yes'"></i>
+                    </div>
                   </div>
 
-                  <form id="message-form-reception" v-on:submit.prevent  v-on:submit="add_note('studio')" >
-                    <div class="leads-block__form">
+                  <span class="note-block__show-more" v-on:click="studio_notes_count = order_data.messages.studio.length + 9999" v-if="studio_notes_count < computed_studio_notes_count"> <i class="icon"></i> Show {{this.order_data.messages.studio.length - 1}} more</span>
+                  <div class="spacer-h-20"></div>
+                </div>
 
-                    <textarea name="text" placeholder="Enter new note…" ref="note_textarea_studio" v-model="studio_note_text" @keyup.alt.enter="add_note('studio')" @keyup.ctrl.enter="add_note('studio')" title="use Enter for line breaks, use Alt+Enter to add note"></textarea>
+                <form id="message-form-reception" v-on:submit.prevent  v-on:submit="add_note('studio')" >
+                  <div class="leads-block__form">
 
-                    <button type="submit" class="button-submit">
-                      <svg class="icon svg-icon-send"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-send"></use> </svg>
-                    </button>
+                  <textarea name="text" placeholder="Enter new note…" ref="note_textarea_studio" v-model="studio_note_text" @keyup.alt.enter="add_note('studio')" @keyup.ctrl.enter="add_note('studio')" title="use Enter for line breaks, use Alt+Enter to add note"></textarea>
 
-                    </div>
-                  </form>
+                  <button type="submit" class="button-submit">
+                    <svg class="icon svg-icon-send"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-send"></use> </svg>
+                  </button>
+
+                  </div>
+                </form>
               </div><!-- leads-block -->
+
             <!--******** END STUDIO    DATA *****
              ************************************ -->
 

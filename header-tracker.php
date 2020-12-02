@@ -7,7 +7,7 @@
 
    <link rel="stylesheet" href="<?php echo THEME_URL ?>/order_tracker/assets/libs/datepicker/daterangepicker.css">
    <link rel="stylesheet" href="<?php echo THEME_URL ?>/order_tracker/assets/libs/datetimepicker/build/jquery.datetimepicker.min.css">
-   <link rel="stylesheet" href="<?php echo THEME_URL ?>/order_tracker/assets/css/main.min.css">
+   <link rel="stylesheet" href="<?php echo THEME_URL ?>/order_tracker/assets/css/main.min2.css">
    <script>
      (function(){
        function addFont() {
@@ -117,7 +117,7 @@
     <script src="//cdn.jsdelivr.net/npm/sortablejs@1.8.4/Sortable.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/Vue.Draggable/2.20.0/vuedraggable.umd.min.js"></script>
 
-   <script defer src="<?php echo THEME_URL ?>/order_tracker/assets/script/main.js"></script>
+   <script defer src="<?php echo THEME_URL ?>/order_tracker/assets/script/main2.js"></script>
  </head>
  <body  id="site-body" class="not-ready">
   <div class="site-container">

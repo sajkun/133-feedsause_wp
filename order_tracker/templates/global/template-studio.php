@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
   <!-- **********************************
   ************ STARTS FILTERS ***********
   ***********************************-->
-  <div class="container-lg switchers" v-if="visible.filters">
+  <div class="container-lg switchers" v-show="visible.filters">
     <div class="spacer-h-40"></div>
     <div class="row  justify-content-start item-margins">
       <div class="alert">

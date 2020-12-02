@@ -12695,6 +12695,10 @@ html {
   opacity: 0;
 }
 
+.upload-item .highlight .download-cta .single-image-2 {
+  opacity: .5;
+}
+
 .upload-item.has-files .download-cta {
   display: none;
 }

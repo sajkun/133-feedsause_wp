@@ -41,9 +41,11 @@ if ( ! defined( 'ABSPATH' ) ) {
           </div><!-- search -->
           <div class="clearfix valign-center">
             <div class="row no-gutters">
+              <?php if (!$is_studio): ?>
               <a href="javascript:create_new_order()" class="new-user">
                 <span>+</span> New
               </a>
+              <?php endif ?>
               <div class="curent-user">
                 <div class="curent-user__gravatar">
                   <?php if ($avatar_url): ?>

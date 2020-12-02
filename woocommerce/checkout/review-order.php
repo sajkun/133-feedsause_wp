@@ -58,7 +58,9 @@ $options = get_theme_checkout_content();
              </div>
 
 
-            <?php if(count( $cart_item['sizes']) > 0){ ?>
+            <?php
+
+            if(in_array( gettype($cart_item['sizes']), array('array', 'object') ) && count( $cart_item['sizes']) > 0){ ?>
 
             <div class="clearfix">
               <svg class="icon svg-icon-size"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-size"></use> </svg>

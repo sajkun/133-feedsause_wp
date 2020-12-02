@@ -1263,8 +1263,12 @@ class theme_formatted_cart{
     $sizes = array();
 
     foreach ($item['items'] as $_i) {
-      $comment = trim($_i['extra_data']['comment']['value']);
-      return $comment;
+      if(isset($_i['extra_data'])){
+        $comment = trim($_i['extra_data']['comment']['value']);
+        return $comment;
+      }else{
+        return '';
+      }
     }
   }
   /**
@@ -1274,7 +1278,11 @@ class theme_formatted_cart{
     $sizes = array();
 
     foreach ($item['items'] as $_i) {
-      return $_i['extra_data']['sizes']['value'];
+      if(isset($_i['extra_data'])){
+        return $_i['extra_data']['sizes']['value'];
+      }else{
+        return '';
+      }
     }
   }
 

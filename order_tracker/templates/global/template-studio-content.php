@@ -78,7 +78,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                       <div class="col-4">Product</div>
                       <div class="col-8">{{item.title}}</div>
                     </div>
-                    <div class="row">
+                    <div class="row" v-if="item.sizes">
                       <div class="col-4">Sizes</div>
                       <div class="col-8">{{item.sizes.join(', ')}}</div>
                     </div>
@@ -172,45 +172,44 @@ if ( ! defined( 'ABSPATH' ) ) {
 
            <div class="leads-block">
              <div class="spacer-h-20"></div>
-
              <h2 class="leads-block__title">Studio Notes</h2>
 
-             <div class="spacer-h-20"></div>
-                <div class="leads-block__row">
-                  <p class="no-notes" v-if="computed_studio_notes.length === 0">No notes there yet</p>
-                  <div v-for="note,key in computed_studio_notes" class="note-block">
-                    <div class="note-block__header clearfix">
-                      <span class="name">{{note.user_name}}</span>
-                      <span class="date">{{note.date}}</span>
+              <div class="spacer-h-20"></div>
+              <div class="leads-block__row">
+                <p class="no-notes" v-if="computed_studio_notes.length === 0">No notes there yet</p>
+                <div v-for="note,key in computed_studio_notes" class="note-block">
+                  <div class="note-block__header clearfix">
+                    <span class="name">{{note.user_name}}</span>
+                    <span class="date">{{note.date}}</span>
 
-                      <i class="remove-note-icon"  v-on:click="delete_note(note.key, 'studio')">
-                        <svg class="icon svg-icon-trash"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-trash"></use></svg>
-                      </i>
-                    </div>
-
-                    <div class="note-block__body" v-bind:class="{'manager-note': note.is_manager == 'yes'}">
-                     <span class="inner">{{note.text}}</span>
-                     <i class="icon-manager-done" v-on:click="mark_note_done(note.key, 'no')" v-if="note.is_manager == 'yes' && note.done =='yes'"></i>
-
-                      <i class="icon-manager-done not" v-on:click="mark_note_done(note.key, 'yes')" v-if="note.is_manager == 'yes' && note.done !='yes'"></i>
-                    </div>
+                    <i class="remove-note-icon"  v-on:click="delete_note('studio', note.text, note.date)">
+                      <svg class="icon svg-icon-trash"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-trash"></use></svg>
+                    </i>
                   </div>
 
-                  <span class="note-block__show-more" v-on:click="studio_notes_count = order_data.messages.studio.length + 9999" v-if="studio_notes_count < computed_studio_notes_count"> <i class="icon"></i> Show {{this.order_data.messages.studio.length - 1}} more</span>
-                  <div class="spacer-h-20"></div>
+                  <div class="note-block__body" v-bind:class="{'manager-note': note.is_manager == 'yes'}">
+                   <span class="inner">{{note.text}}</span>
+                   <i class="icon-manager-done" v-on:click="mark_note_done(note.key, 'no')" v-if="note.is_manager == 'yes' && note.done =='yes'"></i>
+
+                    <i class="icon-manager-done not" v-on:click="mark_note_done(note.key, 'yes')" v-if="note.is_manager == 'yes' && note.done !='yes'"></i>
+                  </div>
                 </div>
 
-                <form id="message-form-reception" v-on:submit.prevent  v-on:submit="add_note('studio')" >
-                  <div class="leads-block__form">
+                <span class="note-block__show-more" v-on:click="studio_notes_count = order_data.messages.studio.length + 9999" v-if="studio_notes_count < computed_studio_notes_count"> <i class="icon"></i> Show {{this.order_data.messages.studio.length - 1}} more</span>
+                <div class="spacer-h-20"></div>
+              </div>
 
-                  <textarea name="text" placeholder="Enter new note…" ref="note_textarea_studio" v-model="studio_note_text" @keyup.alt.enter="add_note('studio')" @keyup.ctrl.enter="add_note('studio')" title="use Enter for line breaks, use Alt+Enter to add note"></textarea>
+              <form id="message-form-reception" v-on:submit.prevent  v-on:submit="add_note('studio')" >
+                <div class="leads-block__form">
 
-                  <button type="submit" class="button-submit">
-                    <svg class="icon svg-icon-send"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-send"></use> </svg>
-                  </button>
+                <textarea name="text" placeholder="Enter new note…" ref="note_textarea_studio" v-model="studio_note_text" @keyup.alt.enter="add_note('studio')" @keyup.ctrl.enter="add_note('studio')" title="use Enter for line breaks, use Alt+Enter to add note"></textarea>
 
-                  </div>
-                </form>
+                <button type="submit" class="button-submit">
+                  <svg class="icon svg-icon-send"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-send"></use> </svg>
+                </button>
+
+                </div>
+              </form>
             </div><!-- leads-block -->
 
           <!--*****end studio notes*******
@@ -252,24 +251,53 @@ if ( ! defined( 'ABSPATH' ) ) {
             <p class="upload-area__header-value">{{number_of_comments}}</p>
           </div>
           <div class="col text-right">
-            <a href="#" v-on:click.prevent="exec_upload" class="upload-area__submit">Submit Photos</a>
+            <a href="#"  v-if="!is_old_order && !is_single_order" v-on:click.prevent="exec_upload" class="upload-area__submit">Submit Photos</a>
           </div>
         </div><!-- upload-area__header -->
-
-
         <div class="upload-area__body">
           <div class="row">
-            <upload-item
-              v-for="(n, i) in number_of_photos"
-              :_number = "n"
+           <upload-item-exists
+              v-for="(file, i) in files_uploaded"
+              :_number = "i + 1"
               :_item_id = "i"
               :key     = "'upload_item_'+i"
-              :_comments = get_comments_for_image(i)
-              :_files_uploaded = files_uploaded[i]
+              :_comments = "get_comments_for_image(i)"
+              :_files_uploaded = "file"
+              :_is_old_order = "is_old_order"
               v-on:show_image = 'show_image_popup'
               v-on:file_changed = "update_files"
+            ></upload-item-exists>
 
+           <upload-item-exists
+               v-if= "is_single_order"
+               :_number = "1"
+              :_item_id = "0"
+              :_comments = "[]"
+              :_files_uploaded = "single_order_files"
+              :_is_old_order = "1"
+              v-on:show_image = 'show_image_popup'
+              v-on:file_changed = "update_files"
+            ></upload-item-exists>
+
+            <upload-item
+              v-for="(file, i) in watch_files_prepared"
+              :_number         = "get_index_prepared(i) + 1"
+              :_item_id        = "get_index_prepared(i)"
+              :key             = "'upload_item_prepared_'+get_index_prepared(i)"
+              :_comments       = "[]"
+              :_files = "file"
+              :_files_uploaded = "files_uploaded[get_index_prepared(i)]"
+              v-on:show_image = "show_image_popup"
+              v-on:file_changed = "update_files"
             ></upload-item>
+
+            <upload-item-blank
+               v-if = "!is_old_order && !is_single_order"
+              :_blank_number = "blank_item_id  + 1"
+              :_blank_item_id = "blank_item_id"
+              v-on:file_changed_blank = "update_files_blank"
+            ></upload-item-blank>
+
           </div><!-- row -->
         </div><!-- upload-area__body -->
       </div><!-- upload-area -->

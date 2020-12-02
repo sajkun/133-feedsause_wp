@@ -21,6 +21,8 @@ if(!class_exists('tracker_ajax')){
 
       //updates data about images
       add_action('wp_ajax_update_order_images', array($this, 'update_images_cb'));
+
+      add_action('wp_ajax_save_notes', array($this, 'save_notes_cb'));
     }
 
     /**
@@ -32,6 +34,31 @@ if(!class_exists('tracker_ajax')){
       $order->set_status($order_status);
       $order->save();
       wp_send_json($_POST);
+    }
+
+
+    /**
+    * updates order status
+    */
+    public static function save_notes_cb(){
+      switch ($_POST['notes_type']) {
+        case 'studio':
+          $meta_name = '_notes_studio';
+          break;
+
+        case 'frontdesk':
+          $meta_name = '_notes_studio';
+          break;
+      }
+
+      if(!update_post_meta($_POST['order_id'], $meta_name, $_POST['notes'])){
+        add_post_meta($_POST['order_id'], $meta_name, $_POST['notes']);
+      }
+
+      wp_send_json(array(
+        'post' => $_POST,
+        'meta_name' => $meta_name,
+      ));
     }
 
     /**
@@ -300,8 +327,11 @@ if(!class_exists('tracker_ajax')){
         add_post_meta($order_id, '_wfp_image_limit',$_POST['limit']);
       }
 
+      $meta = get_post_meta($order_id, '_wfp_image', true);
+
       wp_send_json(array(
         'post'   => $_POST,
+        'meta'   => $meta,
         'update' => $update,
         'add'    => $add,
       ));
