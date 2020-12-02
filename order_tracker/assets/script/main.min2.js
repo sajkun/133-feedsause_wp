@@ -1237,7 +1237,8 @@ var upload_item_mixin = {
       clog('files: ' , 'blue');
       clog(strip(this.files));
 
-      var wfp_data =(this.$parent.order_data.wfp_images)? strip(this.$parent.order_data.wfp_images[this.item_id]) : [];
+      var wfp_data = typeof(this.$parent.order_data.wfp_images) !== 'undefined' && typeof(this.$parent.order_data.wfp_images[this.item_id]) !== 'undefined' ? strip(this.$parent.order_data.wfp_images[this.item_id]) : [];
+
       wfp_data = (this.$parent.order_data.wfp_image_single)? strip(this.$parent.order_data.wfp_image_single) : wfp_data;
 
       clog('wfp_data: ' , 'blue');
@@ -2059,6 +2060,7 @@ Vue.component('single-studio-content', {
                           request: typeof(image.request)       != 'undefined'? image.request : '',
                           path: typeof(image.dropbox_path)     != 'undefined'? image.dropbox_path : '',
                           image_url: typeof(image.archive_url) != 'undefined'? image.archive_url.replace('?dl-1', '?dl-0') : '',
+                          archive_url: typeof(image.archive_url) != 'undefined'? image.archive_url.replace('?dl-1', '?dl-0') : '',
                         };
             files[image_id].push(file);
           }else if(typeof(image.files_uploaded) == 'undefined'){
@@ -2470,8 +2472,8 @@ Vue.component('single-studio-content', {
       }).map(el => {
         var file_uploaded = el.files_uploaded.map(e=>{
           var url;
-          if('undefined' !== e.image_url && e.image_url){
-            url = e.image_url;
+          if('undefined' !== e.archive_url && e.archive_url){
+            url = e.archive_url;
           }else if(e.path){
             url = vm.show_image_loaded(e.path);
           }
