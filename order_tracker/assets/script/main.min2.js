@@ -2484,7 +2484,7 @@ Vue.component('single-studio-content', {
           };
         });
 
-        var was_downloaded = vm.order_data.wfp_images[el.item_id].was_downloaded;
+        var was_downloaded = 'undefined' != typeof(vm.order_data.wfp_images[el.item_id])? vm.order_data.wfp_images[el.item_id].was_downloaded : 0;
 
         var meta = {
           id              :  el.item_id,
