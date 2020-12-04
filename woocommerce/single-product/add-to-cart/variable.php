@@ -241,7 +241,7 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
           v-on:after-enter="enterAfter"
           v-on:after-leave="leaveAfter"
          >
-          <div class="woocommerce-notices-wrapper" v-if="product.alert_variations_no_select || product.alert_name || product.alert_variations_not_found || product.alert_name_duplicate">
+          <div class="woocommerce-notices-wrapper hidden" v-show="product.alert_variations_no_select || product.alert_name || product.alert_variations_not_found || product.alert_name_duplicate">
             <transition-group
               name="errors-list"
               tag="ul"
@@ -339,7 +339,7 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
         v-on:after-enter="enterAfter"
         v-on:after-leave="leaveAfter"
        >
-      <div class="woocommerce-notices-wrapper" v-if="sizes_alert">
+      <div class="woocommerce-notices-wrapper hidden" v-show="sizes_alert">
         <ul class="woocommerce-error-alt">
           <li> Please select at least 1 size. </li>
         </ul>
@@ -354,6 +354,21 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 
       <textarea name="comment"  v-model="comment" class="single-recipe__comment" placeholder="e.g. Only shoot the product from front angle"></textarea>
 
+
+      <transition
+        v-bind:css="false"
+        v-on:before-enter="beforeEnter"
+        v-on:enter="enter"
+        v-on:leave="leave"
+        v-on:after-enter="enterAfter"
+        v-on:after-leave="leaveAfter"
+       >
+      <div class="woocommerce-notices-wrapper hidden" v-show="comment_alert">
+        <ul class="woocommerce-error-alt">
+          <li> Maximum 140 symbols allowed for the comment </li>
+        </ul>
+      </div>
+      </transition>
       <div class="single_variation_wrap">
         <?php
           /**

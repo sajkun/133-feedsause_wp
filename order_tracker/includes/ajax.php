@@ -28,6 +28,8 @@ if(!class_exists('tracker_ajax')){
       // get users by customer
       add_action('wp_ajax_get_orders_by_user', array($this, 'get_orders_by_user_cb'));
 
+      add_action('wp_ajax_update_start_shoot', array($this, 'update_start_shoot_cb'));
+
     }
 
     /**
@@ -324,11 +326,15 @@ if(!class_exists('tracker_ajax')){
 
       $order_id = (int)$_POST['order_id'];
 
-      $update = update_post_meta($order_id, '_wfp_image',$_POST['meta']);
+      $meta = array_filter($_POST['meta'], function($el){
+        return isset($el['files_uploaded']);
+      });
+
+      $update = update_post_meta($order_id, '_wfp_image', $meta);
       $add = false;
 
       if(!$update){
-        $add = add_post_meta($order_id, '_wfp_image',$_POST['meta']);
+        $add = add_post_meta($order_id, '_wfp_image', $meta);
       }
 
       if(!update_post_meta($order_id, '_wfp_image_limit',$_POST['limit'])){
@@ -377,6 +383,32 @@ if(!class_exists('tracker_ajax')){
          'items'  => $items,
          'filters' => $filters,
          'post' => $_POST,
+      ));
+    }
+
+    public static function update_start_shoot_cb(){
+      $order_id = $_POST['order_id'];
+      $order = wc_get_order( $order_id );
+
+      if(!$order){
+        wp_send_json_error( 'Order not found', 418 );
+      }
+
+      $options = duh()->get_options();
+
+      $order_status = str_replace('wc-', '', $options['orders_misc']['shoot']);
+      $order->set_status($order_status);
+      $order->save();
+
+      $updated = update_post_meta($order_id, '_shoot_started', 1);
+
+      if(!$updated){
+        add_post_meta($order_id, '_shoot_started', 1);
+      }
+
+      wp_send_json( array(
+         'post' => $_POST,
+         'options' => $options,
       ));
     }
   }

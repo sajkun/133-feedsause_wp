@@ -14,6 +14,10 @@ if(!class_exists('theme_order_tracker')){
       add_filter('template_include', array($this, 'change_template'), 500);
     }
 
+    public function get_options(){
+      return get_option($this->slug_options);
+    }
+
     /**
     * prints inline javascript variables
     * pass data from database to script
@@ -39,6 +43,7 @@ if(!class_exists('theme_order_tracker')){
       $studio_columns_data = array_filter($options['orders'], function($el){
         return $el['is_studio'] == 'yes';
       });
+
       usort($studio_columns_data, 'sort_by_order');
 
       /**
@@ -78,12 +83,6 @@ if(!class_exists('theme_order_tracker')){
       $sources = isset($options['sources'])? array_map(function($el){ return trim($el);}, explode(PHP_EOL, $options['sources'])): false;
 
       /**
-      * all brands for lists
-      */
-      $brands = isset($options['brands'])? array_map(function($el){ return trim($el);}, explode(PHP_EOL, $options['brands'])) : false;
-
-
-      /**
       * data about user for lists of personal
       */
       $args_users = array(
@@ -96,6 +95,25 @@ if(!class_exists('theme_order_tracker')){
       }
 
       $users = array_map(function($el){
+        return array(
+          'name'     => $el->data->display_name,
+          'gravatar' => get_avatar_url($el),
+        );
+      }, get_users($args_users));
+
+      /**
+      * get all creators
+      */
+      $args_users = array(
+        'limit'          => -1,
+        'posts_per_page' => -1,
+      );
+
+      if(isset($options['user_roles_to_use_creative'])){
+        $args_users['role__in'] = $options['user_roles_to_use_creative'];
+      }
+
+      $creators = array_map(function($el){
         return array(
           'name'     => $el->data->display_name,
           'gravatar' => get_avatar_url($el),
@@ -249,8 +267,18 @@ if(!class_exists('theme_order_tracker')){
        /**
        * get order data
        */
+       switch (get_queried_object_id()) {
+         case (int)$options['tracker_page']:
+           $type = 'frontdesk';
+           break;
 
-       $orders = get_items_for_tracker('frontdesk',  $start_date->format('Y-m-d H:i:s'), $end_date->format('Y-m-d 23:59:59') );
+         case (int)$options['studio_page']:
+           $type = 'studio';
+           break;
+       }
+
+       $orders = get_items_for_tracker($type, $start_date->format('Y-m-d H:i:s'), $end_date->format('Y-m-d 23:59:59') );
+
 
        /**
        * get elements filtered
@@ -292,12 +320,12 @@ if(!class_exists('theme_order_tracker')){
         'tracker_url'             => array(THEME_URL. '/order_tracker/'),
         'theme_debug'             => THEME_DEBUG? 1: 0,
         'all_users'               => $users,
+        'all_creators'            => $creators,
         'dropbox'                 => $options['dropbox'],
         'all_customers'           => $all_customers,
         'available_products'      => array_combine($available_products_keys, $available_products),
         'filter_values'           => $filter_values,
         'order_campaigns'         => $campaigns,
-        'order_brands'            => $brands,
         'order_sources'           => $sources,
         'all_coupons'             => $coupons,
         'order_addons'            => $order_addons,
@@ -353,7 +381,8 @@ if(!class_exists('theme_order_tracker')){
         $tabs = array(
           'general'    => 'General',
           'orders'     => 'Order Settings',
-          'extra_data' => 'Extra Data',
+          'roles'      => 'Roles Settings',
+          'extra_data' => 'Sources, Campaigns',
           'dropbox'    => 'Dropbox',
         );
 
@@ -407,7 +436,9 @@ if(!class_exists('theme_order_tracker')){
   $theme_order_tracker = new theme_order_tracker();
 
 }
-function duh(){
-  global $theme_order_tracker;
-  return $theme_order_tracker;
+if(!function_exists('duh')){
+  function duh(){
+    global $theme_order_tracker;
+    return $theme_order_tracker;
+  }
 }

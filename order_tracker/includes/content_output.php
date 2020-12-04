@@ -48,6 +48,7 @@ if(!class_exists('tracker_content_output')){
 
       $args = array();
       print_duh_template_part( 'studio-content' ,'order_tracker/templates/global', $args);
+
     }
 
 
@@ -70,6 +71,13 @@ if(!class_exists('tracker_content_output')){
       print_duh_template_part( 'popup-product' ,'order_tracker/templates/global', array());
 
       print_duh_template_part( 'popup-fee' ,'order_tracker/templates/global', array());
+    }
+    /**
+    * prints block screen
+    */
+    public static function print_popups_studio(){
+      print_duh_template_part( 'popup-shoot' ,'order_tracker/templates/global', array());
+      print_duh_template_part( 'popup-studio-errors' ,'order_tracker/templates/global', array());
     }
   }
 }

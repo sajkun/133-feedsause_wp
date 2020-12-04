@@ -1,13 +1,19 @@
+<?php
+  $obj_id = get_queried_object_id();
+  $o = get_option(duh()->slug_options);
+?>
 <!DOCTYPE html>
 <html lang="en">
  <head>
-   <title>DUH tracker</title>
+   <title>HUB - Feedsauce <?php echo $obj_id == (int)$o['tracker_page']? ' - Frontdesk' : ' - Studio'; ?></title>
    <meta charset="UTF-8">
    <meta name="viewport" content="width=1200, user-scalable=yes">
 
-   <link rel="stylesheet" href="<?php echo THEME_URL ?>/order_tracker/assets/libs/datepicker/daterangepicker.css">
-   <link rel="stylesheet" href="<?php echo THEME_URL ?>/order_tracker/assets/libs/datetimepicker/build/jquery.datetimepicker.min.css">
-   <link rel="stylesheet" href="<?php echo THEME_URL ?>/order_tracker/assets/css/main.min2.css">
+  <link rel="stylesheet" href="<?php echo THEME_URL ?>/order_tracker/assets/libs/datepicker/daterangepicker.css">
+  <link rel="stylesheet" href="<?php echo THEME_URL ?>/order_tracker/assets/libs/datetimepicker/build/jquery.datetimepicker.min.css">
+  <link rel="stylesheet" href="<?php echo THEME_URL ?>/order_tracker/assets/css/main.min2.css">
+  <link rel="icon" href="<?php echo get_site_icon_url(192)?>"/>
+  <link rel="apple-touch-icon" href="<?php echo get_site_icon_url(180)?>" />
    <script>
      (function(){
        function addFont() {

@@ -75,6 +75,33 @@ if ( ! defined( 'ABSPATH' ) ) {
       ORDER SETTINGS
     **********************************-->
     <div class="duh-page-settings-content orders">
+
+      <h4>Order Status after Creator started shoot</h4>
+
+      <select name="<?php echo $slug ?>[orders_misc][shoot]">
+        <?php  foreach ($order_statuses as $order_id => $order):
+            $selected  = $order['slug'] == $options['orders_misc']['shoot'] ? 'selected ="selected"' : '';
+            printf('<option value="%s" %s >%s</option>', $order['slug'], $selected, is_array($order)? $order['name'] : $order );
+          ?>
+
+        <?php endforeach ?>
+      </select>
+
+      <h4>Order Status after photos were uploaded</h4>
+
+      <select name="<?php echo $slug ?>[orders_misc][uploaded]">
+        <?php  foreach ($order_statuses as $order_id => $order):
+            $selected  = $order['slug'] == $options['orders_misc']['uploaded']? 'selected ="selected"': '';
+            printf('<option value="%s" %s >%s</option>', $order['slug'], $selected, is_array($order)? $order['name'] : $order );
+          ?>
+
+        <?php endforeach ?>
+      </select>
+
+      <div class="spacer-h-20"></div>
+      <input type="submit" value="save" class="btn btn-primary">
+      <div class="spacer-h-20"></div>
+
       <div class="flex" id="order-list-sort">
         <?php
          $counter = 0;
@@ -163,12 +190,6 @@ if ( ! defined( 'ABSPATH' ) ) {
         </div><!-- item-lg -->
 
         <div class="item-lg">
-          <h3>Brands</h3>
-          <textarea name="<?php echo $slug ?>[brands]" class="fullwidth" rows="10"><?php echo isset($options['brands'])? $options['brands'] : ''; ?></textarea>
-          <i>Place every item on a new row</i>
-        </div><!-- item-lg -->
-
-        <div class="item-lg">
           <h3>Selects Users' Roles for personal list</h3>
 
           <ul class="columns-2">
@@ -188,6 +209,46 @@ if ( ! defined( 'ABSPATH' ) ) {
     </div><!-- extra_data -->
   <!-- *******************************
       campaigns, brands, sourses
+      END
+    **********************************-->
+
+  <!-- *******************************
+      roles
+    **********************************-->
+    <div class="duh-page-settings-content roles">
+      <div class="flex">
+        <div class="item-lg">
+          <h3>Selects Users' Roles for personal list</h3>
+
+          <ul class="columns-2">
+          <?php  foreach ($roles  as $role_id => $role) {
+            $checked = isset($options['user_roles_to_use']) && in_array($role_id, $options['user_roles_to_use'])?
+            'checked="checked"' : '';
+            printf('<li><label><input type="hidden" name="%2$s[user_roles_to_use][%1$s]" value="">', $role_id,  $slug);
+            printf('<label><input type="checkbox" name="%4$s[user_roles_to_use][%1$s]" value="%1$s" %2$s>%3$s</label></li>', $role_id, $checked, $role['name'], $slug);
+          }?>
+          </ul>
+        </div>
+        <div class="item-lg">
+            <h3>Selects Users' Roles for Creatives</h3>
+
+            <ul class="columns-2">
+            <?php  foreach ($roles  as $role_id => $role) {
+              $checked = isset($options['user_roles_to_use_creative']) && in_array($role_id, $options['user_roles_to_use_creative'])?
+              'checked="checked"' : '';
+
+              printf('<li><label><input type="hidden" name="%2$s[user_roles_to_use_creative][%1$s]" value="">', $role_id,  $slug);
+              printf('<label><input type="checkbox" name="%4$s[user_roles_to_use_creative][%1$s]" value="%1$s" %2$s>%3$s</label></li>', $role_id, $checked, $role['name'], $slug);
+            }?>
+            </ul>
+          </div>
+        </div>
+
+        <div class="spacer-h-20"></div>
+        <input type="submit" value="save" class="btn btn-primary">
+      </div>
+  <!-- *******************************
+      roles
       END
     **********************************-->
 

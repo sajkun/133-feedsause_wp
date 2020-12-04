@@ -2,9 +2,9 @@
 if ( ! defined( 'ABSPATH' ) ) {
   exit; // Exit if accessed directly
 }
+echo '<script type="text/x-template" id="studio-single-content">';
 ?>
 
-<script type="text/x-template" id="studio-single-content">
   <div class="container-lg" v-if="visible">
     <div class="row full-height">
 
@@ -52,7 +52,7 @@ if ( ! defined( 'ABSPATH' ) ) {
             <div class="hr"></div>
 
             <div class="products-block">
-              <div class="products-block__item" v-for="(item, key) in order_data.order.items" :key="key">
+              <div class="products-block__item" v-for="(item, key) in order_data.order.items" :key="'items_'+key">
                 <div class="products-block__item-head row">
                   <div class="col-4">
                    <span class="products-block__item-title"> {{item.product_name}}</span>
@@ -95,14 +95,6 @@ if ( ! defined( 'ABSPATH' ) ) {
                   <div class="col-4">
                    <span class="products-block__item-title"> {{item.fee_name}}</span>
                   </div>
-
-                  <div class="col-150">
-                  </div>
-
-                  <div class="col text-left">
-                    <span class="products-block__item-title"> {{order_data.order.currency_symbol}}{{item.price}}</span>
-                  </div>
-
                   <div class="col-1 text-right">
                   </div>
                 </div>
@@ -251,11 +243,17 @@ if ( ! defined( 'ABSPATH' ) ) {
             <p class="upload-area__header-value">{{number_of_comments}}</p>
           </div>
           <div class="col text-right">
-            <a href="#"  v-if="!is_old_order && !is_single_order" v-on:click.prevent="exec_upload" class="upload-area__submit">Submit Photos</a>
+
+            <a href="#"  v-if="show_start_shoot_btn" v-on:click.prevent="show_shoot_popup" class="upload-area__shoot">Start Shooting</a>
+
+            <a href="#"  v-if="show_submit_button"
+              v-on:click.prevent="exec_upload"
+              v-bind:class="{grey: !files_to_load_exist}"
+              class="upload-area__submit">Submit Photos</a>
           </div>
         </div><!-- upload-area__header -->
         <div class="upload-area__body">
-          <div class="row">
+          <div class="row" v-if="this.order_data.shoot_started">
            <upload-item-exists
               v-for="(file, i) in files_uploaded"
               :_number = "i + 1"
@@ -297,11 +295,26 @@ if ( ! defined( 'ABSPATH' ) ) {
               :_blank_item_id = "blank_item_id"
               v-on:file_changed_blank = "update_files_blank"
             ></upload-item-blank>
-
           </div><!-- row -->
+
+          <div class="upload-item" v-if="!this.order_data.shoot_started">
+            <div class="upload-item__header">
+              <div class="upload-item__state">
+              </div>
+              <div class="upload-item__comments">
+              </div>
+            </div><!-- upload-item__header -->
+
+            <div class="upload-item__body">
+              <div class="upload-item__drop-area">
+                <img src="<?php echo THEME_URL; ?>/order_tracker/assets/images/start-shoot.png" alt="">
+              </div>
+            </div>
+          </div><!-- upload-item -->
         </div><!-- upload-area__body -->
       </div><!-- upload-area -->
     </div><!-- row -->
+
     <div class="image-preview-popup"
      v-bind:class="{shown: show_popup_preview}"
      v-on:click="show_popup_preview = !show_popup_preview">
@@ -310,4 +323,5 @@ if ( ! defined( 'ABSPATH' ) ) {
       </div>
     </div>
   </div><!-- container-lg -->
-</script>
+
+<?php echo'</script>'; ?>

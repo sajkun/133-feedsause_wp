@@ -31,17 +31,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 
       <div class="col-md-6">
         <div class="row row-h-80 justify-content-between">
-          <div class="search" id="search-field">
+          <div class="search col" id="search-field">
             <form action="#" method="POST" v-on:submit.prevent="exec_search">
               <div class="input-holder">
-                <button>
-                  <svg class="icon svg-icon-search"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-search"></use> </svg>
-                </button>
 
                 <input type="text" placeholder="Search Hub..."
                  v-model="value"
                  autocomplete="off"
                  >
+                <button>
+                  <svg class="icon svg-icon-search"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-search"></use> </svg>
+                </button>
 
                 <div class="input-holder__dropdown visuallyhidden" ref="dropdown" v-show="users_found.length > 0">
                   <ul class="input-holder__list">

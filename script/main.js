@@ -1682,6 +1682,8 @@ products_mixin ={
 
         valid = (!valid_duplicvate_names)? valid_duplicvate_names : valid;
 
+        valid = 'undefined' != typeof(this.comment_alert) && this.comment_alert ? false : valid;
+
 
         if(!valid){
           jQuery(document.body).trigger('scroll_to_error');
@@ -1839,11 +1841,14 @@ if(document.getElementById('single-product-variations')){
         alert_name: false,
         alert_name_duplicate: false,
       }],
-
+      comment_alert: false,
       button_text: 'Add to Basket',
     },
 
     watch: {
+      products: function(val){
+      },
+
       order_product: function(val){
 
         switch(val){
@@ -1866,9 +1871,15 @@ if(document.getElementById('single-product-variations')){
         }
       },
 
-      test:function(){
-        console.log(this.test);
-      }
+      comment: function(val){
+        if(val.length > 140){
+          this.comment_alert = true;
+          var vm = this;
+
+        }else{
+          this.comment_alert = false;
+        }
+      },
     },
 
     mounted: function(){
@@ -1878,6 +1889,8 @@ if(document.getElementById('single-product-variations')){
       this.recipe_name = this.$refs.recipe_name.value;
       this.product_id = this.$refs.product_id.value;
       this.attributes = JSON.parse(this.$refs.attributes.value);
+
+      jQuery('.woocommerce-notices-wrapper').removeClass('hidden');
     },
 
     methods:{
@@ -1890,6 +1903,7 @@ if(document.getElementById('single-product-variations')){
       * adds new product to products' array
       */
       add_new_product: function(){
+        var products = this.products
         this.products.push({
           name: '',
           attributes: {},
@@ -1901,6 +1915,8 @@ if(document.getElementById('single-product-variations')){
         });
 
         this.product_variations.push({});
+
+        console.log(this.products);
       },
 
       /**

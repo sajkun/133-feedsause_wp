@@ -765,7 +765,7 @@ var fds_order = {
       },
 
       order_brands: function(){
-        return order_brands;
+        return [];
       },
 
       order_addons: function(){
@@ -1292,6 +1292,114 @@ var upload_item_mixin = {
     }
   },
 };
+var column_mixin = {
+    data: function () {
+    return {
+      name : '',
+      slug : '',
+      count : '',
+      items : [],
+      moved_item_id: -1,
+      trigger_scroll : false,
+    }
+  },
+
+  props:['_items', '_info', '_count'],
+
+  watch:{
+    _items: function(val){
+      this.items = this._items;
+    },
+
+    _count: function(){
+      this.count = this._count;
+    },
+  },
+
+  computed:{
+    items_formatted:function(){
+      var items = this.items
+      for(var id in items){
+        items[id].data.order_status = this.slug;
+      }
+
+      return items;
+    }
+  },
+
+  beforeMount: function(){
+    this.name  = this._info.name;
+    this.slug  = this._info.slug;
+    this.items = this._items;
+    this.count = this._count;
+  },
+
+  mounted: function(){
+    var header = this.$el.getElementsByClassName('order-column__tag')[0];
+    header.style.backgroundColor = this._info.bg_color;
+    header.style.color           = this._info.text_color;
+  },
+
+  methods: {
+
+    /**
+    *  update items element
+    */
+    update_items: function(items){
+      this.items = items;
+    },
+
+    return_column_slug: function(){
+    },
+
+    end_drag: function(evt,data){
+      this.$emit('update_order_status_on_drag', {order_id: this.moved_item_id});
+      this.moved_item_id = -1;
+    },
+
+    /**
+    * stores move order id
+    */
+    checkMove: function(item){
+      this.moved_item_id = item.draggedContext.element.order_id;
+    },
+
+    /**
+    * emits open order data to a parent component
+    */
+    open_order_col_cb: function(data){
+      this.$emit('open_order_col_cb', data);
+    },
+
+    /**
+    * replaces default scroll of column.
+    * scrolls column by 1 elemnt hieght
+    */
+    scroll_items: function(slug){
+      event.preventDefault()
+
+      if( !this.trigger_scroll ){
+        this.$refs.scroll.scrollTop  = (event.deltaY > 0)? this.$refs.scroll.scrollTop + 76 : this.$refs.scroll.scrollTop - 76;
+      }
+    },
+
+    /**
+    * emits scroll if end of scroll content reached
+    */
+    scroll_items_emit:function(slug){
+      this.trigger_scroll = this.$refs.scroll.offsetHeight + this.$refs.scroll.scrollTop >= this.$refs.scroll.scrollHeight - this.$refs.scroll.scrollHeight  * 0.05;
+
+      var vm = this;
+
+      this.$emit('trigger_scroll',{slug: slug, trigger: vm.trigger_scroll });
+      var vm = this;
+
+      Vue.nextTick(function(){
+        vm.trigger_scroll = false;
+      })
+    },
+  },
+}
 var frontdesk_list,
     frontdesk_order,
     frontdesk_order_new,
@@ -1303,7 +1411,9 @@ var frontdesk_list,
     studio_app,
     list_filter_mixin,
     popup_address_billing,
-    search_field
+    search_field,
+    popup_studio_errors,
+    popup_shoot
 ;
 
 /***********************
@@ -1547,121 +1657,7 @@ Vue.component('frontdesk-item', {
 </div><!-- order-preview" -->`,
 })
 Vue.component('frontdesk-column', {
-  data: function () {
-    return {
-      name : '',
-      slug : '',
-      count : '',
-      items : [],
-      moved_item_id: -1,
-      trigger_scroll : false,
-    }
-  },
-
-  props:['_items', '_info', '_count'],
-
-  watch:{
-    _items: function(val){
-      this.items = this._items;
-    },
-
-    _count: function(){
-      this.count = this._count;
-    },
-  },
-
-  computed:{
-    // count: function(){
-    //   if(typeof(this.items) == 'undefined'){
-    //     return 0;
-    //   }else{
-    //     return this.items.length;
-    //   }
-    // },
-
-    items_formatted:function(){
-      var items = this.items
-      for(var id in items){
-        items[id].data.order_status = this.slug;
-      }
-
-      return items;
-    }
-  },
-
-  beforeMount: function(){
-    this.name  = this._info.name;
-    this.slug  = this._info.slug;
-    this.items = this._items;
-    this.count = this._count;
-  },
-
-  mounted: function(){
-    var header = this.$el.getElementsByClassName('order-column__tag')[0];
-    header.style.backgroundColor = this._info.bg_color;
-    header.style.color           = this._info.text_color;
-  },
-
-  methods: {
-
-    /**
-    *  update items element
-    */
-    update_items: function(items){
-      this.items = items;
-    },
-
-    return_column_slug: function(){
-    },
-
-    end_drag: function(evt,data){
-      this.$emit('update_order_status_on_drag', {order_id: this.moved_item_id});
-      this.moved_item_id = -1;
-    },
-
-    /**
-    * stores move order id
-    */
-    checkMove: function(item){
-      this.moved_item_id = item.draggedContext.element.order_id;
-    },
-
-    /**
-    * emits open order data to a parent component
-    */
-    open_order_col_cb: function(data){
-      this.$emit('open_order_col_cb', data);
-    },
-
-    /**
-    * replaces default scroll of column.
-    * scrolls column by 1 elemnt hieght
-    */
-    scroll_items: function(slug){
-      event.preventDefault()
-
-      if( !this.trigger_scroll ){
-        this.$refs.scroll.scrollTop  = (event.deltaY > 0)? this.$refs.scroll.scrollTop + 76 : this.$refs.scroll.scrollTop - 76;
-      }
-    },
-
-    /**
-    * emits scroll if end of scroll content reached
-    */
-    scroll_items_emit:function(slug){
-      this.trigger_scroll = this.$refs.scroll.offsetHeight + this.$refs.scroll.scrollTop >= this.$refs.scroll.scrollHeight - this.$refs.scroll.scrollHeight  * 0.05;
-
-      var vm = this;
-
-      this.$emit('trigger_scroll',{slug: slug, trigger: vm.trigger_scroll });
-      var vm = this;
-
-      Vue.nextTick(function(){
-        vm.trigger_scroll = false;
-      })
-    },
-  },
-
+  mixins: [column_mixin],
 
   template: `
     <div class="order-column" v-on:mouseup="return_column_slug()">
@@ -1669,7 +1665,8 @@ Vue.component('frontdesk-column', {
         <span class="order-column__tag">{{name}}</span>
         <span class="order-column__count">{{count}}</span>
       </div>
-      <div class="order-column__body" ref="scroll"
+      <div class="order-column__body"
+        ref="scroll"
         @wheel="scroll_items(slug)"
         @scroll="scroll_items_emit(slug)"
         >
@@ -1771,114 +1768,7 @@ Vue.component('studio-item', {
 </div><!-- order-preview" -->`,
 })
 Vue.component('studio-column', {
-  data: function () {
-    return {
-      name : '',
-      slug : '',
-      count : '',
-      items : [],
-      moved_item_id: -1,
-      trigger_scroll : false,
-    }
-  },
-
-  props:['_items', '_info', '_count'],
-
-  watch:{
-    _items: function(){
-      this.items = this._items;
-    },
-
-    _count: function(){
-      this.count = this._count;
-    },
-  },
-
-  computed:{
-    items_formatted:function(){
-      var items = this.items
-      for(var id in items){
-        items[id].data.state = this.slug;
-      }
-
-
-      return items;
-    }
-  },
-
-  beforeMount: function(){
-    this.name  = this._info.name;
-    this.slug  = this._info.slug;
-    this.items = this._items;
-    this.count = this._count;
-  },
-
-  mounted: function(){
-    var header = this.$el.getElementsByClassName('order-column__tag')[0];
-    header.style.backgroundColor = this._info.bg_color;
-    header.style.color           = this._info.text_color;
-  },
-
-  methods: {
-
-    /**
-    *  update items element
-    */
-    update_items: function(items){
-      this.items = items;
-    },
-
-    return_column_slug: function(){
-    },
-
-    end_drag: function(evt,data){
-      this.$emit('update_order_status_on_drag', {order_id: this.moved_item_id});
-      this.moved_item_id = -1;
-    },
-
-    /**
-    * stores move order id
-    */
-    checkMove: function(item){
-      this.moved_item_id = item.draggedContext.element.order_id;
-    },
-
-    /**
-    * emits open order data to a parent component
-    */
-    open_order_col_cb: function(data){
-      this.$emit('open_order_col_cb', data);
-    },
-
-    /**
-    * replaces default scroll of column.
-    * scrolls column by 1 elemnt hieght
-    */
-    scroll_items: function(slug){
-      event.preventDefault()
-
-      if( !this.trigger_scroll ){
-        this.$refs.scroll.scrollTop  = (event.deltaY > 0)? this.$refs.scroll.scrollTop + 76 : this.$refs.scroll.scrollTop - 76;
-      }
-    },
-
-    /**
-    * emits scroll if end of scroll content reached
-    */
-    scroll_items_emit:function(slug){
-      this.trigger_scroll = this.$refs.scroll.offsetHeight + this.$refs.scroll.scrollTop >= this.$refs.scroll.scrollHeight - this.$refs.scroll.scrollHeight  * 0.05;
-
-      var vm = this;
-
-      this.$emit('trigger_scroll',{slug: slug, trigger: vm.trigger_scroll });
-      var vm = this;
-
-      Vue.nextTick(function(){
-        vm.trigger_scroll = false;
-      })
-    },
-  },
-
+  mixins: [column_mixin],
 
   template: `<div class="order-column" v-on:mouseup="return_column_slug()"> <div class="order-column__header"> <span class="order-column__tag">{{name}}</span> <span class="order-column__count">{{count}}</span> </div>
     <div class="order-column__body"
@@ -1886,7 +1776,12 @@ Vue.component('studio-column', {
       @wheel="scroll_items(slug)"
       @scroll="scroll_items_emit(slug)"
     >
-  <draggable :move="checkMove" :list="items_formatted" group="slug" @end="end_drag"><studio-item v-for="item in items_formatted" v-bind:_info="item.data"  v-bind:key="'studio_item_'+item.data.order_id" v-on:open_order_el_cb="open_order_col_cb"></studio-item></draggable>  </div> </div>`,
+  <draggable
+   :move="checkMove"
+   :list="items_formatted"
+   group="slug"
+   @end="end_drag">
+   <studio-item v-for="item in items_formatted" v-bind:_info="item.data"  v-bind:key="'studio_item_'+item.data.order_id" v-on:open_order_el_cb="open_order_col_cb"></studio-item></draggable>  </div> </div>`,
 })
 Vue.component('single-studio-content', {
   data: function(){
@@ -1939,15 +1834,15 @@ Vue.component('single-studio-content', {
     /**
     * return data about current order status
     * uses parameter order_data.state as index
-    * global variable frondtdesk_columns_data stores all data
+    * global variable studio_columns_data stores all data
     *
     * @return object {status, color}
     */
     column_data: function(){
       var vm = this;
-      var data = Object.values(frondtdesk_columns_data)
+      var data = Object.values(studio_columns_data)
                        .filter(e => {
-                          return e.slug == vm.order_data.state;
+                          return e.slug == vm.order_data.order_status;
                         })
                        .map(e=>{
                         return {status: e.name, color: e.text_color };
@@ -1997,7 +1892,6 @@ Vue.component('single-studio-content', {
         diff : diffDays,
         label: last_num != 1 ? 'days' : 'day',
         };
-
     },
 
     /**
@@ -2081,7 +1975,7 @@ Vue.component('single-studio-content', {
                       image_url: typeof(image.image_url) != 'undefined'? image.image_url : '',
                       request  : typeof(image.request)   != 'undefined'? image.request : '',
                     };
-              if(image.image_url){
+              if(image.image_url || image.path){
                files[image_id].push(file);
               }
             }
@@ -2092,7 +1986,6 @@ Vue.component('single-studio-content', {
       files = files.filter(e=>{ return e.length > 0});
       return files;
     },
-
 
 
     /**
@@ -2167,22 +2060,43 @@ Vue.component('single-studio-content', {
       }
       return [];
     },
+
+    shoot_started: function(){
+      return this.order_data.order_status == tracker_options['orders_misc']['shoot'] && this.order_data.shoot_started;
+    },
+
+    show_start_shoot_btn: function(){
+      var shoot_started = this.shoot_started;
+      return !this.is_old_order && !this.is_single_order && !shoot_started;
+    },
+
+    show_submit_button: function(){
+      var shoot_started = this.shoot_started;
+      return !this.is_old_order && !this.is_single_order && shoot_started;
+    },
+
+    files_to_load_exist: function(){
+      return Object.values(this.files_to_load).length > 0;
+    }
   },
 
   watch: {
     visible: function(val){
     },
 
-  studio_note_text:function(){
-    var height = this.$refs.note_textarea_studio.scrollHeight;
-    this.$refs.note_textarea_studio.style.height = height+'px';
+    studio_note_text:function(){
+      var height = this.$refs.note_textarea_studio.scrollHeight;
+      this.$refs.note_textarea_studio.style.height = height+'px';
+    },
   },
+
+  mounted: function(){
+
   },
 
   mixins: [get_set_props, animation_mixin],
 
   methods:{
-
     add_note: function(type){
       type = 'undefined' !== typeof(type)? type : 'enquery';
 
@@ -2260,6 +2174,50 @@ Vue.component('single-studio-content', {
     expand_product: function(key){
       var exp = this.order_data.order.items[key].expanded;
       this.$set(this.order_data.order.items[key], 'expanded', !exp);
+    },
+
+    show_shoot_popup:function(){
+      popup_shoot.visible  = true;
+      popup_shoot.due_date = this.order_data.due_date.date_formatted;
+      popup_shoot.number_of_dates_left = this.number_of_dates_left;
+    },
+
+    exec_start_shoot: function(){
+      block();
+      var vm = this;
+
+      Vue.nextTick(function(){
+        jQuery.ajax({
+          url: WP_URLS.ajax,
+          type: 'POST',
+          dataType: 'json',
+          data: {
+            action: 'update_start_shoot',
+            order_id:  vm.order_data.order_id,
+          },
+        })
+       .done(function(e){
+          vm.order_data.shoot_started = 1;
+          vm.order_data.order_status  = tracker_options['orders_misc']['shoot'];
+
+          var item = vm.$parent.get_item_by('order_id',  vm.order_data.order_id);
+
+          item.data.order_status = tracker_options['orders_misc']['shoot'];
+          item.data.shoot_started = 1;
+        })
+        .fail(function(e) {
+          if('undefined' !== typeof(e.responseJSON.data)){
+            alert(e.responseJSON.data)
+          }else{
+            alert('Something gone wrong')
+          }
+        })
+        .always(function(e) {
+
+          clog(e);
+          unblock();
+        });
+      });
     },
 
     exec_upload: function(){
@@ -2361,7 +2319,9 @@ Vue.component('single-studio-content', {
 
       xhr.addEventListener("readystatechange", function () {
         if (this.readyState === 4) {
-          console.log(this.responseText);
+          slog('show_image_loaded', 'blue')
+          clog(JSON.parse(this.responseText));
+          elog();
         }
       });
 
@@ -2397,6 +2357,11 @@ Vue.component('single-studio-content', {
     },
 
     upload_file: function(path, file,folder_id){
+      var valid = this.exec_validate();
+
+      if(!valid){
+        return;
+      }
 
       var parent = this.$children.filter(
         e => {
@@ -2465,7 +2430,40 @@ Vue.component('single-studio-content', {
       xhr.send(file);
     },
 
+    validate: function(){
+      valid = true;
+      errors = [];
+
+      valid = this.number_of_photos >  this.watch_files_prepared.length ? false : valid;
+
+      return {
+        valid: valid,
+        errors: errors,
+      }
+    },
+
+    exec_validate: function(){
+      var validate = this.validate();
+
+      if(!validate.valid){
+        unblock();
+        popup_studio_errors.errors = validate.errors;
+        popup_studio_errors.visible = true;
+        popup_studio_errors.images_to_show = this.number_of_photos;
+        popup_studio_errors.images_uploaded = this.watch_files_prepared.length;
+      }
+
+      return validate.valid;
+    },
+
     update_wfp_meta: function(){
+
+      var validate = this.exec_validate();
+
+      if(!validate){
+        return;
+      }
+
       var vm = this;
       var meta = vm.$children.filter(el=>{
         return 'undefined' !== typeof(el.files_uploaded);
@@ -2475,7 +2473,8 @@ Vue.component('single-studio-content', {
           if('undefined' !== e.archive_url && e.archive_url){
             url = e.archive_url;
           }else if(e.path){
-            url = vm.show_image_loaded(e.path);
+            // url = vm.show_image_loaded(e.path);
+            url = '';
           }
 
           return {
@@ -2494,6 +2493,7 @@ Vue.component('single-studio-content', {
           request         :  el.comments,
           was_downloaded  : 'undefined' !== typeof(was_downloaded) ?  was_downloaded : 0,
           is_active       : 1,
+
         };
 
         return meta;
@@ -2701,7 +2701,7 @@ Vue.component('upload-item', {
 
       this.files_uploaded.splice(file_id, 1);
       this.delete_in_dropbox(data.dropbox_path);
-      this.$parent.update_wfp_meta();
+      this.$parent.update_wfp_meta({action: 'delete'});
     },
 
     delete_in_dropbox:function(path){
@@ -2822,7 +2822,9 @@ Vue.component('upload-item', {
 
       xhr.addEventListener("readystatechange", function () {
         if (this.readyState === 4) {
-          console.log(this.responseText);
+          slog('show_image_loaded', 'blue')
+          clog(JSON.parse(this.responseText));
+          elog();
         }
       });
 
@@ -3115,7 +3117,7 @@ Vue.component('upload-item-exists', {
 
       this.files_uploaded.splice(file_id, 1);
       this.delete_in_dropbox(data.dropbox_path);
-      this.$parent.update_wfp_meta();
+      this.$parent.update_wfp_meta({action: 'delete'});
     },
 
     delete_in_dropbox:function(path){
@@ -3240,7 +3242,9 @@ Vue.component('upload-item-exists', {
 
       xhr.addEventListener("readystatechange", function () {
         if (this.readyState === 4) {
-          console.log(this.responseText);
+          slog('show_image_loaded', 'blue')
+          clog(JSON.parse(this.responseText));
+          elog();
         }
       });
 
@@ -3360,7 +3364,7 @@ Vue.component('upload-item-blank', {
 
   computed:{
     this_state: function(){
-      return 'Upload';
+      return 'Add New';
     },
   },
 
@@ -3488,7 +3492,7 @@ Vue.component('upload-item-blank', {
         </div>
         <div class="upload-item__comments ">
           <svg class="icon svg-icon-comment"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-comment"></use> </svg>
-          <span class="count">0</span>
+          <span class="count">-</span>
         </div>
       </div><!-- upload-item__header -->
 
@@ -3789,21 +3793,32 @@ Vue.component('user-select', {
       names: '',
       current_user: '',
       gravatar: '',
-      all_users: all_users,
       user_names: [],
       editing: false,
+      all_creators: all_creators,
+      all_users: all_users,
     }
   },
 
   props:['_current_user', '_select_name'],
 
   beforeMount: function(){
+
     var vm = this;
     vm.current_user = vm._current_user;
     vm.gravatar = this.get_gravatar();
 
-    for( var user of this.all_users){
-      this.user_names.push(user.name);
+    switch(this._select_name){
+      case 'creator':
+        for( var user of this.all_creators){
+          this.user_names.push(user.name);
+        }
+        break;
+      default:
+        for( var user of this.all_users){
+          this.user_names.push(user.name);
+        }
+        break;
     }
   },
 
@@ -3849,12 +3864,25 @@ Vue.component('user-select', {
       var vm = this
 
       if( vm._current_user){
-        var user_data = vm.all_users.filter(
-          obj => {
-            return obj.name === vm.current_user ;
-          }
-        );
-        return user_data[0].gravatar;
+
+        switch(this._select_name){
+          case 'creator':
+          var user_data = vm.all_creators.filter(
+            obj => {
+              return obj.name === vm.current_user ;
+            }
+          );
+          return user_data[0].gravatar;
+
+          default:
+            var user_data = vm.all_users.filter(
+              obj => {
+                return obj.name === vm.current_user ;
+              }
+            );
+            return user_data[0].gravatar;
+            break;
+        }
       }
 
       return false;
@@ -4742,6 +4770,8 @@ if(document.getElementById('frontdesk_list')){
         if('undefined' === typeof(order_id) || !order_id){
           return false;
         }
+
+        console.log(order_status)
 
         jQuery.ajax({
           url: WP_URLS.ajax,
@@ -5937,7 +5967,9 @@ if(document.getElementById('studio-vue-app')){
     beforeMount: function(){
     },
 
-    mounted: function(){},
+    mounted: function(){
+      document.getElementById('site-body').classList.remove('not-ready');
+    },
 
     methods:{
       /**
@@ -5990,10 +6022,24 @@ if(document.getElementById('studio-vue-app')){
       *
       * @param order_id - string, id of order to update
       */
-      update_order_status:function(order_id){
+      update_order_status:function(order_id, order_status){
         if('undefined' === typeof(order_id) || !order_id){
           return false;
         }
+
+        jQuery.ajax({
+          url: WP_URLS.ajax,
+          type: 'POST',
+          dataType: 'json',
+          data: {
+            action       : 'save_order_status',
+            order_id     : order_id,
+            order_status : order_status,
+          },
+        })
+        .always(function(e) {
+          console.log(e);
+        });
       },
 
 
@@ -6020,12 +6066,84 @@ if(document.getElementById('studio-vue-app')){
 
         var item = vm.get_item_by('order_id', data.order_id);
 
-        if(item){
-          this.update_order_status(item.order_id);
-        }
+        Vue.nextTick(function(){
+          if(item){
+            vm.update_order_status(item.order_id, item.data.order_status);
+          }
+        })
       },
 
     },
   });
+}
+if(document.getElementById('popup_shoot')){
+  popup_shoot = new Vue({
+    'el' : '#popup_shoot',
+
+    data:{
+      visible: false,
+      due_date: '',
+      number_of_dates_left: {},
+    },
+
+    computed:{
+      status: function(){
+        var id = tracker_options['orders_misc']['shoot'];
+        return tracker_options.orders[id].name;
+      },
+
+      color: function(){
+        var id = tracker_options['orders_misc']['shoot'];
+        return tracker_options.orders[id].text_color;
+      },
+
+      due_date_formatted: function(){
+
+      },
+    },
+
+    watch:{},
+
+    methods: {
+      submit: function(){
+        studio_app.$refs.detailed_view.exec_start_shoot();
+        this.visible = false;
+      }
+    },
+  });
+}
+if(document.getElementById('popup_studio_errors')){
+  popup_studio_errors = new Vue({
+    'el' : '#popup_studio_errors',
+
+    data:{
+      visible: false,
+      images_to_show: -1,
+      images_uploaded: -1,
+      errors: [],
+    },
+
+    watch:{
+      visible:function(v){
+        if(!v){
+          this.images_to_show = -1;
+          this.images_uploaded = -1;
+          this.errors = {};
+        }
+      }
+    },
+
+    computed:{
+      image_error:function(){
+        var is_error = true;
+
+        if(this.images_uploaded < 0 || this.images_to_show < 0){
+          return false;
+        }
+
+        return this.images_uploaded < this.images_to_show;
+      },
+    },
+  })
 }
 ctime('vue script', 'green');

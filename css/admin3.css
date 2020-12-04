@@ -874,3 +874,12 @@ border: 1px solid  #000;
 #dropbox:checked ~ .dropbox{
   display: block;
 }
+
+#roles:checked ~ .duh-tabs [for="roles"]{
+  background: #fff;
+  border-bottom-color:#fff;
+}
+
+#roles:checked ~ .roles{
+  display: block;
+}

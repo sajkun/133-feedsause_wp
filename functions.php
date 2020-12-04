@@ -183,7 +183,7 @@ class velesh_init_theme{
 
     wp_enqueue_script('theme-script', THEME_URL.'/script/admin.js', array('jquery'), THEME_VERSION, true);
 
-    wp_enqueue_style( 'theme-admin-style', THEME_URL.'/css/admin2.css', THEME_VERSION );
+    wp_enqueue_style( 'theme-admin-style', THEME_URL.'/css/admin3.css', THEME_VERSION );
 
     $settings_pages = array(
 

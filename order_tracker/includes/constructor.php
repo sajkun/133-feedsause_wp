@@ -22,7 +22,9 @@ if(!class_exists('tracker_content_constructor')){
 
       if($o['studio_page'] == get_queried_object_id() ){
          tracker_content_constructor::validate();
+
          add_action('do_tracker_content', array('tracker_content_output', 'print_studio'));
+         add_action('do_tracker_after_footer', array('tracker_content_output', 'print_popups_studio'));
       }
 
      add_action('do_tracker_after_footer', array('tracker_content_output', 'print_block_screen'));
@@ -45,7 +47,7 @@ if(!class_exists('tracker_content_constructor')){
       }
 
       foreach ($user->roles as $key => $role) {
-        $validated = in_array($role, $o['user_roles_to_use'])? true : $validated;
+        $validated = in_array($role, $o['user_roles_to_use']) || in_array($role, $o['user_roles_to_use_creative'])? true : $validated;
       }
 
       if(!$validated){

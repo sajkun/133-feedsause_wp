@@ -140,13 +140,12 @@ if ( ! defined( 'ABSPATH' ) ) {
                         </td>
                         <td><p class="leads-block__label">Brand</p></td>
                         <td>
-                          <select-imitation
-                            v-bind:class="'fullwidth style-less'"
-                            _select_name="brand"
-                            v-bind:_options="order_brands"
-                            v-bind:_selected="order_data.customer.brand"
-                            v-on:update_list="update_order($event, 'customer')"
-                          ></select-imitation>
+                          <input-field
+                            _name="brand"
+                            v-model="order_data.customer.brand"
+                            v-bind:class="{'styled' : new_order}"
+                            v-bind:_value="order_data.customer.brand"
+                            v-on:input_value_changed="update_order($event, 'customer')"></input-field>
                         </td>
                       </tr>
 

@@ -1,7 +1,14 @@
 <div class="block-screen">
 <div class="center">
+  <div class="row">
+    <span class="col-2"></span>
+    <span class="col-2"></span>
+    <span class="col-2"></span>
+    <span class="col-2"></span>
+    <span class="col-2"></span>
+    <span class="col-2"></span>
+  </div>
 
-  <span class="wait">Please wait.</span>
-  <img src="<?php echo THEME_URL; ?>/order_tracker/assets/images/spinner.gif" alt="">
+   <img src="<?php echo THEME_URL; ?>/order_tracker/assets/images/spinner2.gif" alt="">
 </div>
 </div>
