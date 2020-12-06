@@ -76,10 +76,13 @@ if(!class_exists('tracker_content_output')){
     * prints block screen
     */
     public static function print_popups_studio(){
+      $options = get_option(duh()->slug_options);
       print_duh_template_part( 'popup-shoot' ,'order_tracker/templates/global', array());
       print_duh_template_part( 'popup-studio-errors' ,'order_tracker/templates/global', array());
 
-      print_duh_template_part( 'popup-quality' ,'order_tracker/templates/global', array());
+      $url = isset($options['standarts'])? get_permalink($options['standarts']) : false;
+
+      print_duh_template_part( 'popup-quality' ,'order_tracker/templates/global', array('url' => $url));
     }
   }
 }

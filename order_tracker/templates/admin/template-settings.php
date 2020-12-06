@@ -47,6 +47,16 @@ if ( ! defined( 'ABSPATH' ) ) {
         <?php endforeach ?>
       </select>
 
+      <h3> Feedsauce’s Shoot Standards Page: </h3>
+      <select name="<?php echo $slug ?>[standarts]">
+        <?php foreach ($pages as $key => $p): ?>
+          <option
+            value="<?php echo $p->ID ?>"
+            <?php echo isset($options['standarts']) && $p->ID == (int)$options['standarts']? 'selected="selected"': ''; ?>
+            ><?php echo $p->post_title ?></option>
+        <?php endforeach ?>
+      </select>
+
       <div class="spacer-h-20"></div>
 
       <h3>Delivery:</h3>

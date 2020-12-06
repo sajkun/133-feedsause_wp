@@ -11,7 +11,8 @@ if ( ! defined( 'ABSPATH' ) ) {
       <img src="<?php echo THEME_URL?>/order_tracker/assets/images/quality.svg" class="head-icon" alt="">
       <div class="spacer-h-30"></div>
       <p class="popup-inner__title2">Quality Control</p>
-      <p class="popup-inner__text2">By marking your shoot as completed,you confirm  <br> that you have met <a href="" target="_blank">Feedsauce’s Shoot Standards.</a></p>
+      <p class="popup-inner__text2">By marking your shoot as completed,you confirm  <br> that you have met
+        <?php echo $url? sprintf('<a href="%s" target="_blank"> Feedsauce’s Shoot Standards. </a> ', $url) : 'Feedsauce’s Shoot Standards'; ?>. </p>
     </div>
      <div class="spacer-h-20"></div>
     <div class="hr"></div>
