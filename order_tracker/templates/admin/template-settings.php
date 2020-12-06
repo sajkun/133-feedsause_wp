@@ -198,20 +198,6 @@ if ( ! defined( 'ABSPATH' ) ) {
           <textarea name="<?php echo $slug ?>[campaigns]" class="fullwidth" rows="10"><?php echo isset($options['campaigns'])? $options['campaigns'] : ''; ?></textarea>
           <i>Place every item on a new row</i>
         </div><!-- item-lg -->
-
-        <div class="item-lg">
-          <h3>Selects Users' Roles for personal list</h3>
-
-          <ul class="columns-2">
-          <?php  foreach ($roles  as $role_id => $role) {
-            $checked = isset($options['user_roles_to_use']) && in_array($role_id, $options['user_roles_to_use'])?
-            'checked="checked"' : '';
-
-            printf('<li><label><input type="checkbox" name="%4$s[user_roles_to_use][%1$s]" value="%1$s" %2$s>%3$s</label></li>', $role_id, $checked, $role['name'], $slug);
-          }?>
-          </ul>
-
-        </div><!-- item-lg -->
       </div><!-- flex -->
 
       <div class="spacer-h-20"></div>
