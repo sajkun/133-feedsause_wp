@@ -281,7 +281,7 @@ if(!class_exists('map_orders_cb')){
 
           'location' => array(
             'unit'    => $order->get_meta('location'),
-            'comment' => $order->get_meta('studio-notes'),
+            'box' => $order->get_meta('_studio-box'),
           ),
 
           'gallery' => array(
@@ -543,7 +543,7 @@ if(!function_exists('save_order_meta')){
       '_assigned_creator' => $_POST['data']['studio']['creator'],
 
       'location'          => $_POST['data']['location']['unit'],
-      'studio-notes'      => $_POST['data']['location']['comment'],
+      '_studio-box'      => $_POST['data']['location']['box'],
 
       'collect-products'  => $_POST['data']['product_collection']['do_collect'] == 'false'? 0 : 1,
 
@@ -559,7 +559,7 @@ if(!function_exists('save_order_meta')){
       '_collection_address'      => $_POST['data']['product_collection']['address'],
       '_free_collection_date'    => $_POST['data']['product_collection']['requested'],
       'collection-date'          => $_POST['data']['product_collection']['scheduled'],
-      '_shoot_started'           => $_POST['data']['shoot_started'],
+      '_shoot_started'           => isset($_POST['data']['shoot_started'])? $_POST['data']['shoot_started'] : 0,
     );
 
 
@@ -590,6 +590,7 @@ if(!function_exists('get_filter_data')){
   * @return array of filters
   */
   function get_filter_data($orders = array()){
+     $o = get_option(duh()->slug_options);
 
      $filter_values = array(
        'campaign' => array(),
@@ -600,8 +601,9 @@ if(!function_exists('get_filter_data')){
      $grab_filter = array(
        'campaign' => ['customer.campaigns'],
        'source'   => ['customer.source'],
-       'team'     => ['customer.assigned', 'studio.creator'],
      );
+
+     $grab_filter['team'] = $o['tracker_page'] == get_queried_object_id()? ['customer.assigned', 'studio.creator'] : ['studio.creator'];
 
      foreach ($grab_filter as $filter_key => $filter_sources) {
        $filter_values[$filter_key] = array();

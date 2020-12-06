@@ -37,6 +37,8 @@ if ( ! defined( 'ABSPATH' ) ) {
         <div class="range-datepicker">
         <svg class="icon svg-icon-calendar"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-calendar"></use> </svg>
 
+        <input type="hidden" id="page_type" value="studio">
+
         <span class="range-datepicker__label">Custom Range</span>
         <span class="range-datepicker__text">Apr 01 2020 → Nov 27 2020</span>
 

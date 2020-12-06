@@ -24,6 +24,8 @@ if ( ! defined( 'ABSPATH' ) ) {
       <div class="range-datepicker">
       <svg class="icon svg-icon-calendar"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-calendar"></use> </svg>
 
+      <input type="hidden" id="page_type" value="frontdesk">
+
       <span class="range-datepicker__label">Past 30 Days</span>
       <span class="range-datepicker__text"> Oct 1 2019 → Nov 1 2019</span>
 

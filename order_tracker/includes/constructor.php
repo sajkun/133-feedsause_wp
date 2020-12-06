@@ -3,12 +3,9 @@ if ( ! defined( 'ABSPATH' ) ) {
   exit; // Exit if accessed directly
 }
 
-
 if(!class_exists('tracker_content_constructor')){
   class tracker_content_constructor{
     public static function init(){
-      // $options['user_roles_to_use'];
-
 
       $o = get_option(duh()->slug_options);
 

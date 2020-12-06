@@ -20,11 +20,11 @@
            var style = document.createElement('style');
            style.rel = 'stylesheet';
            document.head.appendChild(style);
-           style.textContent = localStorage.fonts_174_1;
+           style.textContent = localStorage.fonts_174_2;
        }
 
        try {
-           if (localStorage.fonts_174_1) {
+           if (localStorage.fonts_174_2) {
                // The font is in localStorage, we can load it directly
                addFont();
            } else {
@@ -37,7 +37,7 @@
                        // We save the file in localStorage
                        text = request.responseText;
 
-                       localStorage.fonts_174_1 = text;
+                       localStorage.fonts_174_2 = text;
 
                        // ... and load the font
                        addFont();

@@ -26,12 +26,20 @@ if ( ! defined( 'ABSPATH' ) ) {
           </div>
 
           <div class="col-6 text-right">
+            <order-status-select ref="order_status"
+               _select_name="order_status"
+               v-bind:_options='order_statuses'
+               v-bind:_current_status='order_data.order_status'
+               v-bind:class="'text-left'"
+               v-on:update_list="update_order_status"></order-status-select>
 
-            <order-status-select ref="order_status" _select_name="order_status" v-bind:_current_status='order_data.order_status' v-bind:class="'text-left'" v-on:update_list="update_order_status"></order-status-select>
+            <a href="#"  v-on:click.prevent="exec_save" class="button-save-order" v-bind:class="{gray: !_order_was_changed}">
+               <svg  v-if="!is_run_saving" class="icon svg-icon-ok-marker"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-ok-marker"></use> </svg>
 
-            <a href="#"  v-on:click.prevent="exec_save" class="button-save-order">
-               <svg class="icon svg-icon-ok-marker"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-ok-marker"></use> </svg>
-              Update
+              <span v-if="!is_run_saving">Save Changes</span>
+
+              <img v-if="is_run_saving" src="<?php  echo THEME_URL; ?>/order_tracker/assets/images/spinner_white.gif" alt="" class="spinner-white">
+              <span v-if="is_run_saving">Saving... </span>
             </a>
           </div>
         </div><!-- single-order__top -->
@@ -334,7 +342,7 @@ if ( ! defined( 'ABSPATH' ) ) {
               <h2 class="leads-block__title">
                 Product Collection
 
-                <div class="toggler" v-bind:class="{active:order_data.product_collection.do_collect}" v-on:click="order_data.product_collection.do_collect =! order_data.product_collection.do_collect">
+                <div class="toggler" v-bind:class="{active:order_data.product_collection.do_collect}" v-on:click="do_toggler">
                   <div class="toggler__inner"></div>
                   <div class="toggler__trigger"></div>
                 </div>
@@ -527,8 +535,9 @@ if ( ! defined( 'ABSPATH' ) ) {
                     </td>
                   </tr>
                   <tr>
-                    <td colspan="2">
-                      <textarea type="text" class="styled leads-block__textarea to-right" v-model="order_data.location.comment" ref="location_comment" placeholder="Add"></textarea>
+                    <td></td>
+                    <td class="text-right">
+                      <input type="text" class="leads-block__input_xs leads-block__input to-right" v-model="order_data.location.box" placeholder="Add">
                     </td>
                   </tr>
                 </table>

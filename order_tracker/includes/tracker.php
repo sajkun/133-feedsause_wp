@@ -308,8 +308,6 @@ if(!class_exists('theme_order_tracker')){
          );
        },get_posts($args));
 
-
-
        /**/
        $user = get_user_by('ID',get_current_user_id());
 

@@ -74,7 +74,10 @@ if(!class_exists('tracker_ajax')){
     public static function get_orders_by_dates_cb(){
       $start_date = new DateTime($_POST['data']['_from']);
       $end_date   = new DateTime($_POST['data']['_to']);
-      $orders     = get_items_for_tracker('frontdesk',  $start_date->format('Y-m-d H:i:s'), $end_date->format('Y-m-d 23:59:59') );
+      $type   = isset($_POST['data']['type'])? $_POST['data']['type'] : 'frontdesk';
+
+      $orders     = get_items_for_tracker($type,  $start_date->format('Y-m-d H:i:s'), $end_date->format('Y-m-d 23:59:59') );
+
       $filters  = get_filter_data($orders);
 
       wp_send_json(array(
@@ -355,7 +358,6 @@ if(!class_exists('tracker_ajax')){
     * get order by passed user
     */
     public static function get_orders_by_user_cb(){
-
 
       if($_POST['data']['user_id'] >= 0){
         $args = array(

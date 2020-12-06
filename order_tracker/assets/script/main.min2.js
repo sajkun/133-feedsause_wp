@@ -325,7 +325,7 @@ function init_date_range(){
     jQuery('.range-datepicker__label').text(label);
 
     var data = {from: start.format('MMM DD YYYY') , to: end.format('MMM DD YYYY'), label: label, _from: start.format('MM/DD/YYYY'), _to: end.format('MM/DD/YYYY'), }
-
+    data.type = jQuery('#page_type').val();
     jQuery(document).trigger('get_order_by_date', data);
 
   });
@@ -333,8 +333,8 @@ function init_date_range(){
 
 jQuery(document).on('get_order_by_date', function(e, data){
   slog('Update list of orders', 'green');
-  console.time('list of orders');
   block();
+
   jQuery.ajax({
     url: WP_URLS.ajax,
     type: 'POST',
@@ -588,7 +588,7 @@ var fds_order = {
           var vm = this;
           Vue.nextTick(function(){
             vm.do_save = false;
-            vm.changed = false;
+            vm.order_was_changed = false;
             vm.studio_notes_count  = 1;
             vm.enquery_notes_count = 1;
           })
@@ -784,10 +784,7 @@ var fds_order = {
       }
     },
 
-    created: function(){
-      // this.init_selects();
-      // this.init_order_status_select();
-    },
+    created: function(){},
 
     methods: {
       init_selects: function(){
@@ -800,21 +797,13 @@ var fds_order = {
       },
 
       init_order_status_select: function(){
-        var vm = this;
-        var options = {
-          options: order_statuses,
-          isExpanded: '',
-          isSelected: [],
-          isHiddenSelect: true,
-          isHiddenImitation: false,
-        };
-
-        for(var field_id in options){
-          vm.$refs.order_status.set_value(field_id, options[field_id]);
-        }
       },
 
       change_order_data_value:  function(key, value){
+        clog('change_order_data_value');
+        if(this.visible){
+          this.order_was_changed = true;
+        }
         this.order_data[key] = value;
       },
 
@@ -840,6 +829,11 @@ var fds_order = {
       exec_save_wordpress:function(){
         var data = strip(this.order_data);
 
+        var vm = this;
+
+        this.is_run_saving = true;
+        vm.order_was_changed = true;
+
         jQuery.ajax({
           url: WP_URLS.ajax,
           type: 'POST',
@@ -849,6 +843,8 @@ var fds_order = {
         .always(function(e) {
           clog('update_order_meta');
           clog(e);
+          vm.order_was_changed = false;
+          vm.is_run_saving = false;
         });
 
       },
@@ -857,6 +853,10 @@ var fds_order = {
      * updates order_data
      */
       update_order: function(data, key){
+        if(this.visible){
+          clog('update_order')
+          this.order_was_changed = true;
+        }
         if(key != 'core'){
           this.order_data[key][data.name] = data['val'];
         }else{
@@ -870,7 +870,10 @@ var fds_order = {
       * @param - obj {date: standart date, date_formatted: formatted date , is_overdue: boolean}
       */
       update_reminder:function(data){
-        this.changed = true;
+        if(this.visible){
+          clog('update_reminder')
+          this.order_was_changed = true;
+        }
         if(typeof(this.order_data.reminder) == 'undefined'){
           this.order_data.reminder = {};
         }
@@ -878,6 +881,8 @@ var fds_order = {
         this.order_data.reminder.date = data.value;
         this.order_data.reminder.date_formatted = data.value_formatted;
         this.order_data.reminder.is_overdue = is_boolean(data.overdue);
+
+
       },
 
       /**
@@ -888,12 +893,18 @@ var fds_order = {
       update_order_status: function(data){
         var order_status = Object.keys(order_statuses).filter(id => {return order_statuses[id].title == data.val} );
         this.order_data.order_status = order_status[0];
+
+        if(this.visible){
+          clog('update_order_status'),
+          this.order_was_changed = true;
+        }
       },
 
       /**
       * adds note callback
       */
       add_note: function(type){
+        this.order_was_changed = true;
         type = 'undefined' !== typeof(type)? type : 'enquery';
 
         if(!this.enquery_note_text && type == 'enquery'){
@@ -936,6 +947,9 @@ var fds_order = {
       * delete note callback
       */
       delete_note: function(type, text, date){
+        if(this.visible){
+          this.order_was_changed = true;
+        }
         type = 'undefined' !== typeof(type)? type : 'enquery';
         key = this.order_data.messages[type].findIndex(e=>{
           return e.text == text && e.date == date;
@@ -945,6 +959,10 @@ var fds_order = {
 
       update_due_date: function(data){
         if(data.val){
+        if(this.visible){
+          clog('update_due_date')
+          this.order_was_changed = true;
+        }
           this.order_data.due_date.date = data.val;
           var _date = new Date(data.val);
           var now = new Date();
@@ -1202,6 +1220,10 @@ var upload_pdf_mixin = {
      if(!vm.files){
        return;
      }
+
+      if('undefined' !== typeof(this.order_was_changed )){
+        this.order_was_changed = true;
+      }
 
      var fd   = new FormData();
       fd.append('pdf', vm.files);
@@ -2062,7 +2084,7 @@ Vue.component('single-studio-content', {
     },
 
     shoot_started: function(){
-      return this.order_data.order_status == tracker_options['orders_misc']['shoot'] && this.order_data.shoot_started;
+      return this.order_data.order_status == tracker_options['orders_misc']['shoot'] || this.order_data.shoot_started;
     },
 
     show_start_shoot_btn: function(){
@@ -2220,7 +2242,22 @@ Vue.component('single-studio-content', {
       });
     },
 
+    do_upload: function(){
+      if(!this.files_to_load_exist){
+        return;
+      }
+
+      var valid = this.exec_validate();
+
+      if(!valid){
+        return;
+      }
+
+      popup_shoot.visible = true;
+    },
+
     exec_upload: function(){
+      popup_shoot.visible = false;
       this.do_submit = true;
       var folder_name = 'order_' + this.order_data.order_id;
 
@@ -2357,11 +2394,6 @@ Vue.component('single-studio-content', {
     },
 
     upload_file: function(path, file,folder_id){
-      var valid = this.exec_validate();
-
-      if(!valid){
-        return;
-      }
 
       var parent = this.$children.filter(
         e => {
@@ -2434,7 +2466,7 @@ Vue.component('single-studio-content', {
       valid = true;
       errors = [];
 
-      valid = this.number_of_photos >  this.watch_files_prepared.length ? false : valid;
+      valid = this.number_of_photos >  this.watch_files_prepared.length + this.files_uploaded.length ? false : valid;
 
       return {
         valid: valid,
@@ -2450,20 +2482,13 @@ Vue.component('single-studio-content', {
         popup_studio_errors.errors = validate.errors;
         popup_studio_errors.visible = true;
         popup_studio_errors.images_to_show = this.number_of_photos;
-        popup_studio_errors.images_uploaded = this.watch_files_prepared.length;
+        popup_studio_errors.images_uploaded = this.watch_files_prepared.length + this.files_uploaded.length;
       }
 
       return validate.valid;
     },
 
     update_wfp_meta: function(){
-
-      var validate = this.exec_validate();
-
-      if(!validate){
-        return;
-      }
-
       var vm = this;
       var meta = vm.$children.filter(el=>{
         return 'undefined' !== typeof(el.files_uploaded);
@@ -2473,7 +2498,6 @@ Vue.component('single-studio-content', {
           if('undefined' !== e.archive_url && e.archive_url){
             url = e.archive_url;
           }else if(e.path){
-            // url = vm.show_image_loaded(e.path);
             url = '';
           }
 
@@ -4950,16 +4974,45 @@ if(document.getElementById('single-frontdesk-order')){
       visible: false,
       item_index: -1,
       order_data: {},
-      changed: false,
       do_save: false,
       studio_note_text:  '',
       enquery_note_text: '',
       studio_notes_count:  1,
       enquery_notes_count: 1,
+      order_was_changed: false,
+      is_run_saving: false,
     },
 
     watch:{
       visible: function(val){
+        var vm = this;
+        if(val){
+          Vue.nextTick(function(){
+            vm.order_was_changed = false;
+          })
+        }
+      },
+
+      'order_was_changed': function(val){
+        clog('order_was_changed: ' + val, 'red');
+      },
+
+      'order_data.location.unit': function(val){
+        if(this.visible){
+          this.order_was_changed = true;
+        }
+      },
+
+      'order_data.location.box': function(val){
+        if(this.visible){
+          this.order_was_changed = true;
+        }
+      },
+
+      'order_data.product_collection.address': function(val){
+        if(this.visible){
+          this.order_was_changed = true;
+        }
       },
     },
 
@@ -4974,9 +5027,33 @@ if(document.getElementById('single-frontdesk-order')){
             return e.request.length;
           }).reduce((a, b) => a + b, 0);
       },
+
+      _order_was_changed: function(){
+        if(this.visible){
+          return this.order_was_changed;
+        }
+        return false;
+      },
     },
 
     methods:{
+
+      do_toggler: function(){
+        this.order_data.product_collection.do_collect =! this.order_data.product_collection.do_collect;
+
+        if(this.visible){
+          // this.order_was_changed = true;
+        }
+      },
+
+      exec_save:function(){
+        if(this.order_was_changed){
+          this.do_save = true;
+          this.exec_save_wordpress();
+          this.upload_pdf();
+          var vm = this;
+        }
+      },
 
       get_image_url(image){
         if('undefined' !== typeof(image.archive_url)){
@@ -5002,8 +5079,6 @@ if(document.getElementById('single-frontdesk-order')){
 
         if(vm.do_save){
           vm.exec_save_vue();
-          vm.exec_save_wordpress();
-          vm.upload_pdf();
         }
 
         Vue.nextTick(function(){
@@ -5020,7 +5095,6 @@ if(document.getElementById('single-frontdesk-order')){
             frontdesk_list.update_prop('visible', !visibility);
           }
         })
-
       },
     },
   });
@@ -5036,12 +5110,13 @@ if(document.getElementById('new-frontdesk-order')){
       new_order: true,
       item_index: -1,
       order_data: blank_order.data,
-      changed: false,
       do_save: false,
       studio_note_text:  '',
       enquery_note_text: '',
       studio_notes_count:  1,
       enquery_notes_count: 1,
+      order_was_changed: false, // doesn't used in new order just for mixin compatibility
+      is_run_saving: false,// doesn't used in new order just for mixin compatibility
     },
 
     watch:{
@@ -6145,5 +6220,67 @@ if(document.getElementById('popup_studio_errors')){
       },
     },
   })
+}
+if(document.getElementById('popup_quality')){
+  popup_shoot = new Vue({
+    'el' : '#popup_quality',
+
+    data: {
+      'visible' : false,
+      'check_notes' : false,
+      'check_sizes' : false,
+      'check_product' : false,
+    },
+
+    watch: {
+      check_notes: function(val){
+        if(val){
+          this.$refs.check_notes.classList.remove('error');
+        }
+      },
+
+      check_sizes: function(val){
+        if(val){
+           this.$refs.check_sizes.classList.remove('error');
+        }
+      },
+
+      check_product: function(val){
+        if(val){
+           this.$refs.check_product.classList.remove('error');
+        }
+      },
+    },
+
+    computed:{
+      valid: function(){
+
+        var check = [
+          'check_notes',
+          'check_sizes',
+          'check_product',
+        ];
+
+        for(var index of check){
+          console.log(index);
+          if(!this[index]){
+            this.$refs[index].classList.add('error');
+          }else{
+            this.$refs[index].classList.remove('error');
+          }
+        }
+        return this.check_notes && this.check_sizes && this.check_product;
+      },
+    },
+
+    methods: {
+      submit: function(){
+        if(!this.valid){
+          return;
+        }
+        studio_app.$refs.detailed_view.exec_upload();
+      },
+    }
+  });
 }
 ctime('vue script', 'green');

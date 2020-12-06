@@ -20,7 +20,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 
       <div class="col-6 text-right">
 
-        <order-status-select ref="order_status" _select_name="order_status" v-bind:class="'text-left'" :_options="order_statuses" v-on:update_list="update_order_status"></order-status-select>
+            <order-status-select ref="order_status"
+               _select_name="order_status"
+               v-bind:_options='order_statuses'
+               v-bind:_current_status='order_data.order_status'
+               v-bind:class="'text-left'"
+               v-on:update_list="update_order_status"></order-status-select>
 
         <a href="#"  v-on:click.prevent="save_order" class="button-save-order">
            <svg class="icon svg-icon-ok-marker"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-ok-marker"></use> </svg>
@@ -574,8 +579,9 @@ if ( ! defined( 'ABSPATH' ) ) {
                 </td>
               </tr>
               <tr>
-                <td colspan="2">
-                  <textarea type="text" class="styled leads-block__textarea to-right" v-model="order_data.location.comment" ref="location_comment" placeholder="Add"></textarea>
+                <td></td>
+                <td class="text-right">
+                  <input type="text" class="leads-block__input_xs leads-block__input to-right" v-model="order_data.location.box" placeholder="Add">
                 </td>
               </tr>
             </table>

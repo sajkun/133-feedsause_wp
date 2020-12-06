@@ -140,17 +140,13 @@ echo '<script type="text/x-template" id="studio-single-content">';
                   <tr>
                     <td><p class="leads-block__label no-margin">Unit</p></td>
                     <td class="text-right width-150">
-                      <p class="products-block__item-title">
-                        {{order_data.location.unit}}
-                      </p>
+                      <span class="leads-block__text"> {{order_data.location.unit}} </span>
                     </td>
                   </tr>
                   <tr>
                     <td></td>
                     <td class="text-right width-150">
-                      <p class="products-block__item-title">
-                        {{order_data.location.comment}}
-                      </p>
+                      <span class="leads-block__text"> {{order_data.location.box}} </span>
                     </td>
                   </tr>
                 </table>
@@ -247,13 +243,13 @@ echo '<script type="text/x-template" id="studio-single-content">';
             <a href="#"  v-if="show_start_shoot_btn" v-on:click.prevent="show_shoot_popup" class="upload-area__shoot">Start Shooting</a>
 
             <a href="#"  v-if="show_submit_button"
-              v-on:click.prevent="exec_upload"
+              v-on:click.prevent="do_upload"
               v-bind:class="{grey: !files_to_load_exist}"
               class="upload-area__submit">Submit Photos</a>
           </div>
         </div><!-- upload-area__header -->
         <div class="upload-area__body">
-          <div class="row" v-if="this.order_data.shoot_started">
+          <div class="row" v-if="this.order_data.shoot_started || is_old_order">
            <upload-item-exists
               v-for="(file, i) in files_uploaded"
               :_number = "i + 1"
@@ -297,7 +293,7 @@ echo '<script type="text/x-template" id="studio-single-content">';
             ></upload-item-blank>
           </div><!-- row -->
 
-          <div class="upload-item" v-if="!this.order_data.shoot_started">
+          <div class="upload-item" v-if="!this.order_data.shoot_started && !is_old_order">
             <div class="upload-item__header">
               <div class="upload-item__state">
               </div>

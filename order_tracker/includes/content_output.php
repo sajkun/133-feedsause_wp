@@ -78,6 +78,8 @@ if(!class_exists('tracker_content_output')){
     public static function print_popups_studio(){
       print_duh_template_part( 'popup-shoot' ,'order_tracker/templates/global', array());
       print_duh_template_part( 'popup-studio-errors' ,'order_tracker/templates/global', array());
+
+      print_duh_template_part( 'popup-quality' ,'order_tracker/templates/global', array());
     }
   }
 }
