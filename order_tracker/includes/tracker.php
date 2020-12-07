@@ -33,9 +33,7 @@ if(!class_exists('theme_order_tracker')){
       $frondtdesk_columns_data = array_filter($options['orders'], function($el){
         return $el['is_frontdesk'] == 'yes';
       });
-      if( $frondtdesk_columns_data ){
-        usort($frondtdesk_columns_data, 'sort_by_order');
-      }
+      usort($frondtdesk_columns_data, 'sort_by_order');
 
 
 
@@ -46,9 +44,7 @@ if(!class_exists('theme_order_tracker')){
         return $el['is_studio'] == 'yes';
       });
 
-      if( $studio_columns_data ){
-        usort($studio_columns_data, 'sort_by_order');
-      }
+      usort($studio_columns_data, 'sort_by_order');
 
       /**
       * order statuses for frondesk
@@ -399,9 +395,7 @@ if(!class_exists('theme_order_tracker')){
           }
         }
 
-        if ($order_statuses) {
-           usort($order_statuses, 'sort_by_order');
-        }
+       usort($order_statuses, 'sort_by_order');
 
        global $wp_roles;
 

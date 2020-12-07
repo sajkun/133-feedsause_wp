@@ -14,7 +14,10 @@ do_action('start_page');
   <title><?php wp_title(' | ', 'echo', 'right'); ?></title>
   <meta charset="<?php bloginfo( 'charset' ); ?>">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes">
+
+  <?php if (function_exists('get_google_client_id')): ?>
   <meta name="google-signin-client_id" content="<?php echo get_google_client_id(); ?>">
+  <?php endif ?>
 
   <link rel="pingback" href="<?php bloginfo( 'pingback_url' ); ?>">
   <link rel="dns-prefetch" href="//ajax.googleapis.com">
