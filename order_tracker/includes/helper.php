@@ -48,6 +48,9 @@ if(!function_exists('sort_by_order')){
   * sort function for objects with order key;
   */
   function sort_by_order($a, $b){
+    if(!isset($b['order']) || !isset($a['order'])){
+      return 0;
+    }
     if( $a['order'] == $b['order']){
       return 0;
     }

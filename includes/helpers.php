@@ -6,7 +6,7 @@
 */
 
 
-if(!function_exists('log')){
+if(!function_exists('clog')){
 
   /**
  * prints an inline script with output in console
