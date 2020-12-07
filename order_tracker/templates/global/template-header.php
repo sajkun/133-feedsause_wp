@@ -13,14 +13,15 @@ if ( ! defined( 'ABSPATH' ) ) {
             <img src="<?php echo THEME_URL ?>/order_tracker/assets/images/beta.png" alt="">
           </a>
           <nav class="navigation">
-            <?php if ($home_url): ?>
-            <a href="<?php echo $home_url; ?>" class="navigation__item frontdesk-link">
-              <svg class="icon svg-icon-frdk"> <use xmlns:xlink="ttp://www.w3.org/1999/xlink" xlink:href="#svg-icon-frdk"></use> </svg>
+            <?php if ($home_url && $can_see_frontdesk): ?>
+            <a href="<?php echo $home_url; ?>" class="navigation__item
+              <?php echo $is_frontdesk? 'active': ''; ?> ">
+              <svg class="icon svg-icon-frontdesk"> <use xmlns:xlink="ttp://www.w3.org/1999/xlink" xlink:href="#svg-icon-frontdesk"></use> </svg>
               <span>Frontdesk</span>
             </a>
             <?php endif ?>
             <?php if ($studio_url): ?>
-            <a href="<?php echo $studio_url; ?>#studio" class="navigation__item studio-link">
+            <a href="<?php echo $studio_url; ?>" class="navigation__item <?php echo $is_studio ? 'active': ''; ?> ">
               <svg class="icon svg-icon-frdk"> <use xmlns:xlink="ttp://www.w3.org/1999/xlink" xlink:href="#svg-icon-frdk"></use> </svg>
               <span>Studio</span>
             </a>
@@ -70,6 +71,13 @@ if ( ! defined( 'ABSPATH' ) ) {
                   <?php endif ?>
                 </div>
                 <span class="curent-user__name">Hi, <span><?php echo $name; ?></span></span>
+
+                <div class="input-holder__dropdown">
+                   <ul class="input-holder__list">
+                    <li><a href="<?php echo admin_url('options-general.php?page=duh_tracker_settings');?>">Settings</a></li>
+                    <li><a href="<?php echo wp_logout_url(HOME_URL); ?>">Logout</a></li>
+                  </ul>
+                </div>
               </div>
             </div><!-- row -->
           </div><!-- clearfix valign-center -->

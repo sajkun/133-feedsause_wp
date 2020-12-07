@@ -77,7 +77,7 @@
 
          if( isLocalStorage && localStorage.getItem( 'inlineSVGrev_project_151_2' ) == revision )
          {
-           data = localStorage.getItem( 'inlineSVGdata_project_151_2' );
+           data = localStorage.getItem( 'inlineSVGdata_project_174_3' );
            if( data )
            {
              insert();
@@ -97,8 +97,8 @@
                insert();
                if( isLocalStorage )
                {
-                 localStorage.setItem( 'inlineSVGdata_project_174_1',  data );
-                 localStorage.setItem( 'inlineSVGrev_project_174_1',   revision );
+                 localStorage.setItem( 'inlineSVGdata_project_174_3',  data );
+                 localStorage.setItem( 'inlineSVGrev_project_174_3',   revision );
                }
              }
            }
@@ -111,19 +111,16 @@
 
    <?php do_action('before_scripts'); ?>
 
-   <script
-   src="https://code.jquery.com/jquery-3.5.1.min.js"
-   integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="
-   crossorigin="anonymous"></script>
-   <script src="<?php echo THEME_URL ?>/order_tracker/assets/libs/datepicker/moment.min.js"></script>
-   <script src="<?php echo THEME_URL ?>/order_tracker/assets/libs/datepicker/daterangepicker.js"></script>
-   <script src="<?php echo THEME_URL ?>/order_tracker/assets/libs/datetimepicker/build/jquery.datetimepicker.full.js"></script>
-   <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="<?php echo THEME_URL ?>/order_tracker/assets/libs/jquery/jquery3.js"></script>
+    <script src="<?php echo THEME_URL ?>/order_tracker/assets/libs/datepicker/moment.min.js"></script>
+    <script src="<?php echo THEME_URL ?>/order_tracker/assets/libs/datepicker/daterangepicker.js"></script>
+    <script src="<?php echo THEME_URL ?>/order_tracker/assets/libs/datetimepicker/build/jquery.datetimepicker.full.js"></script>
 
-    <script src="//cdn.jsdelivr.net/npm/sortablejs@1.8.4/Sortable.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/Vue.Draggable/2.20.0/vuedraggable.umd.min.js"></script>
+    <script src="<?php echo THEME_URL ?>/order_tracker/assets/libs/vuejs/vue-dev.js"></script>
 
-   <script defer src="<?php echo THEME_URL ?>/order_tracker/assets/script/main.min2.js"></script>
+    <script src="<?php echo THEME_URL ?>/order_tracker/assets/libs/sortable/sortable.js"></script>
+    <script src="<?php echo THEME_URL ?>/order_tracker/assets/libs/drag/drag.js"></script>
+    <script defer src="<?php echo THEME_URL ?>/order_tracker/assets/script/main.min2.js"></script>
  </head>
  <body  id="site-body" class="not-ready">
   <div class="site-container">

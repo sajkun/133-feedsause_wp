@@ -12,6 +12,15 @@ if(!class_exists('tracker_content_constructor')){
       add_action('do_tracker_header', array('tracker_content_output', 'print_header'));
 
       if($o['tracker_page'] == get_queried_object_id() ){
+          $user = get_user_by('ID', get_current_user_id());
+          $can_see_frontdesk = count(array_intersect($o['user_roles_to_use'],$user->roles)) > 0;
+
+          if(!$can_see_frontdesk){
+            $redirect = get_permalink($o['studio_page'])?:HOME_URL;
+            wp_safe_redirect( $redirect, 302, 'WordPress' );
+            exit;
+          }
+
           tracker_content_constructor::validate();
           add_action('do_tracker_content', array('tracker_content_output', 'print_front_desk'));
           add_action('do_tracker_after_footer', array('tracker_content_output', 'print_popups'));
@@ -19,7 +28,6 @@ if(!class_exists('tracker_content_constructor')){
 
       if($o['studio_page'] == get_queried_object_id() ){
          tracker_content_constructor::validate();
-
          add_action('do_tracker_content', array('tracker_content_output', 'print_studio'));
          add_action('do_tracker_after_footer', array('tracker_content_output', 'print_popups_studio'));
       }
@@ -51,6 +59,9 @@ if(!class_exists('tracker_content_constructor')){
         wp_safe_redirect( HOME_URL, 302, 'WordPress' );
         exit;
       }
+
+
+
     }
   }
 }

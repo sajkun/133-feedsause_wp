@@ -14,13 +14,16 @@ if(!class_exists('tracker_content_output')){
       $options = get_option(duh()->slug_options);
       $user    = wp_get_current_user();
 
+      $can_see_frontdesk = count(array_intersect($options['user_roles_to_use'],$user->roles)) > 0;
+
       $args = array(
         'home_url'   => (isset($options['tracker_page']))? get_permalink($options['tracker_page']) : false,
-
         'studio_url' => (isset($options['studio_page']))? get_permalink($options['studio_page']) : false,
         'name'       => $user->display_name,
-        'is_studio'  => get_queried_object_id() === (int)$options['studio_page'],
+        'is_studio'     => get_queried_object_id() === (int)$options['studio_page'],
+        'is_frontdesk'  => get_queried_object_id() === (int)$options['tracker_page'],
         'avatar_url' => get_avatar_url($user),
+        'can_see_frontdesk' => $can_see_frontdesk,
       );
 
       print_duh_template_part( 'header' ,'order_tracker/templates/global', $args);

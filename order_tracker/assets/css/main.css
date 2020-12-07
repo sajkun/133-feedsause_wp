@@ -6550,6 +6550,26 @@ html {
 .curent-user {
   align-self: center;
   margin-left: 15px;
+  position: relative;
+}
+
+.curent-user .input-holder__dropdown {
+  visibility: hidden;
+  opacity: 0;
+}
+
+.curent-user .input-holder__dropdown a {
+  text-decoration: none;
+  color: #585e65;
+}
+
+.curent-user .input-holder__dropdown li:hover a {
+  color: #fff;
+}
+
+.curent-user:hover .input-holder__dropdown {
+  visibility: visible;
+  opacity: 1;
 }
 
 .curent-user__gravatar {
@@ -12605,6 +12625,32 @@ html {
   border: 1px solid #e0e8f9;
   background-color: #ffffff;
   overflow: hidden;
+}
+
+.upload-item__thumb {
+  height: 38px;
+  line-height: 36px;
+  border-radius: 5px;
+  border: 1px solid #e7eff8;
+  background-color: #fff;
+  padding: 4px;
+  cursor: pointer;
+  margin-right: 5px;
+}
+
+.upload-item__thumb input {
+  display: none;
+  position: absolute;
+  visibility: hidden;
+  opacity: 0;
+}
+
+.upload-item__thumb img {
+  display: block;
+  width: 28px;
+  height: 28px;
+  -o-object-fit: cover;
+     object-fit: cover;
 }
 
 .upload-item__drop-area {

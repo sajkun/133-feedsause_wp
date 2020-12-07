@@ -211,9 +211,9 @@ if(!class_exists('map_orders_cb')){
       $wfp_images = $order->get_meta('_wfp_image');
 
       if($wfp_images){
-        $wfp_images = array_filter($order->get_meta('_wfp_image'), function($el){
-          return !isset($el['was_bought']);
-        });
+        $wfp_images = array_values(array_filter($order->get_meta('_wfp_image'), function($el){
+                  return !isset($el['was_bought']);
+                }));
       }
 
     $order_status = $order->get_status();

@@ -249,33 +249,38 @@ echo '<script type="text/x-template" id="studio-single-content">';
           </div>
         </div><!-- upload-area__header -->
         <div class="upload-area__body">
-          <div class="row" v-if="this.order_data.shoot_started || is_old_order">
+          <div class="row" v-if="shoot_started || is_old_order">
            <upload-item-exists
               v-for="(file, i) in files_uploaded"
               :_number = "i + 1"
               :_item_id = "i"
+              :thumbs_file     = "get_thumb_from_file()"
               :key     = "'upload_item_'+i"
               :_comments = "get_comments_for_image(i)"
               :_files_uploaded = "file"
               :_is_old_order = "is_old_order"
               v-on:show_image = 'show_image_popup'
               v-on:file_changed = "update_files"
+              v-on:change_thumbnail = "change_thumbnail"
             ></upload-item-exists>
 
            <upload-item-exists
                v-if= "is_single_order"
                :_number = "1"
+               :thumbs_file     = "get_thumb_from_file()"
               :_item_id = "0"
               :_comments = "[]"
               :_files_uploaded = "single_order_files"
               :_is_old_order = "1"
               v-on:show_image = 'show_image_popup'
               v-on:file_changed = "update_files"
+              v-on:change_thumbnail = "change_thumbnail"
             ></upload-item-exists>
 
             <upload-item
               v-for="(file, i) in watch_files_prepared"
               :_number         = "get_index_prepared(i) + 1"
+              :thumbs_file     = "get_thumb_from_file()"
               :_item_id        = "get_index_prepared(i)"
               :key             = "'upload_item_prepared_'+get_index_prepared(i)"
               :_comments       = "[]"
@@ -283,6 +288,7 @@ echo '<script type="text/x-template" id="studio-single-content">';
               :_files_uploaded = "files_uploaded[get_index_prepared(i)]"
               v-on:show_image = "show_image_popup"
               v-on:file_changed = "update_files"
+              v-on:change_thumbnail = "change_thumbnail"
             ></upload-item>
 
             <upload-item-blank
@@ -293,7 +299,7 @@ echo '<script type="text/x-template" id="studio-single-content">';
             ></upload-item-blank>
           </div><!-- row -->
 
-          <div class="upload-item" v-if="!this.order_data.shoot_started && !is_old_order">
+          <div class="upload-item" v-if="!shoot_started && !is_old_order">
             <div class="upload-item__header">
               <div class="upload-item__state">
               </div>

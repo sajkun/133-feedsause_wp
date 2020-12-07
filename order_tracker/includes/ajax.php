@@ -346,6 +346,14 @@ if(!class_exists('tracker_ajax')){
 
       $meta = get_post_meta($order_id, '_wfp_image', true);
 
+      $order = wc_get_order( $order_id );
+
+      if($meta){
+        $meta = array_values(array_filter($order->get_meta('_wfp_image'), function($el){
+                  return !isset($el['was_bought']);
+                }));
+      }
+
       wp_send_json(array(
         'post'   => $_POST,
         'meta'   => $meta,
@@ -402,10 +410,17 @@ if(!class_exists('tracker_ajax')){
       $order->set_status($order_status);
       $order->save();
 
+
       $updated = update_post_meta($order_id, '_shoot_started', 1);
 
       if(!$updated){
         add_post_meta($order_id, '_shoot_started', 1);
+      }
+
+      $updated = update_post_meta($order_id, '_assigned_creator', $_POST['logged_in_user']['name']);
+
+      if(!$updated){
+        add_post_meta($order_id,  '_assigned_creator', $_POST['logged_in_user']['name']);
       }
 
       wp_send_json( array(
