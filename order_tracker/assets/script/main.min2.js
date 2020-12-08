@@ -589,14 +589,16 @@ var fds_order = {
           return el.show == '1';
         });
 
-        notes.sort(function (a, b){
-          var date_a = new Date(a._date);
-          var date_b = new Date(a._date);
-          if(date_a == date_b){
-            return 0;
-          }
-          return date_b > date_a ? 1 : -1;
-        });
+        if(this.enquery_notes_count <=1){
+          notes.sort(function (a, b){
+            var date_a = new Date(a._date.replace(/\s/, 'T'));
+            var date_b = new Date(a._date.replace(/\s/, 'T'));
+            if(date_a == date_b){
+              return 0;
+            }
+            return date_b > date_a ? 1 : -1;
+          });
+        }
 
         return notes.splice(0, this.enquery_notes_count);
       },
@@ -613,14 +615,17 @@ var fds_order = {
           return el.show == '1';
         });
 
+       if(this.studio_notes_count <=1){
         notes.sort(function (a, b){
-          var date_a = new Date(a._date);
-          var date_b = new Date(a._date);
+          var date_a = new Date(a._date.replace(/\s/, 'T'));
+          var date_b = new Date(a._date.replace(/\s/, 'T'));
           if(date_a == date_b){
             return 0;
           }
           return date_b > date_a ? 1 : -1;
         });
+
+      }
 
         return notes.splice(0, this.studio_notes_count);
       },
@@ -639,8 +644,8 @@ var fds_order = {
         };
 
         var fmt  = new DateFormatter();
-        var date = new Date(this.order_data.due_date.date);
-        var today = new Date()
+        var date = new Date(this.order_data.due_date.date.replace(/\s/, 'T'));
+        var today = new Date();
 
         due_date.value = fmt.formatDate(date, 'd F Y');
 
@@ -1203,13 +1208,15 @@ var upload_item_mixin = {
     },
 
     _item_id: function(val){
+      clog('_item_id' + val);
       this.item_id = val;
       this.$emit('file_changed', {files: this.files, number: this.number, item_id:this.item_id, thumbs_file: this.thumbs_file});
     },
 
-
     _files_uploaded: function(val){
       if(typeof(val) !== 'undefined'){
+        this.thumbnail =   tracker_url[0]+"/assets/images/blank.svg";
+        this.thumbs_file = false;
         this.files_uploaded =  val;
       }
     },
@@ -1218,23 +1225,24 @@ var upload_item_mixin = {
       this.$emit('file_changed', {files: this.files, number: this.number, item_id:this.item_id, thumbs_file: this.thumbs_file});
     },
   },
+
   computed: {
     this_state: function(){
 
-      slog('item: #' + strip(this.item_id) + ' data', 'red');
+      // slog('item: #' + strip(this.item_id) + ' data', 'red');
 
-      clog('files_uploaded: ' , 'blue');
-      clog(strip(this.files_uploaded));
-      clog('files: ' , 'blue');
-      clog(strip(this.files));
+      // clog('files_uploaded: ' , 'blue');
+      // clog(strip(this.files_uploaded));
+      // clog('files: ' , 'blue');
+      // clog(strip(this.files));
 
       var wfp_data = typeof(this.$parent.order_data.wfp_images) !== 'undefined' && typeof(this.$parent.order_data.wfp_images[this.item_id]) !== 'undefined' ? strip(this.$parent.order_data.wfp_images[this.item_id]) : [];
 
       wfp_data = (this.$parent.order_data.wfp_image_single)? strip(this.$parent.order_data.wfp_image_single) : wfp_data;
 
-      clog('wfp_data: ' , 'blue');
-      clog(wfp_data);
-      elog();
+      // clog('wfp_data: ' , 'blue');
+      // clog(wfp_data);
+      // elog();
 
       if(this.files.length == 0 &&  this.files_uploaded.length == 0){
         return 'Upload';
@@ -1394,14 +1402,14 @@ var column_mixin = {
 var upload_item_thumb = {
   data: function(){
     return{
-      thumbnail: tracker_url[0]+"/assets/images/blank.svg",
-      thumbs_file: false,
+      thumbnail       : tracker_url[0]+"/assets/images/blank.svg",
+      thumbs_file     : false,
+      thumbs_image_id : -1,
     }
   },
 
   watch:{
     thumbs_file: function(val){
-
       if(!val){
         return;
       }
@@ -1413,15 +1421,13 @@ var upload_item_thumb = {
       reader.onloadend = function() {
         vm.thumbnail = reader.result;
       }
-    }
+    },
   },
 
-  beforeMount:function(){
-
-  },
 
   methods:{
     upload_from_input_thumb: function(event){
+      this.$refs.thumb.classList.remove('error');
       var files = [];
       for(var file of event.target.files){
         if(file.type != 'image/jpeg' && file.type != "image/png"){
@@ -1441,7 +1447,7 @@ var upload_item_thumb = {
 
       this.thumbs_file = files[0];
 
-      this.$emit('change_thumbnail', {item_id: this.item_id, file: files[0]})
+      this.$emit('change_thumbnail', {item_id: this.item_id})
     },
   }
 };
@@ -1838,7 +1844,7 @@ Vue.component('single-studio-content', {
       studio_notes_count:  1,
       show_popup_preview: false,
       files_to_load :{},
-      thumbs_to_load :[],
+      thumbs_to_load :false,
       files_prepared:{},
       do_submit: false,
     };
@@ -1850,17 +1856,20 @@ Vue.component('single-studio-content', {
         return el.show == '1';
       });
 
-      notes.sort(function (a, b){
-        var date_a = new Date(a._date);
-        var date_b = new Date(a._date);
-        if(date_a == date_b){
-          return 0;
-        }
-        return date_b > date_a ? 1 : -1;
-      });
+      if(this.studio_notes_count <= 1){
+        notes.sort(function (a, b){
+          var date_a = new Date(a._date.replace(/\s/, 'T'));
+          var date_b = new Date(a._date.replace(/\s/, 'T'));
+          if(date_a == date_b){
+            return 0;
+          }
+          return date_b > date_a ? 1 : -1;
+        });
+      }
 
       return notes.splice(0, this.studio_notes_count);
     },
+
 
     computed_studio_notes_count: function(){
       var shown = this.order_data.messages.studio.map(el=>{
@@ -1869,12 +1878,14 @@ Vue.component('single-studio-content', {
       return shown.reduce((a, b) => a + b, 0);
     },
 
+
     turnaround: function(){
       data = this.order_data.order.addons.filter(e=>{
         return e.title == 'Turnaround';
       });
       return  'undefined' !== typeof(data[0])? data[0].name: 'Not defined';
     },
+
 
     /**
     * return data about current order status
@@ -1884,7 +1895,6 @@ Vue.component('single-studio-content', {
     * @return object {status, color}
     */
     column_data: function(){
-      clog(this.order_data);
       var vm = this;
       var data = Object.values(studio_columns_data)
                        .filter(e => {
@@ -1900,6 +1910,7 @@ Vue.component('single-studio-content', {
       return data[0];
     },
 
+
     /**
     * return formatted date when photos should be ready
     *
@@ -1911,7 +1922,7 @@ Vue.component('single-studio-content', {
         return '-';
       }
 
-      var date = new Date(this.order_data.due_date.date);
+      var date = new Date(this.order_data.due_date.date.replace(/\s/, 'T'));
       var fmt  = new DateFormatter();
       return fmt.formatDate(date, 'D d M');
     },
@@ -1927,7 +1938,7 @@ Vue.component('single-studio-content', {
       }
 
       var today = new Date();
-      var due_date = new Date(this.order_data.due_date.date);
+      var due_date = new Date(this.order_data.due_date.date.replace(/\s/, 'T'));
       var diffTime = due_date - today;
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
@@ -2064,7 +2075,6 @@ Vue.component('single-studio-content', {
       if(this.wfp_image_single){
         return [];
       }
-
       var files_to_load =  this.files_prepared;
       var values = Object.values(files_to_load);
       return values;
@@ -2130,8 +2140,6 @@ Vue.component('single-studio-content', {
     shoot_started: function(){
       var shoot_started = this.order_data.order_status == tracker_options['orders_misc']['shoot'] || this.order_data.shoot_started;
 
-      clog(shoot_started);
-
       return shoot_started;
     },
 
@@ -2146,16 +2154,31 @@ Vue.component('single-studio-content', {
     },
 
     files_to_load_exist: function(){
-      return Object.values(this.files_to_load).length > 0 || this.thumbs_to_load.length > 0;
+      var files_to_load = this.files_to_load;
+      var thumbs_to_load = this.thumbs_to_load;
+
+      files_to_load = Object.values(this.files_to_load).filter(e=>{ return e.length > 0;});
+      return files_to_load.length > 0 || thumbs_to_load;
     }
   },
 
   watch: {
     visible: function(val){
-    },
-
-    thumbs_to_load: function(val){
-      console.log(val);
+        var vm = this;
+      if(!val){
+        Vue.nextTick(function(){
+          vm.show_popup_preview = false;
+          vm.do_submit = false;
+          vm.studio_notes_count  = 1;
+          vm.thumbs_to_load  = false;
+          vm.files_to_load   = {};
+          vm.files_prepared  = {};
+        })
+      }else{
+        Vue.nextTick(function(){
+          vm.update_thumbs();
+        })
+      }
     },
 
     studio_note_text:function(){
@@ -2165,7 +2188,7 @@ Vue.component('single-studio-content', {
   },
 
   mounted: function(){
-
+    this.update_thumbs();
   },
 
   mixins: [get_set_props, animation_mixin],
@@ -2204,6 +2227,31 @@ Vue.component('single-studio-content', {
       this.save_notes();
     },
 
+    update_thumbs: function(){
+      var data = [];
+
+      if('undefined'!== typeof(this.order_data.wfp_thumbnails)){
+        data = strip(this.order_data.wfp_thumbnails);
+      }
+
+      var children = (this.$children).filter(e => {
+        return e.constructor.options.name == 'upload-item-exists' || e.constructor.options.name == 'upload-item'});
+
+      for( var child of children){
+        var item_id = child.item_id;
+
+        if('undefined' !== typeof(data[item_id])){
+          child.thumbnail       = data[item_id].attachment_url;
+          child.thumbs_image_id = data[item_id].attachment_id;
+          child.thumbs_file = false;
+        }else{
+          child.thumbs_file = false;
+          child.thumbnail       =  tracker_url[0]+"/assets/images/blank.svg";
+          child.thumbs_image_id =  -1;
+        }
+      }
+    },
+
     get_index_prepared: function(id){
       return this.files_uploaded.length + id;
     },
@@ -2227,6 +2275,10 @@ Vue.component('single-studio-content', {
         vm.visible = false;
       })
 
+    },
+
+    change_thumbnail: function(){
+      this.thumbs_to_load = true;
     },
 
     /**
@@ -2299,14 +2351,13 @@ Vue.component('single-studio-content', {
           }
         })
         .always(function(e) {
-
-          clog(e);
           unblock();
         });
       });
     },
 
     do_upload: function(){
+
       if(!this.files_to_load_exist){
         return;
       }
@@ -2330,6 +2381,12 @@ Vue.component('single-studio-content', {
           var path = folder_name +"/"+folder +"/"+file.name
           this.upload_file(path, file, folder);
         }
+      }
+
+      clog(Object.values(this.files_to_load).length);
+
+      if(Object.values(this.files_to_load).length == 0){
+        this.collect_thumbs();
       }
     },
 
@@ -2404,10 +2461,10 @@ Vue.component('single-studio-content', {
 
         jQuery('.image-preview-popup__inner').width(width);
         jQuery('.image-preview-popup__inner').height(height);
-      })
+      });
 
       Vue.nextTick(function(){
-      })
+      });
     },
 
     show_image_loaded: function(dropbox_path){
@@ -2437,14 +2494,8 @@ Vue.component('single-studio-content', {
     },
 
     update_files: function(data){
-
+      slog('update_files', 'green')
       this.$set(this.files_to_load, data.item_id, data.files);
-
-      if(data.thumbs_file){
-        var thumbs =  this.thumbs_to_load.filter(e=> {e.item_id != data.item_id});
-        thumbs.push(data.thumbs_file);
-        this.thumbs_to_load = thumbs;
-      }
 
       var count = 0;
 
@@ -2452,12 +2503,16 @@ Vue.component('single-studio-content', {
         count += this.files_to_load[i].length;
       }
 
+      clog(' this.do_submit: ' +  this.do_submit);
+
       if(count === 0 && this.do_submit){
         var vm = this;
         Vue.nextTick(function(){
+          vm.collect_thumbs();
           vm.update_wfp_meta();
         })
       }
+      elog();
     },
 
     update_files_blank: function(data){
@@ -2494,6 +2549,8 @@ Vue.component('single-studio-content', {
 
       xhr.addEventListener("readystatechange", function () {
         if (this.readyState === 4) {
+
+          clog('file was loaded', 'green');
           var data = JSON.parse(this.responseText);
 
           parent[0].files_uploaded.push({
@@ -2538,7 +2595,22 @@ Vue.component('single-studio-content', {
       valid = true;
       errors = [];
 
-      valid = this.number_of_photos >  this.watch_files_prepared.length + this.files_uploaded.length ? false : valid;
+      /**
+      * validate thumbs
+      */
+
+      var thumbs = this.get_thumbs();
+      var thumbs_parsed = thumbs.filter(e=>{ return e.thumbs_image_id > 0 || !!e.thumbs_file});
+
+      if(thumbs.length !== thumbs_parsed.length){
+        errors.push('You need to set up all thumbnails');
+        valid = false;
+      }
+
+
+       var files_prepared = this.watch_files_prepared.filter(e => {return e.length > 0})
+
+       valid = this.number_of_photos >  files_prepared.length + this.files_uploaded.length ? false : valid;
 
       return {
         valid: valid,
@@ -2551,24 +2623,88 @@ Vue.component('single-studio-content', {
 
       if(!validate.valid){
         unblock();
+        var files_prepared = this.watch_files_prepared.filter(e => {return e.length > 0})
         popup_studio_errors.errors = validate.errors;
         popup_studio_errors.visible = true;
         popup_studio_errors.images_to_show = this.number_of_photos;
-        popup_studio_errors.images_uploaded = this.watch_files_prepared.length + this.files_uploaded.length;
+        popup_studio_errors.images_uploaded = files_prepared.length + this.files_uploaded.length;
       }
 
       return validate.valid;
     },
 
-    change_thumbnail: function(data){
-      var thumbs =  this.thumbs_to_load.filter(e=> {e.item_id != data.item_id});
-      thumbs.push(data);
-      this.thumbs_to_load = thumbs;
+    get_thumbs: function(){
+      var vm = this;
+      var children = (this.$children).filter(e => {
+        return e.constructor.options.name == 'upload-item-exists' || e.constructor.options.name == 'upload-item'}).filter(e=>{
+          if(!e.thumbs_file && e.thumbs_image_id < 0){
+            e.$refs.thumb.classList.add('error');
+          }else{
+            e.$refs.thumb.classList.remove('error');
+          }
+          return e});
+
+       var images = children.map(e=>{
+
+
+        return {
+                  'item_id'         :  e.item_id,
+                  'thumbs_image_id' :  e.thumbs_image_id,
+                  'thumbs_file'     :  e.thumbs_file,
+                }
+      });
+
+      return images;
+    },
+
+    collect_thumbs: function(){
+      block();
+      var vm = this;
+      var children = (this.$children).filter(e => {return e.constructor.options.name == 'upload-item-exists' || e.constructor.options.name == 'upload-item'}).filter(e=>{ return e.thumbs_file});
+
+      var fd   = new FormData();
+      var images = children.map(e=>{
+
+        if('undefined' !== typeof(fd)){
+          fd.append('thumb_'+e.item_id, e.thumbs_file);
+        }
+
+        return JSON.stringify({
+                  'item_id'         : e.item_id,
+                  'thumbs_image_id' : e.thumbs_image_id,
+                  'thumbs_file'     :  e.thumbs_file,
+                })
+      });
+
+      fd.append('action', 'add_thumbnails');
+      fd.append('order_id', this.order_data.order_id);
+
+
+      jQuery.ajax({
+        url: WP_URLS.ajax,
+        type: 'POST',
+        processData: false,
+        contentType: false,
+        data: fd,
+      })
+
+      .done(function(e){
+        if('undefined' != typeof(e.meta)){
+          vm.order_data.wfp_thumbnails = e.meta;
+          vm.update_thumbs();
+        }
+      })
+
+      .always(function(e){
+        console.log(e);
+        unblock();
+      });
     },
 
     update_wfp_meta: function(){
+      clog('update_wfp_meta');
+      block();
       var vm = this;
-
       var meta = vm.$children.filter(el=>{
         return 'undefined' !== typeof(el.files_uploaded);
       }).map(el => {
@@ -2601,8 +2737,6 @@ Vue.component('single-studio-content', {
         return meta;
       })
 
-      block();
-
       jQuery.ajax({
         url: WP_URLS.ajax,
         type: 'POST',
@@ -2626,14 +2760,22 @@ Vue.component('single-studio-content', {
       .always(function(e) {
         unblock();
         vm.do_submit = false;
-        console.log(e);
+        vm.thumbs_to_load = false;
+        vm.update_thumbs();
+        slog('update_wfp_meta reuslt', 'green')
+        clog(e);
+        elog();
       });
     },
 
-    get_thumb_from_file: function(id){
-      // return 'undefined' !== typeof(this.thumbs_to_load[id]) ? this.thumbs_to_load[id] : false;
-      return false;
+    get_item_visibility: function(id){
+      var file          = this.watch_files_prepared[id];
+      var files_uploaded = this.files_uploaded[this.get_index_prepared(id)];
+
+
+      return ('undefined' != typeof(file) && file.length > 0) || ('undefined' != typeof(files_uploaded) && files_uploaded.length > 0);
     },
+
   },
 
   template: '#studio-single-content',
@@ -2751,25 +2893,7 @@ Vue.component('upload-item', {
     }, false);
   },
 
-  watch :  {
-    _number: function(val){
-      this.number =  val < 10? '0'+val: val;
-    },
-
-    _item_id: function(val){
-      this.item_id = val;
-    },
-
-    _files_uploaded: function(val){
-      if(typeof(val) !== 'undefined'){
-        this.files_uploaded =  val;
-      }
-    },
-
-    files: function(){
-      this.$emit('file_changed', {files: this.files, number: this.number, item_id:this.item_id});
-    },
-  },
+  watch :  {},
 
   methods: {
 
@@ -2966,7 +3090,7 @@ Vue.component('upload-item', {
         </div>
         <div class="col"></div>
 
-        <label class="upload-item__thumb">
+        <label class="upload-item__thumb" ref="thumb">
           <img :src="thumbnail">
           <input type="file" v-on:change="upload_from_input_thumb">
         </label>
@@ -3216,7 +3340,7 @@ Vue.component('upload-item-exists', {
 
       xhr.addEventListener("readystatechange", function () {
         if (this.readyState === 4) {
-          console.log(this.responseText);
+          console.log(JSON.parse(this.responseText));
         }
       });
 
@@ -3370,7 +3494,7 @@ Vue.component('upload-item-exists', {
         </div>
         <div class="col"></div>
 
-        <label class="upload-item__thumb">
+        <label class="upload-item__thumb" ref="thumb" v-if="!is_old_order">
           <img :src="thumbnail">
           <input type="file" v-on:change="upload_from_input_thumb">
         </label>
@@ -6340,13 +6464,13 @@ if(document.getElementById('popup_quality')){
         ];
 
         for(var index of check){
-          console.log(index);
           if(!this[index]){
             this.$refs[index].classList.add('error');
           }else{
             this.$refs[index].classList.remove('error');
           }
         }
+
         return this.check_notes && this.check_sizes && this.check_product;
       },
     },

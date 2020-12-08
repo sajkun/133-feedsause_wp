@@ -227,6 +227,7 @@ if(!class_exists('map_orders_cb')){
           'created_order' => $order->get_meta('_is_created_order'),
           'wfp_images'      =>  $wfp_images,
           'wfp_image_single' => $order->get_meta('_wfp_image_single'),
+          'wfp_thumbnails' => $order->get_meta('_wfp_thumbnails'),
           'shoot_started'    => $order->get_meta('_shoot_started')? 1 : 0,
 
           'order_status'  =>  $order_status,

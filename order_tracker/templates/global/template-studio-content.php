@@ -105,6 +105,14 @@ echo '<script type="text/x-template" id="studio-single-content">';
               <table class="leads-block__data">
                 <tbody>
                   <tr>
+                    <td><p class="leads-block__label no-margin">Brand</p></td>
+                    <td  class="width-150">
+                      <span class="leads-block__text no-margin"> {{order_data.customer.brand}} </span>
+                    </td>
+                    <td>
+                    </td>
+                  </tr>
+                  <tr>
                     <td>
                       <p class="leads-block__label no-margin">Turnaround</p>
                     </td>
@@ -183,7 +191,7 @@ echo '<script type="text/x-template" id="studio-single-content">';
                   </div>
                 </div>
 
-                <span class="note-block__show-more" v-on:click="studio_notes_count = order_data.messages.studio.length + 9999" v-if="studio_notes_count < computed_studio_notes_count"> <i class="icon"></i> Show {{this.order_data.messages.studio.length - 1}} more</span>
+                <span class="note-block__show-more" v-on:click="studio_notes_count = order_data.messages.studio.length + 9999" v-if="studio_notes_count < computed_studio_notes_count"> <i class="icon"></i> Show {{computed_studio_notes_count - 1}} more</span>
                 <div class="spacer-h-20"></div>
               </div>
 
@@ -232,7 +240,7 @@ echo '<script type="text/x-template" id="studio-single-content">';
           </div>
           <div class="col">
             <p class="upload-area__header-label">Photos</p>
-            <p class="upload-area__header-value">{{number_of_photos}}</p>
+            <p class="upload-area__header-value">{{number_of_photos_bought}}</p>
           </div>
           <div class="col">
             <p class="upload-area__header-label">Reviews</p>
@@ -254,7 +262,6 @@ echo '<script type="text/x-template" id="studio-single-content">';
               v-for="(file, i) in files_uploaded"
               :_number = "i + 1"
               :_item_id = "i"
-              :thumbs_file     = "get_thumb_from_file()"
               :key     = "'upload_item_'+i"
               :_comments = "get_comments_for_image(i)"
               :_files_uploaded = "file"
@@ -267,7 +274,6 @@ echo '<script type="text/x-template" id="studio-single-content">';
            <upload-item-exists
                v-if= "is_single_order"
                :_number = "1"
-               :thumbs_file     = "get_thumb_from_file()"
               :_item_id = "0"
               :_comments = "[]"
               :_files_uploaded = "single_order_files"
@@ -280,7 +286,6 @@ echo '<script type="text/x-template" id="studio-single-content">';
             <upload-item
               v-for="(file, i) in watch_files_prepared"
               :_number         = "get_index_prepared(i) + 1"
-              :thumbs_file     = "get_thumb_from_file()"
               :_item_id        = "get_index_prepared(i)"
               :key             = "'upload_item_prepared_'+get_index_prepared(i)"
               :_comments       = "[]"

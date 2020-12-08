@@ -30,7 +30,10 @@ if(!class_exists('tracker_ajax')){
 
       add_action('wp_ajax_update_start_shoot', array($this, 'update_start_shoot_cb'));
 
+      add_action('wp_ajax_add_thumbnails', array($this, 'add_thumbnails_cb'));
+
     }
+
 
     /**
     * updates order status
@@ -314,13 +317,49 @@ if(!class_exists('tracker_ajax')){
 
         wp_send_json(array(
           'POST' => $_POST,
-          'pdf' => $file,
+          'pdf'  => $file,
           'attachment_id' => $attachment_id,
         ));
       }
 
       wp_send_json( $file );
     }
+
+
+    public static function add_thumbnails_cb(){
+      require_once ABSPATH . 'wp-admin/includes/image.php';
+      require_once ABSPATH . 'wp-admin/includes/file.php';
+      require_once ABSPATH . 'wp-admin/includes/media.php';
+
+      $order_id = (int)$_POST['order_id'];
+      $order = wc_get_order($order_id);
+
+      $data = [];
+      $meta = $order->get_meta('_wfp_thumbnails')?: array();
+
+      foreach ($_FILES as $key => $file) {
+
+       $attachment_id = media_handle_upload( $key, 0 , array());
+
+        if(!is_a($attachment_id, 'WP_error')){
+          $key_pierces  = explode('_', $key);
+          $meta[(int)$key_pierces[1]] = array(
+            'attachment_id'    => $attachment_id,
+            'item_id'          => (int)$key_pierces[1],
+            'attachment_url'   => wp_get_attachment_image_url($attachment_id, 'wfp_image_thumbnail'),
+          );
+        }
+      }
+
+      if(!update_post_meta($order_id, '_wfp_thumbnails', $meta )){
+        add_post_meta($order_id, '_wfp_thumbnails', $meta );
+      }
+
+      wp_send_json(array(
+       'meta'  =>  $meta,
+      ));
+    }
+
 
     /**
     * undates uloaded images meta

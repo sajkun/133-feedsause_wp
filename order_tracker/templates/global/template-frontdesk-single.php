@@ -190,7 +190,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                       </div>
                     </div>
 
-                    <span class="note-block__show-more" v-on:click="enquery_notes_count = order_data.messages.enquery.length + 999" v-if="enquery_notes_count < computed_enquery_notes_count"> <i class="icon"></i> Show {{order_data.messages.enquery.length - 1}} more</span>
+                    <span class="note-block__show-more" v-on:click="enquery_notes_count = order_data.messages.enquery.length + 999" v-if="enquery_notes_count < computed_enquery_notes_count"> <i class="icon"></i> Show {{computed_enquery_notes_count - 1}} more</span>
                     <div class="spacer-h-20"></div>
                   </div>
 
@@ -498,7 +498,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                     </div>
                   </div>
 
-                  <span class="note-block__show-more" v-on:click="studio_notes_count = order_data.messages.studio.length + 9999" v-if="studio_notes_count < computed_studio_notes_count"> <i class="icon"></i> Show {{this.order_data.messages.studio.length - 1}} more</span>
+                  <span class="note-block__show-more" v-on:click="studio_notes_count = order_data.messages.studio.length + 9999" v-if="studio_notes_count < computed_studio_notes_count"> <i class="icon"></i> Show {{computed_studio_notes_count - 1}} more</span>
                   <div class="spacer-h-20"></div>
                 </div>
 
