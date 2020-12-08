@@ -44,12 +44,19 @@ if(!class_exists('tracker_ajax')){
       $order_status = str_replace('wc-', '', $_POST['order_status']);
       $order->set_status($order_status);
       $meta = $order->get_meta('_wfp_image');
+      $meta2 = $order->get_meta('_wfp_image_limit');
       $order->save();
 
       if($order->meta_exists('_wfp_image')){
         $order->update_meta_data('_wfp_image', $meta);
       }else{
         $order->add_meta_data('_wfp_image', $meta);
+      }
+
+      if($order->meta_exists('_wfp_image_limit')){
+        $order->update_meta_data('_wfp_image_limit', $meta2);
+      }else{
+        $order->add_meta_data('_wfp_image_limit', $meta2);
       }
 
       $order->save_meta_data();
@@ -400,13 +407,14 @@ if(!class_exists('tracker_ajax')){
         $add = add_post_meta($order_id, '_wfp_image', $meta);
       }
 
-      if(!update_post_meta($order_id, '_wfp_image_limit',$_POST['limit'])){
-        add_post_meta($order_id, '_wfp_image_limit',$_POST['limit']);
-      }
 
       $meta = get_post_meta($order_id, '_wfp_image', true);
 
       $order->save();
+
+      if(!update_post_meta($order_id, '_wfp_image_limit',$_POST['limit'])){
+        add_post_meta($order_id, '_wfp_image_limit',$_POST['limit']);
+      }
 
       if($order->meta_exists('_wfp_image')){
         $order->update_meta_data('_wfp_image', $meta);
