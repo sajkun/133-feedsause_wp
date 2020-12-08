@@ -2175,6 +2175,7 @@ Vue.component('single-studio-content', {
           vm.files_prepared  = {};
         })
       }else{
+        clog()
         Vue.nextTick(function(){
           vm.update_thumbs();
         })
@@ -2372,6 +2373,9 @@ Vue.component('single-studio-content', {
     },
 
     exec_upload: function(){
+      var vm = this;
+      vm.order_data.order_status = tracker_options.orders_misc.uploaded;
+
       popup_quality.visible = false;
       this.do_submit = true;
       var folder_name = 'order_' + this.order_data.order_id;
@@ -2382,8 +2386,6 @@ Vue.component('single-studio-content', {
           this.upload_file(path, file, folder);
         }
       }
-
-      clog(Object.values(this.files_to_load).length);
 
       if(Object.values(this.files_to_load).length == 0){
         this.collect_thumbs();
@@ -2444,7 +2446,6 @@ Vue.component('single-studio-content', {
       .always(function(e) {
         console.log(e);
       });
-
     },
 
     show_image_popup: function(data){
@@ -2468,7 +2469,6 @@ Vue.component('single-studio-content', {
     },
 
     show_image_loaded: function(dropbox_path){
-
       var data = JSON.stringify({
         "path": dropbox_path
       });
@@ -2702,9 +2702,10 @@ Vue.component('single-studio-content', {
     },
 
     update_wfp_meta: function(){
-      clog('update_wfp_meta');
-      block();
+      clog('update_wfp_meta', 'green');
       var vm = this;
+
+      block();
       var meta = vm.$children.filter(el=>{
         return 'undefined' !== typeof(el.files_uploaded);
       }).map(el => {
@@ -6187,12 +6188,6 @@ if(document.getElementById('studio-vue-app')){
       comment_count: function(){
         var comments_count = 0;
         var items = this.items;
-
-        // var _items = Object.values(items)
-        //               .map(function(e){
-        //                 return e.data.gallery.comments;
-        //               })
-        //               .filter(e => { return e > 0});
 
         var __items = Object.values(items).filter(e=>{
           if(!e.data.wfp_images){

@@ -39,11 +39,25 @@ if(!class_exists('tracker_ajax')){
     * updates order status
     */
     public static function save_order_status_cb(){
-      $order = wc_get_order($_POST['order_id']);
+      $order_id = $_POST['order_id'];
+      $order = wc_get_order($order_id);
       $order_status = str_replace('wc-', '', $_POST['order_status']);
       $order->set_status($order_status);
+      $meta = $order->get_meta('_wfp_image');
       $order->save();
-      wp_send_json($_POST);
+
+      if($order->meta_exists('_wfp_image')){
+        $order->update_meta_data('_wfp_image', $meta);
+      }else{
+        $order->add_meta_data('_wfp_image', $meta);
+      }
+
+      $order->save_meta_data();
+
+      wp_send_json(array(
+        'post' => $_POST,
+        'meta' => $meta,
+      ));
     }
 
 
@@ -98,7 +112,6 @@ if(!class_exists('tracker_ajax')){
       $order->set_status($_POST['data']['order_status']);
       $order_id = $order->get_id();
 
-
       $customer_id = $order->get_customer_id();
       $customer = new WC_Customer( $customer_id );
       $customer->set_billing_phone($_POST['data']['customer']['phone']);
@@ -124,7 +137,9 @@ if(!class_exists('tracker_ajax')){
     public static function create_new_order_cb(){
 
       $order       = wc_create_order();
+
       $user_id = isset($_POST['data']['customer']['user_id'])? (int)$_POST['data']['customer']['user_id'] : -1;
+
       $billing = isset($_POST['data']['customer']['billing'])? $_POST['data']['customer']['billing'] : array();
 
       // if a new user insert it
@@ -331,6 +346,8 @@ if(!class_exists('tracker_ajax')){
       require_once ABSPATH . 'wp-admin/includes/file.php';
       require_once ABSPATH . 'wp-admin/includes/media.php';
 
+      $o = duh()->get_options();
+
       $order_id = (int)$_POST['order_id'];
       $order = wc_get_order($order_id);
 
@@ -366,7 +383,11 @@ if(!class_exists('tracker_ajax')){
     */
     public static function update_images_cb(){
 
+      $o = duh()->get_options();
+
       $order_id = (int)$_POST['order_id'];
+      $order = wc_get_order( $order_id );
+      $order->set_status($o['orders_misc']['uploaded']);
 
       $meta = array_filter($_POST['meta'], function($el){
         return isset($el['files_uploaded']);
@@ -385,7 +406,14 @@ if(!class_exists('tracker_ajax')){
 
       $meta = get_post_meta($order_id, '_wfp_image', true);
 
-      $order = wc_get_order( $order_id );
+      $order->save();
+
+      if($order->meta_exists('_wfp_image')){
+        $order->update_meta_data('_wfp_image', $meta);
+      }else{
+        $order->add_meta_data('_wfp_image', $meta);
+      }
+      $order->save_meta_data();
 
       if($meta){
         $meta = array_values(array_filter($order->get_meta('_wfp_image'), function($el){
@@ -396,8 +424,7 @@ if(!class_exists('tracker_ajax')){
       wp_send_json(array(
         'post'   => $_POST,
         'meta'   => $meta,
-        'update' => $update,
-        'add'    => $add,
+        'o'    => $o,
       ));
     }
 

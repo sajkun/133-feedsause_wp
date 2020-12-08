@@ -55,7 +55,7 @@ if(!class_exists('theme_order_tracker')){
 
       $order_statuses_frontdesk = array_map(function($el){
         return array(
-        'color' => $el['text_color'],
+        'color' => $el['bg_color'],
         'title' => $el['name'],
         'slug'  => $el['slug'],
         );
