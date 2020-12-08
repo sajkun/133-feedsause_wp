@@ -339,7 +339,7 @@ if(!class_exists('tracker_ajax')){
 
       foreach ($_FILES as $key => $file) {
 
-       $attachment_id = media_handle_upload( $key, 0 , array());
+       $attachment_id = media_handle_upload( $key, 0, array());
 
         if(!is_a($attachment_id, 'WP_error')){
           $key_pierces  = explode('_', $key);
