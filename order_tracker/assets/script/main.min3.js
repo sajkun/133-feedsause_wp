@@ -6145,7 +6145,8 @@ if(document.getElementById('search-field')){
         .fail(function(e) {
           alert('Search Failed');
         })
-        .always(function() {
+        .always(function(e) {
+          console.log(e);
           unblock();
           elog();
         });

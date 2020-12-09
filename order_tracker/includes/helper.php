@@ -278,7 +278,7 @@ if(!class_exists('map_orders_cb')){
             'address_billing'   => str_replace('<br/>', PHP_EOL, $order->get_formatted_billing_address()),
             'address_shipping'  => str_replace('<br/>', PHP_EOL, $order->get_formatted_shipping_address()),
             'requested'         => $order->get_meta('_free_collection_date'),
-            'scheduled'         => get_field('collection-date', $order->get_id()),
+            'scheduled'         => get_field('collection-date', $order->get_id())?:'',
             'pdf'               =>  $pdf,
           ),
 

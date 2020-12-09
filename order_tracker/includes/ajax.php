@@ -444,10 +444,11 @@ if(!class_exists('tracker_ajax')){
       if($_POST['data']['user_id'] >= 0){
         $args = array(
           'numberposts' => -1,
-          'customer_id'  => $_POST['data']['user_id'],
+          'customer_id'  => (int)$_POST['data']['user_id'],
         );
 
         $items = array_map('map_orders',wc_get_orders($args));
+
       }else{
         $user_ids = array_map( function($el){
           return $el['user_id'];
@@ -464,9 +465,10 @@ if(!class_exists('tracker_ajax')){
       $filters = get_filter_data($items);
 
       wp_send_json( array(
-         'items'  => $items,
+         'items'   => $items,
          'filters' => $filters,
-         'post' => $_POST,
+         'post'    => $_POST,
+         'orders'    => wc_get_orders($args),
       ));
     }
 
