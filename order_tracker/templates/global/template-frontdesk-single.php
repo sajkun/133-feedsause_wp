@@ -360,6 +360,23 @@ if ( ! defined( 'ABSPATH' ) ) {
                 <div class="leads-block__row" v-if="order_data.product_collection.do_collect">
                   <table class="leads-block__data">
                     <tbody>
+                      <tr v-if="order_data.product_collection.address_billing">
+                        <td class="width-150">
+                          <span class="leads-block__label lh-18 no-margin">Billing <br> Address</span>
+                        </td>
+                        <td class="width-">
+                          <span class="leads-block__text">{{order_data.product_collection.address_billing}} </span>
+                        </td>
+                      </tr>
+                      <tr>
+                      <tr v-if="order_data.product_collection.address_shipping">
+                        <td class="width-150">
+                          <span class="leads-block__label lh-18 no-margin">Shipping <br> Address</span>
+                        </td>
+                        <td class="width-">
+                          <span class="leads-block__text">{{order_data.product_collection.address_shipping}} </span>
+                        </td>
+                      </tr>
                       <tr>
                         <td class="width-150">
                           <span class="leads-block__label no-margin">Address</span>

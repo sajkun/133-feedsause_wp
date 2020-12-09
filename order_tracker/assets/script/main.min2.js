@@ -1634,7 +1634,7 @@ Vue.component('frontdesk-item', {
 
       var multiplier = days / 5;
 
-      var due_date    = new Date(this.info.due_date.date);
+      var due_date    = new Date(this.info.due_date.date.replace(/\s/, 'T'));
       var today       = new Date();
       var diff = days - Math.floor((due_date.getTime() - today.getTime() )/ (1000*60*60*24));
 
@@ -1643,7 +1643,7 @@ Vue.component('frontdesk-item', {
       diff = diff <= 0 ? 1 : diff;
       diff = diff > 5? 5 : diff;
 
-      return diff;
+      return Math.floor(diff);
     },
   },
 
@@ -1771,6 +1771,23 @@ Vue.component('studio-item', {
       // }
       // return 0;
     },
+
+    _stage: function(){
+      var days = this.info.is_fasttrack ? parseInt(tracker_options.turnaround.fasttrack) : parseInt(tracker_options.turnaround.regular);
+
+      var multiplier = days / 5;
+
+      var due_date    = new Date(this.info.due_date.date.replace(/\s/, 'T'));
+      var today       = new Date();
+      var diff = days - Math.floor((due_date.getTime() - today.getTime() )/ (1000*60*60*24));
+
+      diff = diff > days ? days : diff;
+      diff = diff/multiplier;
+      diff = diff <= 0 ? 1 : diff;
+      diff = diff > 5? 5 : diff;
+
+      return Math.floor(diff);
+    },
   },
 
   mounted: function(){
@@ -1806,7 +1823,7 @@ Vue.component('studio-item', {
        <svg class="icon svg-icon-due"> <use xmlns:xlink="ttp://www.w3.org/1999/xlink" xlink:href="#svg-icon-due"></use> </svg>
        {{due_date}}
     </span>
-    <div class="col-6" v-bind:class="'stage'+info.stage">
+     <div class="col-6" v-bind:class="'stage'+_stage">
       <div class="order-preview__progress">
         <span></span>
         <span></span>

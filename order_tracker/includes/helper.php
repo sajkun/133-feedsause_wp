@@ -227,14 +227,13 @@ if(!class_exists('map_orders_cb')){
           'created_order' => $order->get_meta('_is_created_order'),
           'wfp_images'      =>  $wfp_images,
           'wfp_image_single' => $order->get_meta('_wfp_image_single'),
-          'wfp_thumbnails' => $order->get_meta('_wfp_thumbnails'),
+          'wfp_thumbnails'   => $order->get_meta('_wfp_thumbnails'),
           'shoot_started'    => $order->get_meta('_shoot_started')? 1 : 0,
-
-          'order_status'  =>  $order_status,
-          'is_fasttrack'  => $is_fasttrack,
-          'stage'         => 1,
-          'message_count' => (int)$order->get_meta('_message_count'),
-          'phone_count'   => (int)$order->get_meta('_phone_count') ,
+          'order_status'     =>  $order_status,
+          'is_fasttrack'     => $is_fasttrack,
+          'stage'            => 1,
+          'message_count'    => (int)$order->get_meta('_message_count'),
+          'phone_count'      => (int)$order->get_meta('_phone_count') ,
 
           'reminder' => $order->get_meta('_reminder')?: array(
             'date'           => '',
@@ -276,11 +275,11 @@ if(!class_exists('map_orders_cb')){
           'product_collection' => array(
             'do_collect' => !!$order->get_meta('collect-products'),
             'address'      => $order->get_meta('_collect_address'),
-
-            'requested'    => $order->get_meta('_free_collection_date'),
-
-            'scheduled'    => get_field('collection-date', $order->get_id()),
-            'pdf'    =>  $pdf,
+            'address_billing'   => str_replace('<br/>', PHP_EOL, $order->get_formatted_billing_address()),
+            'address_shipping'  => str_replace('<br/>', PHP_EOL, $order->get_formatted_shipping_address()),
+            'requested'         => $order->get_meta('_free_collection_date'),
+            'scheduled'         => get_field('collection-date', $order->get_id()),
+            'pdf'               =>  $pdf,
           ),
 
           'location' => array(

@@ -1,4 +1,4 @@
-<?php
+update_order_status_on_drag<?php
 if ( ! defined( 'ABSPATH' ) ) {
   exit; // Exit if accessed directly
 }

@@ -11225,6 +11225,10 @@ html {
   margin: 0 2px;
 }
 
+.leads-block__label.lh-18 {
+  line-height: 18px;
+}
+
 @media (min-width: 1170px) {
   .leads-block__label {
     margin: 0 10px 0 15px;

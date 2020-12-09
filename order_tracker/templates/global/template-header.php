@@ -9,8 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
       <div class="col-md-6 header-separator-margin">
         <div class="row row-h-80">
           <a href="<?php echo $home_url; ?>" class="logo beta">
-            <img src="<?php echo THEME_URL ?>/order_tracker/assets/images/logo.png" alt="">
-            <img src="<?php echo THEME_URL ?>/order_tracker/assets/images/beta.png" alt="">
+            <img src="<?php echo THEME_URL ?>/order_tracker/assets/images/hub-logo.svg" alt="">
           </a>
           <nav class="navigation">
             <?php if ($home_url && $can_see_frontdesk): ?>
