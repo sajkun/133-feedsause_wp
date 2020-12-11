@@ -25,8 +25,10 @@ if(!class_exists('tracker_ajax')){
       // save notes meta
       add_action('wp_ajax_save_notes', array($this, 'save_notes_cb'));
 
-      // get users by customer
+      // get orders by customer
       add_action('wp_ajax_get_orders_by_user', array($this, 'get_orders_by_user_cb'));
+
+      add_action('wp_ajax_get_order_by_number', array($this, 'get_order_by_number_cb'));
 
       add_action('wp_ajax_update_start_shoot', array($this, 'update_start_shoot_cb'));
 
@@ -331,15 +333,22 @@ if(!class_exists('tracker_ajax')){
 
       if(!isset($file['error'])){
 
-        $attachment_id = wp_insert_attachment(array(), $file['file_loaded']['thumb_upload_url']);
+        $attachment_id = wp_insert_attachment(array(), $file['file_loaded']['file']);
 
-        if(!update_post_meta($_POST['order_id'], 'attachments', $attachment_id)){
-            add_post_meta($_POST['order_id'], 'attachments', $attachment_id);
-        }
+        // $update  = update_post_meta($_POST['order_id'], 'postage-label', $attachment_id);
+
+        update_field('postage-label', $attachment_id, $_POST['order_id']);
+        // $add = false;
+
+        // if(!$update ){
+        //     // $add = add_post_meta($_POST['order_id'], 'postage-label', $attachment_id);
+        // }
 
         wp_send_json(array(
-          'POST' => $_POST,
-          'pdf'  => $file,
+          'POST'   => $_POST,
+          // 'add'    => $add,
+          // 'update' => $update,
+          'pdf'    => $file,
           'attachment_id' => $attachment_id,
         ));
       }
@@ -437,7 +446,7 @@ if(!class_exists('tracker_ajax')){
     }
 
     /**
-    * get order by passed user
+    * get order by user or users
     */
     public static function get_orders_by_user_cb(){
 
@@ -469,6 +478,31 @@ if(!class_exists('tracker_ajax')){
          'filters' => $filters,
          'post'    => $_POST,
          'orders'    => wc_get_orders($args),
+         'search_mode' => $POST['data']['search_mode'],
+      ));
+    }
+
+    /**
+    * get order by number
+    */
+
+    public static function get_order_by_number_cb(){
+      $order_id = (int)$_POST['data']['search_value'];
+      $order    = wc_get_order( $order_id );
+
+      if(!$order){
+        wp_send_json( array(
+           'error'   => 'Order #'.$order_id .' was not found',
+           'search_mode' => $_POST['data']['search_mode'],
+        ));
+      }
+
+      $items = array_map('map_orders',array($order));
+
+      wp_send_json( array(
+         'error'   => 0,
+         'item'    => $items[0],
+         'search_mode' => $_POST['data']['search_mode'],
       ));
     }
 

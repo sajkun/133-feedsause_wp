@@ -266,9 +266,12 @@ echo '<script type="text/x-template" id="studio-single-content">';
               :_comments = "get_comments_for_image(i)"
               :_files_uploaded = "file"
               :_is_old_order = "is_old_order"
+              :_is_single_order = "0"
               v-on:show_image = 'show_image_popup'
               v-on:file_changed = "update_files"
               v-on:change_thumbnail = "change_thumbnail"
+              v-on:delete_path_update = "delete_path_update"
+              v-on:toggle_free_paid = "toggle_free_paid_cb"
             ></upload-item-exists>
 
            <upload-item-exists
@@ -278,9 +281,11 @@ echo '<script type="text/x-template" id="studio-single-content">';
               :_comments = "[]"
               :_files_uploaded = "single_order_files"
               :_is_old_order = "1"
+              :_is_single_order = "1"
               v-on:show_image = 'show_image_popup'
               v-on:file_changed = "update_files"
               v-on:change_thumbnail = "change_thumbnail"
+              v-on:delete_path_update = "delete_path_update"
             ></upload-item-exists>
 
             <upload-item
@@ -294,6 +299,7 @@ echo '<script type="text/x-template" id="studio-single-content">';
               v-on:show_image = "show_image_popup"
               v-on:file_changed = "update_files"
               v-on:change_thumbnail = "change_thumbnail"
+              v-on:toggle_free_paid = "toggle_free_paid_cb"
             ></upload-item>
 
             <upload-item-blank

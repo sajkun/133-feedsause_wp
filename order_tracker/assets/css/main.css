@@ -6611,8 +6611,20 @@ html {
   margin-top: 20px;
 }
 
+#search-field .inner {
+  display: flex;
+  justify-content: space-between;
+}
+
+#search-field .icon-clear {
+  color: #f00;
+  cursor: pointer;
+  vertical-align: middle;
+}
+
 #search-field input {
-  width: calc(100% - 35px);
+  flex-basis: calc(100% - 55px);
+  width: calc(100% - 55px);
 }
 
 .gutters-5 {
@@ -10575,6 +10587,13 @@ html {
   vertical-align: -2px;
 }
 
+.order-preview__number {
+  color: #a4aab2;
+  font-family: "_HelveticaFont_", sans-serif;
+  font-size: 13px;
+  vertical-align: 1px;
+}
+
 .order-preview__progress {
   white-space: nowrap;
   text-align: right;
@@ -12624,11 +12643,80 @@ html {
   margin: 0 8px 20px;
   width: 210px;
   flex-basis: 210px;
-  height: 292px;
+  height: 340px;
   border-radius: 5px;
   border: 1px solid #e0e8f9;
   background-color: #ffffff;
   overflow: hidden;
+}
+
+.upload-item__footer {
+  border-top: 1px solid #e0e8f9;
+  padding: 9px 10px;
+  box-sizing: border-box;
+}
+
+.upload-item__footer .paid-free {
+  height: 28px;
+  width: 82px;
+  display: inline-block;
+  border-radius: 14px;
+  background-color: #e1e5f2;
+  color: #a1a3b2;
+  font-family: "_HelveticaFont_", sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 28px;
+  display: flex;
+  position: relative;
+  cursor: pointer;
+}
+
+.upload-item__footer .paid-free__marker {
+  z-index: 10;
+  position: absolute;
+  width: 50%;
+  height: 28px;
+  display: block;
+  border-radius: 14px;
+  background-color: #5769ff;
+  transition: all .3s;
+  left: 0;
+  top: 0;
+}
+
+.upload-item__footer .paid-free.active .paid-free__marker {
+  left: 50%;
+  background-color: #3cbf8a;
+}
+
+.upload-item__footer .paid-free .paid {
+  flex-basis: 50%;
+  display: block;
+  text-align: center;
+  color: #fff;
+  height: 100%;
+  transition: all .3s;
+  position: relative;
+  z-index: 20;
+}
+
+.upload-item__footer .paid-free .free {
+  transition: all .3s;
+  flex-basis: 50%;
+  display: block;
+  text-align: center;
+  position: relative;
+  z-index: 20;
+  color: #a1a3b2;
+}
+
+.upload-item__footer .paid-free.active .paid {
+  color: #a1a3b2;
+}
+
+.upload-item__footer .paid-free.active .free {
+  color: #fff;
 }
 
 .upload-item__thumb {

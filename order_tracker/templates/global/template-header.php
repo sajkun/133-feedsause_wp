@@ -35,13 +35,16 @@ if ( ! defined( 'ABSPATH' ) ) {
             <form action="#" method="POST" v-on:submit.prevent="exec_search">
               <div class="input-holder">
 
-                <input type="text" placeholder="Search Hub..."
-                 v-model="value"
-                 autocomplete="off"
-                 >
-                <button>
-                  <svg class="icon svg-icon-search"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-search"></use> </svg>
-                </button>
+                <div class="inner">
+                  <input type="text" placeholder="Search Hub..."
+                   v-model="value"
+                   autocomplete="off"
+                   >
+                  <i class="icon-clear" v-if="value" v-on:click="value=''">×</i>
+                  <button>
+                    <svg class="icon svg-icon-search"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-search"></use> </svg>
+                  </button>
+                </div>
 
                 <div class="input-holder__dropdown visuallyhidden" ref="dropdown" v-show="users_found.length > 0">
                   <ul class="input-holder__list">
@@ -73,7 +76,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 
                 <div class="input-holder__dropdown">
                    <ul class="input-holder__list">
-                    <li><a href="<?php echo admin_url('options-general.php?page=duh_tracker_settings');?>">Settings</a></li>
+                    <?php if ($is_frontdesk): ?>
+                    <li><a target="_blank" href="<?php echo admin_url('edit.php?post_type=shop_order');?>">WooCommerce Orders</a></li>
+                    <?php endif ?>
+
+                    <li><a href="<?php echo admin_url('options-general.php?page=duh_tracker_settings');?>" target="_blank">Settings</a></li>
                     <li><a href="<?php echo wp_logout_url(HOME_URL); ?>">Logout</a></li>
                   </ul>
                 </div>

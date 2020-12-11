@@ -203,11 +203,10 @@ if(!class_exists('map_orders_cb')){
         }
       }
 
-      $attachment_id = get_post_meta($this->order_id, 'attachments', true);
+      $attachment_id = get_post_meta($this->order_id, 'postage-label', true);
 
-      // $pdf = !!$attachment_id?  array(wp_get_attachment_url((int)$attachment_id)) : array();
+      $pdf = !!$attachment_id?  array(wp_get_attachment_url((int)$attachment_id)) : array();
 
-      $pdf = array();
       $wfp_images = $order->get_meta('_wfp_image');
 
       if($wfp_images){
@@ -655,7 +654,6 @@ if(!function_exists('exec_upload_file')){
     // global $upload_exeptions;
 
     $upload_exeptions = array(
-      'error' => array(),
       'success' => array(),
       'info' => array(),
     );
@@ -704,7 +702,7 @@ if(!function_exists('exec_upload_file')){
         throw new Exception('Wrong file extension. Tried to upload <b>' . $file['type'] . '</b> file. Only jpg, jpeg, png, pdf are allowed');
       }
 
-      add_filter('upload_dir', 'my_upload_dir');
+      // add_filter('upload_dir', 'my_upload_dir');
 
       $file_loaded = wp_handle_upload( $file, $overrides );
 
@@ -712,32 +710,12 @@ if(!function_exists('exec_upload_file')){
          throw new Exception('Failed to load. '. $file_loaded['error']);
       }
 
-
-      $p = explode('/', $file_loaded['file']);
-      $file_name = end($p);
-      $file_name_parts = explode('.', $file_name);
-      $file_resolution = end($file_name_parts);
-      $file_resolution_check = strtolower($file_resolution);
-
-      if($file['type'] === 'image/png' || $file['type'] === 'image/jpg' || $file['type'] === 'image/jpeg'  ){
-        $search     = '.'.$file_resolution;
-        $replace    = '_thumb.'.$file_resolution;
-        $thumb_name = str_replace($search, $replace, $file_name);
-        $upload_file_path = str_replace($file_name, $thumb_name, $file_loaded['file']);
-
-        // create_thmb( $file_loaded ['file'], $upload_file_path );
-        $file_loaded['thumb_upload_url'] = str_replace($dir['basedir'], '', $upload_file_path);
-      } else {
-        $file_loaded['thumb_upload_url'] = THEME_URL. '/images/'. $file_resolution .'-icon.png';
-      }
-
-      remove_filter('upload_dir', 'my_upload_dir');
+      // remove_filter('upload_dir', 'my_upload_dir');
 
       $upload_exeptions['success'][] = 'Upload of the file ' . $file['name'] . ' was completed successfully';
 
 
       return array(
-        'file' => $file,
         'file_loaded' => $file_loaded,
       ) ;
     } catch(Exception $ex){
@@ -758,7 +736,7 @@ if(!function_exists('my_upload_dir')){
   */
   function my_upload_dir($upload) {
 
-    $upload['subdir'] = '/documents' . $upload['subdir'];
+    $upload['subdir'] = $upload['subdir'];
 
     $upload['path']   = $upload['basedir'] . $upload['subdir'];
 

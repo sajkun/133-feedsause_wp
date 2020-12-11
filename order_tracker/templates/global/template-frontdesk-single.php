@@ -418,6 +418,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                           <a :href="url" class="pdf-link" target="_blank">
                             <img src="<?php echo THEME_URL ?>/order_tracker/assets/images/pdf.png" alt="">
                           </a>
+                          <div class="spacer-h-10"></div>
                         </td>
                       </tr>
                       <tr v-if="order_data.product_collection.pdf.length == 0">
