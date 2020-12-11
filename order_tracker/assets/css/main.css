@@ -12776,6 +12776,10 @@ html {
   overflow: auto;
 }
 
+.upload-item_blank .upload-item__body {
+  height: 272px;
+}
+
 .upload-item__scroll {
   max-height: 100%;
   overflow: auto;
@@ -13026,6 +13030,10 @@ html {
 
 .upload-item .download-cta__text .marked {
   color: #3396ff;
+}
+
+.upload-item_blank .download-cta {
+  height: 266px;
 }
 
 .upload-item .highlight {

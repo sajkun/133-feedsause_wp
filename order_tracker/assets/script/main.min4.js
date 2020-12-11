@@ -3236,6 +3236,7 @@ Vue.component('upload-item', {
       files          : [],
       files_uploaded : [],
       show_comments  : false,
+      is_single_order  : false,
     };
   },
 
@@ -3248,6 +3249,7 @@ Vue.component('upload-item', {
     '_comments',
     '_files_uploaded',
     '_files',
+    '_is_single_order',
   ],
 
   beforeMount: function(){
@@ -3256,9 +3258,10 @@ Vue.component('upload-item', {
     this.files_uploaded = typeof(this._files_uploaded) !== 'undefined' ?this._files_uploaded : this.files_uploaded  ;
     this.files = this._files;
     this.item_id = this._item_id;
+    this.is_single_order = this._is_single_order;
 
     var item = this.$parent.order_data.wfp_images[this.item_id];
-    this.is_free = 'undefined' != typeof(item.is_free) && item.is_free == 1;
+    this.is_free = 'undefined' != typeof(item) && item.is_free == 1;
   },
 
   mounted: function(){
@@ -3692,7 +3695,7 @@ Vue.component('upload-item-blank', {
   },
 
   template: `
-    <div class="upload-item">
+    <div class="upload-item upload-item_blank">
       <div class="upload-item__header">
         <div class="upload-item__state">
           <span class="number">{{blank_number}} </span>
