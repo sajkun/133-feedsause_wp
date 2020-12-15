@@ -4083,7 +4083,8 @@ Vue.component('user-select', {
               return obj.name === vm.current_user ;
             }
           );
-          return user_data[0].gravatar;
+
+          return typeof(user_data[0]) != 'undefined'? user_data[0].gravatar : '';
 
           default:
             var user_data = vm.all_users.filter(
@@ -4091,7 +4092,7 @@ Vue.component('user-select', {
                 return obj.name === vm.current_user ;
               }
             );
-            return user_data[0].gravatar;
+            return typeof(user_data[0]) != 'undefined'? user_data[0].gravatar : '';
             break;
         }
       }
@@ -5219,13 +5220,7 @@ if(document.getElementById('single-frontdesk-order')){
         if('undefined' !== typeof(image.archive_url)){
           return image.archive_url;
         }
-        if('undefined' !== typeof(image.files_uploaded)){
-         var img = image.files_uploaded.filter(e=>{
-            return 'undefined' !== e['image_url'] && e['image_url'];
-          })
-
-         return img[0].image_url;
-        }
+        clog(this.order_data);
         return '';
       },
 

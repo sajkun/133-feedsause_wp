@@ -575,8 +575,17 @@ if ( ! defined( 'ABSPATH' ) ) {
               <div class="hr"></div>
 
               <div class="leads-block__row">
-                <div class="row gutters-20-15 justify-between">
-                  <div class="col-4" v-for="(image, key) in order_data.wfp_images" :key="key">
+                <div class="row gutters-20-15 justify-between" v-if="order_data.wfp_thumbnails">
+                  <div class="col-4" v-for="(image, key) in order_data.wfp_thumbnails" :key="'image_preview_'+key">
+                    <div class="gallery-item">
+                      <img :src="image.attachment_url" alt="">
+                    </div>
+                    <div class="spacer-h-20"></div>
+                  </div><!-- col-4 -->
+                </div><!-- row gutters-20-15 justify-between -->
+
+                <div class="row gutters-20-15 justify-between" v-else>
+                  <div class="col-4" v-for="(image, key) in order_data.wfp_images" :key="'image_preview_'+key">
                     <div class="gallery-item">
                       <img :src="get_image_url(image)" alt="">
                     </div>
