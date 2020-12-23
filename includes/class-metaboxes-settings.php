@@ -291,6 +291,24 @@ class velesh_theme_meta{
     $date1 = get_post_meta($post->ID, '_free_collection_date', true);
     $date2 = get_post_meta($post->ID, '_self_shipping_date', true);
 
+    $active_methods   = array();
+    $shipping_methods = WC()->shipping()->get_shipping_methods();
+    foreach ( $shipping_methods as $id => $shipping_method ) {
+      if ( isset( $shipping_method->enabled ) && 'yes' === $shipping_method->enabled ) {
+        $active_methods[ $id ] = array(
+          'title'      => $shipping_method->get_method_title(),
+          'instance_id' => $shipping_method->get_instance_id() ,
+        );
+      }
+    }
+    $order = wc_get_order($post->ID);
+    clog($order->get_shipping_methods());
+
+    foreach ($order->get_shipping_methods() as $key => $m) {
+      clog($m->get_data());
+      clog($m->get_instance_id());
+    }
+    clog($active_methods);
 
     $date = false;
 

@@ -122,7 +122,6 @@ class velesh_init_theme{
    * @hookedto - wp_enqueue_scripts 999
    */
   public function enqueue_scripts_styles_front(){
-
     wp_enqueue_script('jquery-ui-core');
 
     wp_enqueue_script('jquery-ui-datepicker');
@@ -248,6 +247,7 @@ class velesh_init_theme{
    */
   public function init_hooks(){
 
+
     add_action('plugins_loaded', array($this, 'exec_on_plugins_load'));
 
     // /* js and css hooks for the frontend*/
@@ -257,10 +257,6 @@ class velesh_init_theme{
     add_action('wp_enqueue_scripts', array($this,'prepare_template_data'),9992);
 
     add_action('wp_enqueue_scripts', array($this,'inline_custom_data'), 9990);
-
-    // add_action('wp_enqueue_scripts', array($this,'merge_all_scripts'), 9999);
-
-    // add_action('wp_enqueue_scripts', array($this,'merge_all_styles'), 9995);
 
     add_action('do_theme_after_head', array($this,'print_theme_inline_styles'), 9999);
 
@@ -677,235 +673,11 @@ class velesh_init_theme{
   }
 
 
-  public function merge_all_styles(){
-
-    if(is_admin()) return;
-
-    do_action('theme_before_merge_styles');
-
-     if(function_exists('is_checkout')){
-        if(is_checkout() || is_cart() ){
-          return;
-        }
-     }
-
-    if(isset($_GET['elementor-preview'])) return;
-
-
-    global $wp_styles;
-    global $footer_inline_style;
-    $footer_inline_style = '';
-    $merged_file_location = get_stylesheet_directory() . DIRECTORY_SEPARATOR . 'merged-style2.css';
-    $wp_styles->all_deps($wp_styles->queue);
-
-    $merged_style    = '';
-    $exclude         = array();
-
-    $print_in_footer = array(
-      'font-awesome',
-      'select2-style',
-      'elementor-icons',
-      'contact-form-7',
-    );
-
-    $to_do = $wp_styles->to_do;
-
-    $must_have = array(
-      'elementor-common',
-      'elementor-frontend',
-      'admin-bar',
-      'dashicons',
-    );
-
-    foreach ($must_have as $key => $s) {
-      if(!in_array($s, $to_do)){
-        $to_do[] = $s;
-      }
-    }
-
-    // if(!file_exists($merged_file_location)):
-
-      foreach ( $to_do  as $key => $handle) {
-        if(!isset($wp_styles->registered[$handle])) continue;
-
-         $src = strtok($wp_styles->registered[$handle]->src, '?');
-
-        if (strpos($src, 'http') !== false) {
-          $site_url = site_url();
-
-          if (strpos($src, $site_url) !== false)
-            $css_file_path = str_replace($site_url, '', $src);
-          else
-            $css_file_path = $src;
-          $css_file_path = ltrim($css_file_path, '/');
-        } else {
-          $css_file_path = ltrim($src, '/');
-        }
-
-      if(file_exists($css_file_path)):
-          $style          = file_get_contents($css_file_path);
-          $style_location = dirname($css_file_path);
-          $search_reg     = '/url\(\.{0,2}\/[-a-zA-Z0-9@:%_\+.~#?&\/\/=]{2,256}/';
-          $search_path    = '/\.\.\\//';
-
-          preg_match_all($search_reg, $style, $matches);
-
-          if(count($matches[0])> 0){
-            foreach ($matches[0] as $key => $m) {
-              preg_match_all($search_path, $m, $counts);
-              $location_array = explode('/', $style_location);
-              $length         = count( $location_array ) - count($counts[0]);
-              $location_array = array_slice($location_array, 0 ,$length );
-              $new_url        = implode('/', $location_array);
-              $search         = str_replace('url(', '', $m);
-              $url            = str_replace('../', '', $search);
-              $abs_url        = esc_url(site_url(). '/' . $new_url . '/'. $url);
-              $style          = str_replace($search, $abs_url, $style);
-            }
-          }
-
-
-          if(in_array($handle,  $print_in_footer )){
-            $footer_inline_style .=  minify_css($style);
-          }else{
-            $merged_style .= minify_css($style);
-          }
-        endif;
-      }
-
-
-    $footer_inline_style_new = str_replace('@font-face{', '@font-face{ font-display: swap;', $footer_inline_style);
-
-     $search_reg = '/@font-face\s*{([\s\S]*?)}/';
-     preg_match_all($search_reg, $footer_inline_style, $fontface);
-
-     $search_name = '/font-family\s*([\s\S]*?);/';
-
-     foreach ($fontface[0] as $key => $font) {
-       preg_match_all($search_name, $font, $fontfamily);
-       $fontname = str_replace(':','', $fontfamily[1][0]);
-       $replace   = 'src: local(\''. $fontname.'\'),';
-       $footer_inline_style_new = str_replace('src:', $replace , $footer_inline_style_new );
-     }
-
-
-    $footer_inline_style = ( $footer_inline_style_new )?  $footer_inline_style_new :  $footer_inline_style;
-
-
-    file_put_contents ($merged_file_location , $merged_style);
-
-    wp_enqueue_style( 'merged_style', get_stylesheet_directory_uri() .'/merged-style2.css', THEME_VERSION );
-
-    $inline_style = '';
-
-    foreach( $to_do as $handle ) {
-      if(!in_array($handle, $exclude)){
-        if(WP_Styles()->print_inline_style($handle, false)){
-          $inline_style .= minify_css(WP_Styles()->print_inline_style($handle, false));
-        }
-
-        wp_deregister_style($handle);
-      }
-    }
-    printf('<style>%s</style>', $inline_style );
-
-    global $wp_styles;
-  }
-
-
   public function print_styles_in_footer(){
     global $footer_inline_style;
     printf('<style>%s</style>', $footer_inline_style );
   }
 
-
-  /**
-   * merges all javascripts into 1 and puts file into a theme folder
-   *
-   * @hookedto - wp_enqueue_scripts 9999
-   */
-  public function merge_all_scripts(){
-
-   if(is_admin() || is_customize_preview()) return;
-
-   do_action('theme_before_merge_scrypts');
-
-   if(isset($_GET['elementor-preview'])) return;
-
-   global $post;
-
-   if(function_exists('is_checkout')){
-      if(is_checkout() || is_cart() || is_product()){
-        return;
-      }
-   }
-
-    $do_not_merge = get_post_meta($post->ID, '_merge_scipt');
-
-    if($do_not_merge  == "1"){
-      return false;
-    }
-
-    global $wp_scripts;
-
-    $wp_scripts->all_deps($wp_scripts->queue);
-
-
-    $merged_file_location = get_stylesheet_directory() . DIRECTORY_SEPARATOR . 'merged-script2.js';
-
-    $merged_script = array();
-
-
-    // $exclude = array('jquery', 'jquery-core');
-
-
-    // if(!file_exists($merged_file_location)):
-
-      foreach( $wp_scripts->to_do as $handle) {
-
-      if(!in_array($handle, $exclude)){
-
-        $src = strtok($wp_scripts->registered[$handle]->src, '?');
-
-        if (strpos($src, 'http') !== false) {
-          $site_url = site_url();
-
-          if (strpos($src, $site_url) !== false)
-            $js_file_path = str_replace($site_url, '', $src);
-          else
-            $js_file_path = $src;
-          $js_file_path = ltrim($js_file_path, '/');
-        } else {
-          $js_file_path = ltrim($src, '/');
-        }
-
-        if (file_exists($js_file_path)) {
-          $localize = '';
-          if (@key_exists('data', $wp_scripts->registered[$handle]->extra)) {
-            $localize = $wp_scripts->registered[$handle]->extra['data'] . ';';
-          }
-          $merged_script[] = $localize;
-          $merged_script[] = file_get_contents($js_file_path);
-        }
-      }
-     }
-
-     $merged_script = implode(PHP_EOL,$merged_script);
-
-      file_put_contents ($merged_file_location , $merged_script);
-
-    // endif;
-
-    wp_enqueue_script('merged-script', get_stylesheet_directory_uri() . '/merged-script2.js', array(), '',  true);
-
-    foreach( $wp_scripts->to_do as $handle ) {
-      if(!in_array($handle, $exclude)){
-        wp_deregister_script($handle);
-      }else{
-      }
-    }
-    global $wp_scripts;
-  }
 
   public static function add_cors_http_header(){
     header("Access-Control-Allow-Origin: *");

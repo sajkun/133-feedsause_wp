@@ -145,9 +145,6 @@ if(!class_exists('tracker_ajax')){
     */
     public static function create_new_order_cb(){
 
-      for($i = 0; $i < 1000; $i++){
-
-
       $order       = wc_create_order();
 
       $user_id = isset($_POST['data']['customer']['user_id'])? (int)$_POST['data']['customer']['user_id'] : -1;
@@ -317,11 +314,12 @@ if(!class_exists('tracker_ajax')){
       save_order_meta($order);
       $order->save_meta_data();
       $order->save();
-      }
 
       $data = get_item_for_tracker($order->get_id());
 
       wp_send_json(array(
+        'post' => $_POST,
+        'post2' =>  $_POST['data']['order']['addons']['sendvia']['name'],
         'order_data' => $data['data'],
         'user_id'    => $user_id,
         'order_id'   => $order->get_id(),

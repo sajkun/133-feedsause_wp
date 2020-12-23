@@ -436,6 +436,12 @@ if(!class_exists('map_orders_cb')){
           'name'  => in_array('Returning product', $order_addons)? 'Returning Product' : 'Hold Products',
           'price' =>  in_array('Returning product', $order_addons)? _wc_price(wc_get_product($this->return_product_id)->get_regular_price()) : _wc_price(0),
         ),
+
+        'sendvia' => array(
+          'title' => 'Send Via',
+          'price' => _wc_price(0),
+          'name'  => $order->get_shipping_method()?: $order->get_meta('_sendvia'),
+        ),
       );
 
       $addons = array_merge($addons , $coupons );
@@ -560,6 +566,7 @@ if(!function_exists('save_order_meta')){
 
       '_collection_address'      => $_POST['data']['product_collection']['address'],
       '_free_collection_date'    => $_POST['data']['product_collection']['requested'],
+      '_sendvia'    => isset($_POST['data']['order']['addons']['sendvia']['name'])? $_POST['data']['order']['addons']['sendvia']['name'] : '',
       'collection-date'          => $_POST['data']['product_collection']['scheduled'],
       '_shoot_started'           => isset($_POST['data']['shoot_started'])? $_POST['data']['shoot_started'] : 0,
     );

@@ -840,7 +840,7 @@ class theme_content_output{
               $currency_countries = get_currency_countries();
 
               ?>
-              <?php if ($o['items']):
+              <?php if (isset($o['items'])):
                 $items = $o['items'];
               ?>
               <div class="select-imitation__value" >

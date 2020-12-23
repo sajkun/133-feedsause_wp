@@ -167,6 +167,9 @@ function is_boolean(val){
     case 'number':
       return !!parseInt(val);
       break;
+    case 'undefined':
+      return false;
+      break;
   }
 }
 jQuery(document).on('click', '.mobile-menu-switcher', function(){
@@ -179,58 +182,6 @@ jQuery(document).on('click', '.site-container', function(e){
     jQuery('.mobile-menu-switcher').removeClass('active');
     jQuery('.menu-holder').removeClass('shown');
   }
-})
-
-// jQuery('.navigation__item').click(function(e) {
-//   e.preventDefault();
-
-//   var href = jQuery(this).attr('href')
-
-//   if(history.pushState) {
-//       history.pushState(null, null, href);
-//   }
-//   else {
-//       location.hash = target;
-//   }
-//   jQuery(this).addClass('active').siblings('a').removeClass('active');
-
-//   // if(location.hash == '#studio'){
-//   //   frontdesk_list.visible = false;
-//   //   filters.visible = false;
-//   //   frontdesk_order.visible = false;
-//   //   frontdesk_order_new.visible = false;
-
-//   //   studio_app.visible.filters = true;
-//   //   studio_app.visible.columns = true;
-//   // }else{
-//   //   filters.visible = true;
-//   //   frontdesk_list.visible = true;
-//   //   studio_app.visible.filters = false;
-//   //   studio_app.visible.columns = false;
-//   // }
-// });
-
-jQuery(document).ready(function(){
-  if(location.hash == '#studio'){
-    jQuery('.navigation__item').removeClass('active');
-    jQuery('.studio-link').addClass('active');
-  }else{
-    jQuery('.frontdesk-link').addClass('active');
-  }
-
-  // if(location.hash == '#studio'){
-  //   frontdesk_list.visible = false;
-  //   filters.visible = false;
-  //   frontdesk_order.visible = false;
-  //   frontdesk_order_new.visible = false;
-  //   studio_app.visible.filters = true;
-  //   studio_app.visible.columns = true;
-  // }else{
-  //   filters.visible = true;
-  //   frontdesk_list.visible = true;
-  //   studio_app.visible.filters = false;
-  //   studio_app.visible.columns = false;
-  // }
 })
 jQuery(document).ready(function(){
   init_date_range();
@@ -641,14 +592,16 @@ var fds_order = {
           return el.show == '1';
         });
 
-        notes.sort(function (a, b){
-          var date_a = new Date(a._date);
-          var date_b = new Date(a._date);
-          if(date_a == date_b){
-            return 0;
-          }
-          return date_b > date_a ? 1 : -1;
-        });
+        if(this.enquery_notes_count <=1){
+          notes.sort(function (a, b){
+            var date_a = new Date(a._date.replace(/\s/, 'T'));
+            var date_b = new Date(a._date.replace(/\s/, 'T'));
+            if(date_a == date_b){
+              return 0;
+            }
+            return date_b > date_a ? 1 : -1;
+          });
+        }
 
         return notes.splice(0, this.enquery_notes_count);
       },
@@ -665,14 +618,17 @@ var fds_order = {
           return el.show == '1';
         });
 
+       if(this.studio_notes_count <=1){
         notes.sort(function (a, b){
-          var date_a = new Date(a._date);
-          var date_b = new Date(a._date);
+          var date_a = new Date(a._date.replace(/\s/, 'T'));
+          var date_b = new Date(a._date.replace(/\s/, 'T'));
           if(date_a == date_b){
             return 0;
           }
           return date_b > date_a ? 1 : -1;
         });
+
+      }
 
         return notes.splice(0, this.studio_notes_count);
       },
@@ -691,8 +647,8 @@ var fds_order = {
         };
 
         var fmt  = new DateFormatter();
-        var date = new Date(this.order_data.due_date.date);
-        var today = new Date()
+        var date = new Date(this.order_data.due_date.date.replace(/\s/, 'T'));
+        var today = new Date();
 
         due_date.value = fmt.formatDate(date, 'd F Y');
 
@@ -857,6 +813,7 @@ var fds_order = {
           clog('update_order')
           this.order_was_changed = true;
         }
+
         if(key != 'core'){
           this.order_data[key][data.name] = data['val'];
         }else{
@@ -991,7 +948,7 @@ var fds_order = {
       },
     },
 }
-var get_set_props = {
+get_set_props = {
   methods: {
     /**
     * update prop
@@ -1030,7 +987,8 @@ var get_set_props = {
 }
 var list_filter_mixin = {
   data:{
-    shifts:{}
+    shifts:{},
+    show_number: false,
   },
 
   beforeMount: function(){
@@ -1044,6 +1002,15 @@ var list_filter_mixin = {
     //filters items according to selected filters
     filtered_items: function(){
       var vm = this;
+
+      // show only numbers
+      if(this.show_number){
+        var items = this.items.filter(item => {
+          return item.order_id.toString().indexOf(this.show_number) >= 0;
+        });
+
+        return items;
+      }
 
       var items = this.items.filter(item => {
         validated = true;
@@ -1078,7 +1045,7 @@ var list_filter_mixin = {
           comments_count =  0;
         }else{
           comments_count = comments_data.filter(e=>{
-            return typeof(e.request) != 'undefined';
+            return typeof(e.request) != 'undefined' && e.is_active == 0;
           }).map(
           e=>{return e.request.length}
           ).reduce((a, b) => a + b, 0);
@@ -1117,6 +1084,8 @@ var list_filter_mixin = {
       if(typeof(filters) !== 'undefined'){
         filters.update_prop('due_count', _items.length);
       }
+
+
       return items;
     },
 
@@ -1199,6 +1168,15 @@ var list_filter_mixin = {
         this.shifts[data.slug].length += this.items_by_load;
       }
     },
+
+
+    may_be_add_item: function(item){
+      var may_be_item = this.get_item_by('order_id', item.order_id);
+
+      if(!may_be_item){
+        this.items.push(item);
+      }
+    },
   }
 }
 var upload_pdf_mixin = {
@@ -1210,22 +1188,24 @@ var upload_pdf_mixin = {
   methods:{
     update_pdf: function(event){
       for(var file of event.target.files){
+        this.order_was_changed = true;
         this.file_name = file.name;
         this.files = file;
       }
     },
 
     upload_pdf:function(){
-     var vm = this;
-     if(!vm.files){
-       return;
-     }
+      var vm = this;
+      if(!vm.files){
+        clog('no files to upload');
+        return;
+      }
 
       if('undefined' !== typeof(this.order_was_changed )){
         this.order_was_changed = true;
       }
 
-     var fd   = new FormData();
+      var fd   = new FormData();
       fd.append('pdf', vm.files);
       fd.append('action', 'upload_pdf');
       fd.append('order_id', vm.order_data.order_id);
@@ -1238,34 +1218,134 @@ var upload_pdf_mixin = {
         data: fd,
       })
 
-      .success(function(e) {
+      .done(function(e) {
         var item = frontdesk_list.get_item_by('order_id', vm.order_data.order_id);
         item.data.product_collection.pdf.push(e.pdf.file_loaded.url);
+        vm.order_data.product_collection.pdf.push(e.pdf.file_loaded.url);
       })
-      .always(function(){
+
+      .always(function(e){
+        slog('upload pdf', 'blue');
+        clog(e);
+        elog();
         vm.files = '';
       });
     },
   }
 }
 var upload_item_mixin = {
+
+  data: function(){
+    return {
+      is_free: 0,
+    };
+  },
+
+  watch:{
+    _number: function(val){
+      this.number =  val < 10? '0'+val: val;
+    },
+
+    _item_id: function(val){
+      clog('_item_id' + val);
+      this.item_id = val;
+      this.$emit('file_changed', {files: this.files, number: this.number, item_id:this.item_id, thumbs_file: this.thumbs_file});
+    },
+
+    _files_uploaded: function(val){
+      if(typeof(val) !== 'undefined'){
+        this.thumbnail =   tracker_url[0]+"/assets/images/blank.svg";
+        this.thumbs_file = false;
+        this.files_uploaded =  val;
+      }
+    },
+
+    files: function(){
+      this.$el.classList.remove('error');
+      this.$emit('file_changed', {files: this.files, number: this.number, item_id:this.item_id, thumbs_file: this.thumbs_file});
+    },
+  },
+
   computed: {
+    files_to_show_ready: function(){
+      if(this.show_comments && this.has_comment){
+        return [];
+      };
+
+      return this.files_uploaded;
+    },
+
+    files_to_show:function(){
+      if(this.show_comments && this.has_comment){
+        return [];
+      }
+
+      var files = [];
+
+      var counter = 0;
+
+      for(file_id in this.files){
+        var file = this.files[file_id];
+        var image_id = file.name + '_' + this.number + '_' + counter;
+        image_id = image_id.replace(' ', '');
+        var data = {
+          name : file.name,
+          size : file.size,
+          state: 'ready to load',
+          image_id : image_id,
+        };
+
+        this.files[file_id].image_id = image_id;
+
+        files.push(data);
+        counter++;
+      }
+
+
+      return files;
+    },
+
+    parsed_comments: function(){
+      if(!this.show_comments){
+        return [];
+      }
+      var comments = this.comments.sort(function(a,b){
+        var date_a = new Date(a.date);
+        var date_b = new Date(b.date);
+        return date_b - date_a;
+      });
+
+      return comments;
+    },
+
+    has_files: function(){
+      return this.files.length > 0 || this.files_uploaded.length > 0;
+    },
+
+    has_comment: function(){
+      return this.comments.length > 0;
+    },
+
+    exec_show_comments: function(){
+      return this.show_comments && this.has_comment;
+    },
+
+
     this_state: function(){
 
-      slog('item: #' + strip(this.item_id) + ' data', 'red');
-
-      clog('files_uploaded: ' , 'blue');
-      clog(strip(this.files_uploaded));
-      clog('files: ' , 'blue');
-      clog(strip(this.files));
 
       var wfp_data = typeof(this.$parent.order_data.wfp_images) !== 'undefined' && typeof(this.$parent.order_data.wfp_images[this.item_id]) !== 'undefined' ? strip(this.$parent.order_data.wfp_images[this.item_id]) : [];
 
       wfp_data = (this.$parent.order_data.wfp_image_single)? strip(this.$parent.order_data.wfp_image_single) : wfp_data;
 
-      clog('wfp_data: ' , 'blue');
-      clog(wfp_data);
-      elog();
+      // slog('item: #' + strip(this.item_id) + ' data', 'red');
+      // clog('files_uploaded: ' , 'blue');
+      // clog(strip(this.files_uploaded));
+      // clog('files: ' , 'blue');
+      // clog(strip(this.files));
+      // clog('wfp_data: ' , 'blue');
+      // clog(wfp_data);
+      // elog();
 
       if(this.files.length == 0 &&  this.files_uploaded.length == 0){
         return 'Upload';
@@ -1287,7 +1367,7 @@ var upload_item_mixin = {
         return 'In Review';
       }
 
-      return 'Test';
+      return '';
     },
 
     is_downloaded: function(){
@@ -1308,10 +1388,203 @@ var upload_item_mixin = {
   },
 
   methods:{
+    toggle_free_paid_cb: function(){
+      this.is_free = 1 - this.is_free;
+      this.$emit('toggle_free_paid', {'item_id': this.item_id, is_free: this.is_free});
+    },
+
+
+    get_state: function(){
+      return this.this_state;
+    },
+
     get_state_slug: function(state){
       state = state.replace(' ', '-');
       return state.toLowerCase();
-    }
+    },
+
+    /**
+    * calculates date and return it in formatted view
+    *
+    * @param d - string 'Y-m-d H:i:s'
+    *
+    * @return string
+    */
+    date: function(d){
+      var date = new Date(d);
+      var fmt  = new DateFormatter();
+      return fmt.formatDate(date, 'M d, H:i');
+
+    },
+
+     delete_image: function(data){
+      if(this.is_old_order){
+        alert('this order can be edited only in WordPress dashboard');
+        return;
+      }
+      var file_id = this.files.findIndex(e=>{
+      return e.image_id == data.image_id})
+      this.files.splice(file_id, 1);
+    },
+
+    delete_image_loaded: function(data){
+      if(this.is_old_order){
+        alert('this order can be edited only in WordPress dashboard');
+        return;
+      }
+
+      if(this.is_downloaded){
+        alert("You can't delete downloaded image");
+        return;
+      }
+
+      var file_id = this.files_uploaded.findIndex(e=>{
+        return e.path == data.dropbox_path
+      });
+
+      slog('delete exist item');
+
+      clog(file_id);
+      clog(data);
+
+      this.files_uploaded.splice(file_id, 1);
+      this.$emit('delete_path_update', data);
+
+      elog();
+    },
+
+
+    /**
+    * handles drop image in drag-n-drop area
+    *
+    * @param e - event
+    */
+    handledrop: function(e){
+      let dt = e.dataTransfer;
+      let files = dt.files;
+      var items = dt.items;
+
+      for(var file of files){
+        if(file.type != 'image/jpeg' && file.type != "image/png"){
+          continue;
+        }
+
+        this.files.push(file);
+      }
+    },
+
+    /**
+    * adds highlight style for drag area
+    */
+    highlight: function(e) {
+      this.$refs.drop_area.classList.add('highlight')
+    },
+
+    init_drop_area: function(){
+      var dropArea = this.$refs.drop_area;
+
+      if(this.is_old_order){
+        return;
+      }
+
+      if(this.is_downloaded){
+        return;
+      }
+
+      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, this.prevent_defaults, false)
+      });
+
+      ['dragenter', 'dragover'].forEach(eventName => {
+        dropArea.addEventListener(eventName, this.highlight, false)
+      })
+
+      ;['dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, this.unhighlight, false)
+      })
+
+      dropArea.addEventListener('drop', this.handledrop, false);
+    },
+
+    prevent_defaults: function(e) {
+      e.preventDefault()
+      e.stopPropagation()
+    },
+
+    /**
+    * shows preview of a passed file
+    *
+    * @param file - file
+    *
+    * @return void;
+    */
+    preview_file: function(file) {
+      let reader = new FileReader()
+      reader.readAsDataURL(file)
+      var vm = this;
+      reader.onloadend = function() {
+        let img = document.createElement('img')
+        img.src = reader.result
+        vm.$emit('show_image',{img: img});
+      }
+
+    },
+
+    show_image: function(data){
+      var image = this.files.filter(
+        e => {
+          return e.image_id === data.image_id
+        });
+
+      this.preview_file(image[0]);
+    },
+
+    show_image_loaded: function(data){
+
+      if(data.image_url){
+        var img = "<img src='"+data.image_url+"'>"
+        this.$emit('show_image',{img: img});
+        return;
+      }
+
+      var data = JSON.stringify({
+        "path": data.dropbox_path
+      });
+
+      var xhr = new XMLHttpRequest();
+
+      xhr.addEventListener("readystatechange", function () {
+        if (this.readyState === 4) {
+          slog('show_image_loaded', 'blue')
+          clog(JSON.parse(this.responseText));
+          elog();
+        }
+      });
+
+      xhr.open("POST", "https://api.dropboxapi.com/2/files/get_temporary_link", false);
+      xhr.setRequestHeader("authorization", "Bearer "+ dropbox.token);
+      xhr.setRequestHeader("content-type", "application/json");
+      xhr.setRequestHeader("cache-control", "no-cache");
+      xhr.send(data);
+
+      var response = JSON.parse(xhr.responseText);
+      var img = "<img src='"+response.link+"'>"
+      this.$emit('show_image',{img: img});
+    },
+
+    upload_from_input: function(event){
+      for(var file of event.target.files){
+        if(file.type != 'image/jpeg' && file.type != "image/png"){
+          continue;
+        }else{
+          this.files.push(file);
+        }
+      }
+    },
+
+    unhighlight: function(e) {
+      this.$refs.drop_area.classList.remove('highlight')
+    },
   },
 };
 var column_mixin = {
@@ -1422,6 +1695,89 @@ var column_mixin = {
     },
   },
 }
+var upload_item_thumb = {
+  data: function(){
+    return{
+      thumbnail       : tracker_url[0]+"/assets/images/blank.svg",
+      thumbs_file     : false,
+      thumbs_image_id : -1,
+    }
+  },
+
+  watch:{
+    thumbs_file: function(val){
+      if(!val){
+        return;
+      }
+
+      let reader = new FileReader()
+      reader.readAsDataURL(val)
+
+      var vm = this;
+      reader.onloadend = function() {
+        vm.thumbnail = reader.result;
+      }
+    },
+  },
+
+
+  methods:{
+    upload_from_input_thumb: function(event){
+      this.$refs.thumb.classList.remove('error');
+      var files = [];
+      for(var file of event.target.files){
+        if(file.type != 'image/jpeg' && file.type != "image/png"){
+          // alert('wrong file type, only png or jpeg allowed');
+          continue;
+        }
+        files.push(file);
+      }
+
+      let reader = new FileReader()
+      reader.readAsDataURL(files[0])
+
+      var vm = this;
+      reader.onloadend = function() {
+        vm.thumbnail = reader.result;
+      }
+
+      this.thumbs_file = files[0];
+
+      this.$emit('change_thumbnail', {item_id: this.item_id})
+    },
+  }
+};
+var get_item = {
+  methods: {
+    /**
+    * gets item data by provided value
+    *
+    * @param key - string - key inside searching item object
+    * @param value - mixed - the value to be searched by
+    *
+    * @return item object
+    */
+    get_item_by: function(key, value){
+      var item = this.items.filter(obj => {
+        return obj.data[key] === value
+      });
+
+      return item[0];
+    },
+
+    /**
+    * gets index of item among this.items
+    *
+    * @param key - string - key inside searching item object
+    * @param value - mixed - the value to be searched by
+    *
+    * @return item index, integer
+    */
+    get_index_of_item_by: function(key, value){
+      return this.items.map(function(e) { return e[key]; }).indexOf(value);
+    },
+  }
+};
 var frontdesk_list,
     frontdesk_order,
     frontdesk_order_new,
@@ -1435,7 +1791,7 @@ var frontdesk_list,
     popup_address_billing,
     search_field,
     popup_studio_errors,
-    popup_quality,
+    get_set_props,
     popup_shoot
 ;
 
@@ -1547,6 +1903,7 @@ var blank_order = {order_id:      '',
       location: {
         unit: '',
         comment: '',
+        box: '',
       },
 
       studio:{
@@ -1588,6 +1945,10 @@ Vue.component('frontdesk-item', {
 
   props:['_info'],
 
+  mounted:function(){
+    clog(this.info);
+  },
+
   computed: {
     is_fasttrack: function(){
       return this.info.is_fasttrack;
@@ -1606,7 +1967,7 @@ Vue.component('frontdesk-item', {
 
       var multiplier = days / 5;
 
-      var due_date    = new Date(this.info.due_date.date);
+      var due_date    = new Date(this.info.due_date.date.replace(/\s/, 'T'));
       var today       = new Date();
       var diff = days - Math.floor((due_date.getTime() - today.getTime() )/ (1000*60*60*24));
 
@@ -1615,7 +1976,7 @@ Vue.component('frontdesk-item', {
       diff = diff <= 0 ? 1 : diff;
       diff = diff > 5? 5 : diff;
 
-      return diff;
+      return Math.floor(diff);
     },
   },
 
@@ -1641,12 +2002,12 @@ Vue.component('frontdesk-item', {
   },
 
   template: `<div class="order-preview" :title="info.name" v-on:click="open_order(info.order_id)">
-  <div class="row">
-    <div class="col-8">
+  <div class="row no-gutters">
+    <div class="col-6">
       <span class="order-preview__name">{{info.name}}</span>
       <svg class="icon svg-icon-fastrack" v-if="is_fasttrack"> <use xmlns:xlink="ttp://www.w3.org/1999/xlink" xlink:href="#svg-icon-fastrack"></use> </svg>
     </div>
-    <div class="col-4 text-right">
+    <div class="col-6 text-right">
       <svg class="icon svg-icon-bell" v-bind:class="{'green': !is_overdue }" v-if="info.reminder.date"><use xmlns:xlink="ttp://www.w3.org/1999/xlink" xlink:href="#svg-icon-bell"></use> </svg>
 
       <i class="icon-with-popup blue">
@@ -1658,6 +2019,8 @@ Vue.component('frontdesk-item', {
       <svg class="icon svg-icon-email" v-bind:class="{'green': info.message_count > 0}" > <use xmlns:xlink="ttp://www.w3.org/1999/xlink" xlink:href="#svg-icon-email"></use> </svg>
        <span class="counter" v-if="info.message_count > 0">{{info.message_count}}</span>
       </i>
+
+      <span class="order-preview__number">#{{info.order_id}}</span>
     </div>
   </div><!-- row -->
   <div class="spacer-h-10"></div>
@@ -1734,7 +2097,7 @@ Vue.component('studio-item', {
 
       // if(typeof(wfp_images) == 'array'){
         var count = wfp_images.filter(e=>{
-          return typeof(e.request) != 'undefined';
+          return typeof(e.request) != 'undefined' &&  e.is_active == 0;
         }).map(
         e=>{return e.request.length}
         ).reduce((a, b) => a + b, 0);
@@ -1742,6 +2105,23 @@ Vue.component('studio-item', {
         return count;
       // }
       // return 0;
+    },
+
+    _stage: function(){
+      var days = this.info.is_fasttrack ? parseInt(tracker_options.turnaround.fasttrack) : parseInt(tracker_options.turnaround.regular);
+
+      var multiplier = days / 5;
+
+      var due_date    = new Date(this.info.due_date.date.replace(/\s/, 'T'));
+      var today       = new Date();
+      var diff = days - Math.floor((due_date.getTime() - today.getTime() )/ (1000*60*60*24));
+
+      diff = diff > days ? days : diff;
+      diff = diff/multiplier;
+      diff = diff <= 0 ? 1 : diff;
+      diff = diff > 5? 5 : diff;
+
+      return Math.floor(diff);
     },
   },
 
@@ -1756,18 +2136,20 @@ Vue.component('studio-item', {
   },
 
   template: `<div class="order-preview" :title="info.name" v-on:click="open_order(info.order_id)">
-  <div class="row">
-    <div class="col-8">
+  <div class="row no-gutters">
+    <div class="col-6">
       <span class="order-preview__name">{{info.name}}</span>
       <svg class="icon svg-icon-fastrack" v-if="is_fasttrack"> <use xmlns:xlink="ttp://www.w3.org/1999/xlink" xlink:href="#svg-icon-fastrack"></use> </svg>
     </div>
-    <div class="col-4 text-right">
+    <div class="col-6 text-right">
       <svg class="icon svg-icon-bell" v-bind:class="{'green': !is_overdue}" v-if="info.reminder.date"><use xmlns:xlink="ttp://www.w3.org/1999/xlink" xlink:href="#svg-icon-bell"></use> </svg>
 
       <i class="icon-with-popup" v-if="comments_count > 0">
       <svg class="icon svg-icon-comment"> <use xmlns:xlink="ttp://www.w3.org/1999/xlink" xlink:href="#svg-icon-comment"></use> </svg>
         <span class="counter" v-if="info.gallery.comments > 0">{{info.gallery.comments}}</span>
       </i>
+
+      <span class="order-preview__number">#{{info.order_id}}</span>
 
     </div>
   </div><!-- row -->
@@ -1778,7 +2160,7 @@ Vue.component('studio-item', {
        <svg class="icon svg-icon-due"> <use xmlns:xlink="ttp://www.w3.org/1999/xlink" xlink:href="#svg-icon-due"></use> </svg>
        {{due_date}}
     </span>
-    <div class="col-6" v-bind:class="'stage'+info.stage">
+     <div class="col-6" v-bind:class="'stage'+_stage">
       <div class="order-preview__progress">
         <span></span>
         <span></span>
@@ -1816,29 +2198,34 @@ Vue.component('single-studio-content', {
       studio_notes_count:  1,
       show_popup_preview: false,
       files_to_load :{},
+      thumbs_to_load :false,
       files_prepared:{},
       do_submit: false,
+      state_changed : false,
+      delete_paths: [],
     };
   },
 
   computed:{
-
     computed_studio_notes: function(){
       var notes = this.order_data.messages.studio.filter(el => {
         return el.show == '1';
       });
 
-      notes.sort(function (a, b){
-        var date_a = new Date(a._date);
-        var date_b = new Date(a._date);
-        if(date_a == date_b){
-          return 0;
-        }
-        return date_b > date_a ? 1 : -1;
-      });
+      if(this.studio_notes_count <= 1){
+        notes.sort(function (a, b){
+          var date_a = new Date(a._date.replace(/\s/, 'T'));
+          var date_b = new Date(a._date.replace(/\s/, 'T'));
+          if(date_a == date_b){
+            return 0;
+          }
+          return date_b > date_a ? 1 : -1;
+        });
+      }
 
       return notes.splice(0, this.studio_notes_count);
     },
+
 
     computed_studio_notes_count: function(){
       var shown = this.order_data.messages.studio.map(el=>{
@@ -1847,12 +2234,14 @@ Vue.component('single-studio-content', {
       return shown.reduce((a, b) => a + b, 0);
     },
 
+
     turnaround: function(){
       data = this.order_data.order.addons.filter(e=>{
         return e.title == 'Turnaround';
       });
       return  'undefined' !== typeof(data[0])? data[0].name: 'Not defined';
     },
+
 
     /**
     * return data about current order status
@@ -1877,6 +2266,7 @@ Vue.component('single-studio-content', {
       return data[0];
     },
 
+
     /**
     * return formatted date when photos should be ready
     *
@@ -1888,7 +2278,7 @@ Vue.component('single-studio-content', {
         return '-';
       }
 
-      var date = new Date(this.order_data.due_date.date);
+      var date = new Date(this.order_data.due_date.date.replace(/\s/, 'T'));
       var fmt  = new DateFormatter();
       return fmt.formatDate(date, 'D d M');
     },
@@ -1904,7 +2294,7 @@ Vue.component('single-studio-content', {
       }
 
       var today = new Date();
-      var due_date = new Date(this.order_data.due_date.date);
+      var due_date = new Date(this.order_data.due_date.date.replace(/\s/, 'T'));
       var diffTime = due_date - today;
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
@@ -1923,7 +2313,20 @@ Vue.component('single-studio-content', {
     * @return integer or '-' if no or 0 photos
     */
     number_of_photos: function(){
-      var already_set = this.order_data.wfp_images.length;
+      var already_set = 0;
+
+      var already_set_images = this.order_data.wfp_images;
+
+      if(already_set_images){
+        switch(typeof(this.order_data.wfp_images)){
+          case 'object':
+            already_set = Object.values(this.order_data.wfp_images).length
+            break;
+          case 'array':
+            already_set = this.order_data.wfp_images.length
+            break;
+        }
+      }
 
       return Math.max(this.number_of_photos_bought, already_set);
     },
@@ -1979,6 +2382,10 @@ Vue.component('single-studio-content', {
                           image_url: typeof(image.archive_url) != 'undefined'? image.archive_url.replace('?dl-1', '?dl-0') : '',
                           archive_url: typeof(image.archive_url) != 'undefined'? image.archive_url.replace('?dl-1', '?dl-0') : '',
                         };
+            if('undefined' == typeof(files[image_id])){
+              files[image_id] = [];
+            }
+
             files[image_id].push(file);
           }else if(typeof(image.files_uploaded) == 'undefined'){
             file = [];
@@ -1999,6 +2406,9 @@ Vue.component('single-studio-content', {
                       request  : typeof(image.request)   != 'undefined'? image.request : '',
                     };
               if(image.image_url || image.path){
+               if('undefined' == typeof(files[image_id])){
+                  files[image_id] = [];
+               }
                files[image_id].push(file);
               }
             }
@@ -2021,7 +2431,6 @@ Vue.component('single-studio-content', {
       if(this.wfp_image_single){
         return [];
       }
-
       var files_to_load =  this.files_prepared;
       var values = Object.values(files_to_load);
       return values;
@@ -2085,7 +2494,9 @@ Vue.component('single-studio-content', {
     },
 
     shoot_started: function(){
-      return this.order_data.order_status == tracker_options['orders_misc']['shoot'] || this.order_data.shoot_started;
+      var shoot_started = this.order_data.order_status == tracker_options['orders_misc']['shoot'] || this.order_data.shoot_started;
+
+      return shoot_started;
     },
 
     show_start_shoot_btn: function(){
@@ -2099,12 +2510,33 @@ Vue.component('single-studio-content', {
     },
 
     files_to_load_exist: function(){
-      return Object.values(this.files_to_load).length > 0;
+      var files_to_load = this.files_to_load;
+      var thumbs_to_load = this.thumbs_to_load;
+      var state_changed = this.state_changed;
+
+      files_to_load = Object.values(this.files_to_load).filter(e=>{ return e.length > 0;});
+      return files_to_load.length > 0 || thumbs_to_load || state_changed;
     }
   },
 
   watch: {
     visible: function(val){
+        var vm = this;
+      if(!val){
+        Vue.nextTick(function(){
+          vm.show_popup_preview = false;
+          vm.do_submit = false;
+          vm.studio_notes_count  = 1;
+          vm.thumbs_to_load  = false;
+          vm.state_changed  = false;
+          vm.files_to_load   = {};
+          vm.files_prepared  = {};
+        })
+      }else{
+        Vue.nextTick(function(){
+          vm.update_thumbs();
+        })
+      }
     },
 
     studio_note_text:function(){
@@ -2114,7 +2546,7 @@ Vue.component('single-studio-content', {
   },
 
   mounted: function(){
-
+    this.update_thumbs();
   },
 
   mixins: [get_set_props, animation_mixin],
@@ -2153,6 +2585,31 @@ Vue.component('single-studio-content', {
       this.save_notes();
     },
 
+    update_thumbs: function(){
+      var data = [];
+
+      if('undefined'!== typeof(this.order_data.wfp_thumbnails)){
+        data = strip(this.order_data.wfp_thumbnails);
+      }
+
+      var children = (this.$children).filter(e => {
+        return e.constructor.options.name == 'upload-item-exists' || e.constructor.options.name == 'upload-item'});
+
+      for( var child of children){
+        var item_id = child.item_id;
+
+        if('undefined' !== typeof(data[item_id])){
+          child.thumbnail       = data[item_id].attachment_url;
+          child.thumbs_image_id = data[item_id].attachment_id;
+          child.thumbs_file = false;
+        }else{
+          child.thumbs_file = false;
+          child.thumbnail       =  tracker_url[0]+"/assets/images/blank.svg";
+          child.thumbs_image_id =  -1;
+        }
+      }
+    },
+
     get_index_prepared: function(id){
       return this.files_uploaded.length + id;
     },
@@ -2176,6 +2633,10 @@ Vue.component('single-studio-content', {
         vm.visible = false;
       })
 
+    },
+
+    change_thumbnail: function(){
+      this.thumbs_to_load = true;
     },
 
     /**
@@ -2209,6 +2670,17 @@ Vue.component('single-studio-content', {
       block();
       var vm = this;
 
+      if( studio_app.filter_values.team.indexOf(logged_in_user.name) < 0){
+        studio_app.filter_values.team.push(logged_in_user.name);
+      }
+
+      var item = vm.$parent.get_item_by('order_id',  vm.order_data.order_id);
+      item.data.studio.creator = logged_in_user.name;
+      item.data.studio.creator = logged_in_user.name;
+      item.data.filters.team.push(logged_in_user.name);
+      vm.order_data.studio.creator = logged_in_user.name;
+      vm.order_data.filters.team.push(logged_in_user.name);
+
       Vue.nextTick(function(){
         jQuery.ajax({
           url: WP_URLS.ajax,
@@ -2217,6 +2689,7 @@ Vue.component('single-studio-content', {
           data: {
             action: 'update_start_shoot',
             order_id:  vm.order_data.order_id,
+            logged_in_user:  logged_in_user,
           },
         })
        .done(function(e){
@@ -2236,14 +2709,13 @@ Vue.component('single-studio-content', {
           }
         })
         .always(function(e) {
-
-          clog(e);
           unblock();
         });
       });
     },
 
     do_upload: function(){
+
       if(!this.files_to_load_exist){
         return;
       }
@@ -2254,11 +2726,14 @@ Vue.component('single-studio-content', {
         return;
       }
 
-      popup_shoot.visible = true;
+      popup_quality.visible = true;
     },
 
     exec_upload: function(){
-      popup_shoot.visible = false;
+      var vm = this;
+      vm.order_data.order_status = tracker_options.orders_misc.uploaded;
+
+      popup_quality.visible = false;
       this.do_submit = true;
       var folder_name = 'order_' + this.order_data.order_id;
 
@@ -2268,6 +2743,16 @@ Vue.component('single-studio-content', {
           this.upload_file(path, file, folder);
         }
       }
+
+      if(Object.values(this.files_to_load).length == 0){
+        this.collect_thumbs();
+
+        if(this.state_changed){
+          this.update_wfp_meta();
+        }
+      }
+
+      this.exec_delete_paths();
     },
 
     /**
@@ -2324,7 +2809,6 @@ Vue.component('single-studio-content', {
       .always(function(e) {
         console.log(e);
       });
-
     },
 
     show_image_popup: function(data){
@@ -2341,14 +2825,13 @@ Vue.component('single-studio-content', {
 
         jQuery('.image-preview-popup__inner').width(width);
         jQuery('.image-preview-popup__inner').height(height);
-      })
+      });
 
       Vue.nextTick(function(){
-      })
+      });
     },
 
     show_image_loaded: function(dropbox_path){
-
       var data = JSON.stringify({
         "path": dropbox_path
       });
@@ -2374,19 +2857,25 @@ Vue.component('single-studio-content', {
     },
 
     update_files: function(data){
+      slog('update_files', 'green')
       this.$set(this.files_to_load, data.item_id, data.files);
+
       var count = 0;
 
       for(var i in this.files_to_load){
         count += this.files_to_load[i].length;
       }
 
+      clog(' this.do_submit: ' +  this.do_submit);
+
       if(count === 0 && this.do_submit){
         var vm = this;
         Vue.nextTick(function(){
+          vm.collect_thumbs();
           vm.update_wfp_meta();
         })
       }
+      elog();
     },
 
     update_files_blank: function(data){
@@ -2395,7 +2884,6 @@ Vue.component('single-studio-content', {
     },
 
     upload_file: function(path, file,folder_id){
-
       var parent = this.$children.filter(
         e => {
           return typeof(e.item_id) !== 'undefined' && e.item_id == parseInt(folder_id);
@@ -2423,6 +2911,8 @@ Vue.component('single-studio-content', {
 
       xhr.addEventListener("readystatechange", function () {
         if (this.readyState === 4) {
+
+          clog('file was loaded', 'green');
           var data = JSON.parse(this.responseText);
 
           parent[0].files_uploaded.push({
@@ -2467,7 +2957,56 @@ Vue.component('single-studio-content', {
       valid = true;
       errors = [];
 
-      valid = this.number_of_photos >  this.watch_files_prepared.length + this.files_uploaded.length ? false : valid;
+      /**
+      * validate thumbs
+      */
+      var thumbs = this.get_thumbs();
+      var thumbs_parsed = thumbs.filter(e=>{ return e.thumbs_image_id > 0 || !!e.thumbs_file});
+
+      if(thumbs.length !== thumbs_parsed.length){
+        errors.push('You need to set up all thumbnails');
+        valid = false;
+      }
+
+      // validate by items uploaded
+      var childs_no_images = this.get_upload_childs().filter(e=> {
+        var _return =  e.files.length == 0 && e.files_uploaded.length == 0;
+
+        if(_return){
+          e.$el.classList.add('error');
+        }else{
+          e.$el.classList.remove('error');
+        }
+
+        return _return;
+      });
+
+      if(childs_no_images.length > 0){
+        valid = false;
+        errors.push('Every image container should have fotos uploaded');
+      }
+      //validate review
+
+      var childs_in_review = this.get_upload_childs().filter(e=>{
+        var state = e.get_state();
+        var error =  state == 'In Review' && e.files.length == 0;
+        if(error){
+          e.$el.classList.add('error');
+        }else{
+          e.$el.classList.remove('error');
+        }
+        return error;
+      });
+
+      if(childs_in_review.length > 0){
+        valid = false;
+        errors.push('You must update all images in Review');
+      }
+
+      // validate by items count
+       var files_prepared = this.watch_files_prepared.filter(e => {return e.length > 0})
+
+       valid = this.number_of_photos >  files_prepared.length + this.files_uploaded.length ? false : valid;
 
       return {
         valid: valid,
@@ -2480,20 +3019,106 @@ Vue.component('single-studio-content', {
 
       if(!validate.valid){
         unblock();
+        var files_prepared = this.watch_files_prepared.filter(e => {return e.length > 0})
         popup_studio_errors.errors = validate.errors;
         popup_studio_errors.visible = true;
         popup_studio_errors.images_to_show = this.number_of_photos;
-        popup_studio_errors.images_uploaded = this.watch_files_prepared.length + this.files_uploaded.length;
+        popup_studio_errors.images_uploaded = files_prepared.length + this.files_uploaded.length;
       }
 
       return validate.valid;
     },
 
-    update_wfp_meta: function(){
+    get_upload_childs: function(){
+      var childs = (this.$children).filter(e => {
+        return e.constructor.options.name == 'upload-item-exists' || e.constructor.options.name == 'upload-item'}).filter(e=>{
+          if(!e.thumbs_file && e.thumbs_image_id < 0){
+            e.$refs.thumb.classList.add('error');
+          }else{
+            e.$refs.thumb.classList.remove('error');
+          }
+          return e});
+
+        return childs;
+    },
+
+    get_thumbs: function(){
       var vm = this;
-      var meta = vm.$children.filter(el=>{
+      var child = this.get_upload_childs();
+
+       var images = child.map(e=>{
+
+
+        return {
+                  'item_id'         :  e.item_id,
+                  'thumbs_image_id' :  e.thumbs_image_id,
+                  'thumbs_file'     :  e.thumbs_file,
+                }
+      });
+
+      return images;
+    },
+
+    collect_thumbs: function(){
+
+      if(!this.thumbs_to_load){
+        return;
+      }
+
+      block();
+      var vm = this;
+      var childs = (this.$children).filter(e => {return e.constructor.options.name == 'upload-item-exists' || e.constructor.options.name == 'upload-item'}).filter(e=>{ return e.thumbs_file});
+
+      var fd   = new FormData();
+      var images = childs.map(e=>{
+
+        if('undefined' !== typeof(fd)){
+          fd.append('thumb_'+e.item_id, e.thumbs_file);
+        }
+
+        return JSON.stringify({
+                  'item_id'         : e.item_id,
+                  'thumbs_image_id' : e.thumbs_image_id,
+                  'thumbs_file'     :  e.thumbs_file,
+                })
+      });
+
+      fd.append('action', 'add_thumbnails');
+      fd.append('order_id', this.order_data.order_id);
+
+
+      jQuery.ajax({
+        url: WP_URLS.ajax,
+        type: 'POST',
+        processData: false,
+        contentType: false,
+        data: fd,
+      })
+
+      .done(function(e){
+        if('undefined' != typeof(e.meta)){
+          vm.order_data.wfp_thumbnails = e.meta;
+          vm.update_thumbs();
+        }
+      })
+
+      .always(function(e){
+        console.log(e);
+        vm.thumbs_to_load = false;
+        unblock();
+      });
+    },
+
+    update_wfp_meta: function(){
+      slog('update_wfp_meta', 'green');
+      var vm = this;
+
+      block();
+      var meta = vm.get_upload_childs().filter(el=>{
+        console.log(el.files_uploaded);
         return 'undefined' !== typeof(el.files_uploaded);
       }).map(el => {
+
         var file_uploaded = el.files_uploaded.map(e=>{
           var url;
           if('undefined' !== e.archive_url && e.archive_url){
@@ -2518,13 +3143,14 @@ Vue.component('single-studio-content', {
           request         :  el.comments,
           was_downloaded  : 'undefined' !== typeof(was_downloaded) ?  was_downloaded : 0,
           is_active       : 1,
-
+          is_free         : is_boolean(el.is_free)? 1 : 0,
         };
 
         return meta;
       })
 
-      block();
+      clog(meta);
+      elog();
 
       jQuery.ajax({
         url: WP_URLS.ajax,
@@ -2542,14 +3168,60 @@ Vue.component('single-studio-content', {
         vm.files_prepared = {},
         vm.order_data.wfp_images     = e.meta;
       })
+
       .fail(function() {
       })
+
       .always(function(e) {
         unblock();
         vm.do_submit = false;
-        console.log(e);
+        vm.state_changed = false;
+        vm.update_thumbs();
+        slog('update_wfp_meta reuslt', 'green')
+        clog(e);
+        elog();
       });
     },
+
+    get_item_visibility: function(id){
+      var file          = this.watch_files_prepared[id];
+      var files_uploaded = this.files_uploaded[this.get_index_prepared(id)];
+
+
+      return ('undefined' != typeof(file) && file.length > 0) || ('undefined' != typeof(files_uploaded) && files_uploaded.length > 0);
+    },
+
+
+    delete_path_update: function(data){
+      this.delete_paths.push(data.dropbox_path);
+    },
+
+    exec_delete_paths:function(){
+      for(var path of this.delete_paths){
+        var data = JSON.stringify({
+          "path": path
+        });
+
+        var xhr = new XMLHttpRequest();
+
+        xhr.addEventListener("readystatechange", function () {
+          if (this.readyState === 4) {
+            console.log(JSON.parse(this.responseText));
+          }
+        });
+
+        xhr.open("POST", "https://api.dropboxapi.com/2/files/delete_v2");
+        xhr.setRequestHeader("authorization", "Bearer " + dropbox.token);
+        xhr.setRequestHeader("content-type", "application/json");
+        xhr.setRequestHeader("cache-control", "no-cache");
+
+        xhr.send(data);
+      }
+    },
+
+    toggle_free_paid_cb: function(data){
+      this.state_changed = true;
+    }
   },
 
   template: '#studio-single-content',
@@ -2564,10 +3236,11 @@ Vue.component('upload-item', {
       files          : [],
       files_uploaded : [],
       show_comments  : false,
+      is_single_order  : false,
     };
   },
 
-  mixins: [upload_item_mixin],
+  mixins: [upload_item_mixin, upload_item_thumb],
 
   props : [
     '_item_id',
@@ -2576,72 +3249,8 @@ Vue.component('upload-item', {
     '_comments',
     '_files_uploaded',
     '_files',
+    '_is_single_order',
   ],
-
-  computed:{
-    has_comment: function(){
-      return this.comments.length > 0;
-    },
-
-    exec_show_comments: function(){
-      return this.show_comments && this.has_comment;
-    },
-
-    parsed_comments: function(){
-      if(!this.show_comments){
-        return [];
-      }
-      var comments = this.comments.sort(function(a,b){
-        var date_a = new Date(a.date);
-        var date_b = new Date(b.date);
-        return date_b - date_a;
-      });
-
-      return comments;
-    },
-
-    has_files: function(){
-      return this.files.length > 0 || this.files_uploaded.length > 0;
-    },
-
-    files_to_show_ready: function(){
-      if(this.show_comments && this.has_comment){
-        return [];
-      };
-
-      return this.files_uploaded;
-    },
-
-    files_to_show:function(){
-      if(this.show_comments && this.has_comment){
-        return [];
-      }
-
-      var files = [];
-
-      var counter = 0;
-
-      for(file_id in this.files){
-        var file = this.files[file_id];
-        var image_id = file.name + '_' + this.number + '_' + counter;
-        image_id = image_id.replace(' ', '');
-        var data = {
-          name : file.name,
-          size : file.size,
-          state: 'ready to load',
-          image_id : image_id,
-        };
-
-        this.files[file_id].image_id = image_id;
-
-        files.push(data);
-        counter++;
-      }
-
-
-      return files;
-    },
-  },
 
   beforeMount: function(){
     this.number =  this._number < 10? '0' + this._number : this._number;
@@ -2649,6 +3258,10 @@ Vue.component('upload-item', {
     this.files_uploaded = typeof(this._files_uploaded) !== 'undefined' ?this._files_uploaded : this.files_uploaded  ;
     this.files = this._files;
     this.item_id = this._item_id;
+    this.is_single_order = this._is_single_order;
+
+    var item = this.$parent.order_data.wfp_images[this.item_id];
+    this.is_free = 'undefined' != typeof(item) && item.is_free == 1;
   },
 
   mounted: function(){
@@ -2667,217 +3280,9 @@ Vue.component('upload-item', {
     }, false);
   },
 
-  watch :  {
-    _number: function(val){
-      this.number =  val < 10? '0'+val: val;
-    },
+  watch :  {},
 
-    _item_id: function(val){
-      this.item_id = val;
-    },
-
-    _files_uploaded: function(val){
-      if(typeof(val) !== 'undefined'){
-        this.files_uploaded =  val;
-      }
-    },
-
-    files_uploaded: function(val){},
-
-    show_comments: function(show){
-    },
-
-    files: function(){
-      this.$emit('file_changed', {files: this.files, number: this.number, item_id:this.item_id});
-    },
-  },
-
-  methods: {
-
-    /**
-    * calculates date and return it in formatted view
-    *
-    * @param d - string 'Y-m-d H:i:s'
-    *
-    * @return string
-    */
-    date: function(d){
-      var date = new Date(d);
-      var fmt  = new DateFormatter();
-      return fmt.formatDate(date, 'M d, H:i');
-
-    },
-
-    delete_image: function(data){
-      var file_id = this.files.findIndex(e=>{
-      return e.image_id == data.image_id})
-      this.files.splice(file_id, 1);
-    },
-
-    delete_image_loaded: function(data){
-      if(this.is_downloaded){
-        alert("You can't delete downloaded image");
-        return;
-      }
-
-      var file_id = this.files_uploaded.findIndex(e=>{
-        return e.path == data.dropbox_path
-      });
-
-      this.files_uploaded.splice(file_id, 1);
-      this.delete_in_dropbox(data.dropbox_path);
-      this.$parent.update_wfp_meta({action: 'delete'});
-    },
-
-    delete_in_dropbox:function(path){
-      var data = JSON.stringify({
-        "path": path
-      });
-
-      var xhr = new XMLHttpRequest();
-
-      xhr.addEventListener("readystatechange", function () {
-        if (this.readyState === 4) {
-          console.log(this.responseText);
-        }
-      });
-
-      xhr.open("POST", "https://api.dropboxapi.com/2/files/delete_v2");
-      xhr.setRequestHeader("authorization", "Bearer " + dropbox.token);
-      xhr.setRequestHeader("content-type", "application/json");
-      xhr.setRequestHeader("cache-control", "no-cache");
-
-      xhr.send(data);
-    },
-
-    /**
-    * handles drop image in drag-n-drop area
-    *
-    * @param e - event
-    */
-    handledrop: function(e){
-      let dt = e.dataTransfer;
-      let files = dt.files;
-      var items = dt.items;
-
-      for(var file of files){
-        if(file.type != 'image/jpeg' && file.type != "image/png"){
-          continue;
-        }
-
-        this.files.push(file);
-      }
-    },
-
-    /**
-    * adds highlight style for drag area
-    */
-    highlight: function(e) {
-      this.$refs.drop_area.classList.add('highlight')
-    },
-
-    init_drop_area: function(){
-      var dropArea = this.$refs.drop_area;
-
-      if(this.is_downloaded){
-        return;
-      }
-
-      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-        dropArea.addEventListener(eventName, this.prevent_defaults, false)
-      });
-
-      ['dragenter', 'dragover'].forEach(eventName => {
-        dropArea.addEventListener(eventName, this.highlight, false)
-      })
-
-      ;['dragleave', 'drop'].forEach(eventName => {
-        dropArea.addEventListener(eventName, this.unhighlight, false)
-      })
-
-      dropArea.addEventListener('drop', this.handledrop, false);
-    },
-
-    prevent_defaults: function(e) {
-      e.preventDefault()
-      e.stopPropagation()
-    },
-
-    /**
-    * shows preview of a passed file
-    *
-    * @param file - file
-    *
-    * @return void;
-    */
-    preview_file: function(file) {
-      let reader = new FileReader()
-      reader.readAsDataURL(file)
-      var vm = this;
-      reader.onloadend = function() {
-        let img = document.createElement('img')
-        img.src = reader.result
-        vm.$emit('show_image',{img: img});
-      }
-
-    },
-
-    show_image: function(data){
-      var image = this.files.filter(
-        e => {
-          return e.image_id === data.image_id
-        });
-
-      this.preview_file(image[0]);
-    },
-
-    show_image_loaded: function(data){
-
-      if(data.image_url){
-        var img = "<img src='"+data.image_url+"'>"
-        this.$emit('show_image',{img: img});
-        return;
-      }
-
-      var data = JSON.stringify({
-        "path": data.dropbox_path
-      });
-
-      var xhr = new XMLHttpRequest();
-
-      xhr.addEventListener("readystatechange", function () {
-        if (this.readyState === 4) {
-          slog('show_image_loaded', 'blue')
-          clog(JSON.parse(this.responseText));
-          elog();
-        }
-      });
-
-      xhr.open("POST", "https://api.dropboxapi.com/2/files/get_temporary_link", false);
-      xhr.setRequestHeader("authorization", "Bearer "+ dropbox.token);
-      xhr.setRequestHeader("content-type", "application/json");
-      xhr.setRequestHeader("cache-control", "no-cache");
-      xhr.send(data);
-
-      var response = JSON.parse(xhr.responseText);
-      var img = "<img src='"+response.link+"'>"
-      this.$emit('show_image',{img: img});
-    },
-
-    upload_from_input: function(event){
-      for(var file of event.target.files){
-        if(file.type != 'image/jpeg' && file.type != "image/png"){
-          // alert('wrong file type, only png or jpeg allowed');
-          continue;
-        }
-        this.files.push(file);
-      }
-    },
-
-    unhighlight: function(e) {
-      this.$refs.drop_area.classList.remove('highlight')
-    },
-  },
+  methods: {},
 
   template: `
     <div class="upload-item" v-bind:class="{'has-files' : has_files}">
@@ -2886,6 +3291,13 @@ Vue.component('upload-item', {
           <span class="number">{{number}} </span>
           <span class="state" v-bind:class="get_state_slug(this_state)">{{this_state}} </span>
         </div>
+        <div class="col"></div>
+
+        <label class="upload-item__thumb" ref="thumb">
+          <img :src="thumbnail">
+          <input type="file" v-on:change="upload_from_input_thumb">
+        </label>
+
         <div class="upload-item__comments "
           v-bind:class="{cup: has_comment , active: exec_show_comments}"
           v-on:click="show_comments = !show_comments"
@@ -2898,12 +3310,12 @@ Vue.component('upload-item', {
       <div class="upload-item__body">
         <div class="upload-item__drop-area" v-show=" !exec_show_comments && !is_downloaded" ref="drop_area">
           <div class="download-cta">
-            <img src="`+tracker_url[0]+`/assets/images/load.png"  class="multiple-image" alt="">
-            <img src="`+tracker_url[0]+`/assets/images/load_blank.png" class="single-image" alt="">
+            <img src="`+tracker_url[0]+`assets/images/load.png"  class="multiple-image" alt="">
+            <img src="`+tracker_url[0]+`assets/images/load_blank.png" class="single-image" alt="">
             <span class="download-cta__text">
               <b>Drop your images here</b>
               or
-              <input type="file" :id="'fileupload'+number" v-on:change="upload_from_input">
+              <input type="file" multiple :id="'fileupload'+number" v-on:change="upload_from_input">
 
               <label class="marked" :for="'fileupload'+number">
                 browse
@@ -2951,6 +3363,17 @@ Vue.component('upload-item', {
           </div>
         </div>
       </div>
+
+      <div class="upload-item__footer">
+        <div class="paid-free"
+          v-bind:class="{active: is_free}"
+          v-if="!is_single_order"
+          v-on:click="toggle_free_paid_cb">
+          <span class="paid">Paid</span>
+          <span class="free">Free</span>
+          <span class="paid-free__marker"></span>
+        </div>
+      </div>
     </div><!-- upload-item -->
   `,
 });
@@ -2959,6 +3382,7 @@ Vue.component('upload-item-exists', {
     return {
       number         : '',
       is_old_order   : '',
+      is_single_order : '',
       item_id        : '',
       state          : this._state,
       comments       : [],
@@ -2976,75 +3400,10 @@ Vue.component('upload-item-exists', {
     '_files_uploaded',
     '_files',
     '_is_old_order',
+    '_is_single_order',
   ],
 
-  mixins: [upload_item_mixin],
-
-  computed:{
-    has_comment: function(){
-      return this.comments.length > 0;
-    },
-
-    exec_show_comments: function(){
-      return this.show_comments && this.has_comment;
-    },
-
-    parsed_comments: function(){
-      if(!this.show_comments){
-        return [];
-      }
-      var comments = this.comments.sort(function(a,b){
-        var date_a = new Date(a.date);
-        var date_b = new Date(b.date);
-        return date_b - date_a;
-      });
-
-      return comments;
-    },
-
-    has_files: function(){
-      return this.files.length > 0 || this.files_uploaded.length > 0;
-    },
-
-    files_to_show_ready: function(){
-      if(this.show_comments && this.has_comment){
-        return [];
-      };
-
-      return this.files_uploaded;
-    },
-
-    files_to_show:function(){
-      if(this.show_comments && this.has_comment){
-        return [];
-      }
-
-      var files = [];
-
-      var counter = 0;
-
-      for(file_id in this.files){
-        var file = this.files[file_id];
-        var image_id = file.name + '_' + this.number + '_' + counter;
-        image_id = image_id.replace(' ', '');
-        var data = {
-          name : file.name,
-          size : file.size,
-          state: 'ready to load',
-          image_id : image_id,
-        };
-
-        this.files[file_id].image_id = image_id;
-
-        files.push(data);
-        counter++;
-      }
-
-
-      return files;
-    },
-
-  },
+  mixins: [upload_item_mixin, upload_item_thumb],
 
   beforeMount: function(){
     this.number =  this._number < 10? '0' + this._number : this._number;
@@ -3052,12 +3411,14 @@ Vue.component('upload-item-exists', {
     this.files_uploaded = typeof(this._files_uploaded) !== 'undefined' ?this._files_uploaded : this.files_uploaded  ;
     this.item_id = this._item_id;
     this.is_old_order = this._is_old_order;
+    this.is_single_order = this._is_single_order;
+    var item = this.$parent.order_data.wfp_images[this.item_id];
+    this.is_free = 'undefined' != typeof(item.is_free) && item.is_free == 1;
   },
 
   mounted: function(){
     this.init_drop_area();
     var vm = this;
-
 
     /*
     * add event listener that will hide view comments state
@@ -3071,80 +3432,16 @@ Vue.component('upload-item-exists', {
   },
 
   watch :  {
-    _number: function(val){
-      this.number =  val < 10? '0'+val: val;
-    },
-
-    _item_id: function(val){
-      this.item_id = val;
-    },
-
     _is_old_order: function(val){
       this.is_old_order = val;
     },
 
-    _files_uploaded: function(val){
-      if(typeof(val) !== 'undefined'){
-        this.files_uploaded =  val;
-      }
-    },
-
-    files_uploaded: function(val){},
-
-    show_comments: function(show){
-    },
-
-    files: function(){
-      this.$emit('file_changed', {files: this.files, number: this.number, item_id:this.item_id});
+    _is_single_order: function(val){
+      this.is_single_order = val;
     },
   },
 
   methods: {
-
-    /**
-    * calculates date and return it in formatted view
-    *
-    * @param d - string 'Y-m-d H:i:s'
-    *
-    * @return string
-    */
-    date: function(d){
-      var date = new Date(d);
-      var fmt  = new DateFormatter();
-      return fmt.formatDate(date, 'M d, H:i');
-
-    },
-
-    delete_image: function(data){
-      if(this.is_old_order){
-        alert('this order can be edited only in WordPress dashboard');
-        return;
-      }
-      var file_id = this.files.findIndex(e=>{
-      return e.image_id == data.image_id})
-      this.files.splice(file_id, 1);
-    },
-
-    delete_image_loaded: function(data){
-      if(this.is_old_order){
-        alert('this order can be edited only in WordPress dashboard');
-        return;
-      }
-
-      if(this.is_downloaded){
-        alert("You can't delete downloaded image");
-        return;
-      }
-
-      var file_id = this.files_uploaded.findIndex(e=>{
-        return e.path == data.dropbox_path
-      });
-
-      this.files_uploaded.splice(file_id, 1);
-      this.delete_in_dropbox(data.dropbox_path);
-      this.$parent.update_wfp_meta({action: 'delete'});
-    },
-
     delete_in_dropbox:function(path){
       var data = JSON.stringify({
         "path": path
@@ -3154,7 +3451,7 @@ Vue.component('upload-item-exists', {
 
       xhr.addEventListener("readystatechange", function () {
         if (this.readyState === 4) {
-          console.log(this.responseText);
+          console.log(JSON.parse(this.responseText));
         }
       });
 
@@ -3165,138 +3462,6 @@ Vue.component('upload-item-exists', {
 
       xhr.send(data);
     },
-
-    /**
-    * handles drop image in drag-n-drop area
-    *
-    * @param e - event
-    */
-    handledrop: function(e){
-      let dt = e.dataTransfer;
-      let files = dt.files;
-      var items = dt.items;
-
-      for(var file of files){
-        if(file.type != 'image/jpeg' && file.type != "image/png"){
-          continue;
-        }
-
-        this.files.push(file);
-      }
-    },
-
-    /**
-    * adds highlight style for drag area
-    */
-    highlight: function(e) {
-      this.$refs.drop_area.classList.add('highlight')
-    },
-
-    init_drop_area: function(){
-      var dropArea = this.$refs.drop_area;
-
-      if(this.is_old_order){
-        return;
-      }
-
-      if(this.is_downloaded){
-        return;
-      }
-
-      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-        dropArea.addEventListener(eventName, this.prevent_defaults, false)
-      });
-
-      ['dragenter', 'dragover'].forEach(eventName => {
-        dropArea.addEventListener(eventName, this.highlight, false)
-      })
-
-      ;['dragleave', 'drop'].forEach(eventName => {
-        dropArea.addEventListener(eventName, this.unhighlight, false)
-      })
-
-      dropArea.addEventListener('drop', this.handledrop, false);
-    },
-
-    prevent_defaults: function(e) {
-      e.preventDefault()
-      e.stopPropagation()
-    },
-
-    /**
-    * shows preview of a passed file
-    *
-    * @param file - file
-    *
-    * @return void;
-    */
-    preview_file: function(file) {
-      let reader = new FileReader()
-      reader.readAsDataURL(file)
-      var vm = this;
-      reader.onloadend = function() {
-        let img = document.createElement('img')
-        img.src = reader.result
-        vm.$emit('show_image',{img: img});
-      }
-
-    },
-
-    show_image: function(data){
-      var image = this.files.filter(
-        e => {
-          return e.image_id === data.image_id
-        });
-
-      this.preview_file(image[0]);
-    },
-
-    show_image_loaded: function(data){
-
-      if(data.image_url){
-        var img = "<img src='"+data.image_url+"'>"
-        this.$emit('show_image',{img: img});
-        return;
-      }
-
-      var data = JSON.stringify({
-        "path": data.dropbox_path
-      });
-
-      var xhr = new XMLHttpRequest();
-
-      xhr.addEventListener("readystatechange", function () {
-        if (this.readyState === 4) {
-          slog('show_image_loaded', 'blue')
-          clog(JSON.parse(this.responseText));
-          elog();
-        }
-      });
-
-      xhr.open("POST", "https://api.dropboxapi.com/2/files/get_temporary_link", false);
-      xhr.setRequestHeader("authorization", "Bearer "+ dropbox.token);
-      xhr.setRequestHeader("content-type", "application/json");
-      xhr.setRequestHeader("cache-control", "no-cache");
-      xhr.send(data);
-
-      var response = JSON.parse(xhr.responseText);
-      var img = "<img src='"+response.link+"'>"
-      this.$emit('show_image',{img: img});
-    },
-
-    upload_from_input: function(event){
-      for(var file of event.target.files){
-        if(file.type != 'image/jpeg' && file.type != "image/png"){
-          // alert('wrong file type, only png or jpeg allowed');
-          continue;
-        }
-        this.files.push(file);
-      }
-    },
-
-    unhighlight: function(e) {
-      this.$refs.drop_area.classList.remove('highlight')
-    },
   },
 
   template: `
@@ -3306,6 +3471,13 @@ Vue.component('upload-item-exists', {
           <span class="number">{{number}} </span>
           <span class="state" v-bind:class="get_state_slug(this_state)">{{this_state}} </span>
         </div>
+        <div class="col"></div>
+
+        <label class="upload-item__thumb" ref="thumb" v-if="!is_old_order">
+          <img :src="thumbnail">
+          <input type="file" v-on:change="upload_from_input_thumb">
+        </label>
+
         <div class="upload-item__comments "
           v-bind:class="{cup: has_comment , active: exec_show_comments}"
           v-on:click="show_comments = !show_comments"
@@ -3323,7 +3495,7 @@ Vue.component('upload-item-exists', {
             <span class="download-cta__text">
               <b>Drop your images here</b>
               or
-              <input type="file" :id="'fileupload'+number" v-on:change="upload_from_input">
+              <input type="file" multiple :id="'fileupload'+number" v-on:change="upload_from_input">
 
               <label class="marked" :for="'fileupload'+number">
                 browse
@@ -3369,6 +3541,17 @@ Vue.component('upload-item-exists', {
             </p>
             <div class="spacer-h-20"></div>
           </div>
+        </div>
+      </div>
+      <div class="upload-item__footer">
+        <div class="paid-free"
+        v-bind:class="{active: is_free}"
+        v-on:click="toggle_free_paid_cb"
+        v-if="!is_single_order"
+        >
+          <span class="paid">Paid</span>
+          <span class="free">Free</span>
+          <span class="paid-free__marker"></span>
         </div>
       </div>
     </div><!-- upload-item -->
@@ -3494,13 +3677,16 @@ Vue.component('upload-item-blank', {
       var files_temp = [];
       for(var file of event.target.files){
         if(file.type != 'image/jpeg' && file.type != "image/png"){
-          // alert('wrong file type, only png or jpeg allowed');
           continue;
+        }else{
+          files_temp.push(file);
         }
-        files_temp.push(file);
       }
 
-      this.$emit('file_changed_blank', {files: files_temp, number: this.blank_number, item_id:this.blank_item_id});
+      if(files_temp.length > 0){
+        this.$emit('file_changed_blank', {files: files_temp, number: this.blank_number, item_id:this.blank_item_id});
+      }
+
     },
 
     unhighlight: function(e) {
@@ -3509,7 +3695,7 @@ Vue.component('upload-item-blank', {
   },
 
   template: `
-    <div class="upload-item">
+    <div class="upload-item upload-item_blank">
       <div class="upload-item__header">
         <div class="upload-item__state">
           <span class="number">{{blank_number}} </span>
@@ -3528,7 +3714,7 @@ Vue.component('upload-item-blank', {
              <span class="download-cta__text">
               <b>Drop your images here</b>
               or
-              <input type="file" :id="'fileupload'+blank_number" v-on:change="upload_from_input">
+              <input type="file" multiple :id="'fileupload'+blank_number" v-on:change="upload_from_input">
 
               <label class="marked" :for="'fileupload'+blank_number">
                 browse
@@ -3897,7 +4083,8 @@ Vue.component('user-select', {
               return obj.name === vm.current_user ;
             }
           );
-          return user_data[0].gravatar;
+
+          return typeof(user_data[0]) != 'undefined'? user_data[0].gravatar : '';
 
           default:
             var user_data = vm.all_users.filter(
@@ -3905,7 +4092,7 @@ Vue.component('user-select', {
                 return obj.name === vm.current_user ;
               }
             );
-            return user_data[0].gravatar;
+            return typeof(user_data[0]) != 'undefined'? user_data[0].gravatar : '';
             break;
         }
       }
@@ -4634,7 +4821,7 @@ if(document.getElementById('frontdesk_list')){
   frontdesk_list = new Vue({
     'el' : '#frontdesk_list',
 
-    mixins: [get_set_props, list_filter_mixin],
+    mixins: [get_set_props, list_filter_mixin, get_item],
 
     data: {
         visible: true,
@@ -4733,33 +4920,6 @@ if(document.getElementById('frontdesk_list')){
         if(!theme_debug){return;}
       },
 
-      /**
-      * gets item data by provided value
-      *
-      * @param key - string - key inside searching item object
-      * @param value - mixed - the value to be searched by
-      *
-      * @return item object
-      */
-      get_item_by: function(key, value){
-        var item = this.items.filter(obj => {
-          return obj.data[key] === value
-        });
-
-        return item[0];
-      },
-
-      /**
-      * gets index of item among this.items
-      *
-      * @param key - string - key inside searching item object
-      * @param value - mixed - the value to be searched by
-      *
-      * @return item index, integer
-      */
-      get_index_of_item_by: function(key, value){
-        return this.items.map(function(e) { return e[key]; }).indexOf(value);
-      },
 
       /**
       * opens order details
@@ -5060,13 +5220,7 @@ if(document.getElementById('single-frontdesk-order')){
         if('undefined' !== typeof(image.archive_url)){
           return image.archive_url;
         }
-        if('undefined' !== typeof(image.files_uploaded)){
-         var img = image.files_uploaded.filter(e=>{
-            return 'undefined' !== e['image_url'] && e['image_url'];
-          })
-
-         return img[0].image_url;
-        }
+        clog(this.order_data);
         return '';
       },
 
@@ -5345,6 +5499,7 @@ if(document.getElementById('new-frontdesk-order')){
         for(var id in data.val){
           this.order_data.order.addons[key][id] = data.val[id];
         }
+        console.log(strip(this.order_data.order.addons));
       },
 
       update_coupon: function(data){
@@ -5823,26 +5978,55 @@ if(document.getElementById('search-field')){
        value: '',
        focused: false,
        user_id: -1,
+       search_mode: 'customer',
      },
 
      watch: {
-      value: function(val){
+       // fires search value
+       value: function(val){
         this.focused = true;
         var vm = this;
 
-        var search = this.all_customers.filter(e=>{
-          return vm.value.toLowerCase() == e.name.toLowerCase();
-        });
+        // discard search only by digits in lists
+        if(val.length < 2){
+          if('undefined' != typeof(frontdesk_list)) {
+            frontdesk_list.show_number = false;
+          }
 
-        if(search.length == 1){
-          vm.value   = search[0].name;
-          vm.user_id = search[0].user_id;
-
-          Vue.nextTick(function(){
-            vm.focused = false;
-          })
+          if('undefined' != typeof(studio_app)) {
+            studio_app.show_number = false;
+          }
         }
-      },
+
+        // search order by number
+        if(val.search(/\D/) < 0 ){
+          this.search_mode = 'order';
+          if(val.length >= 2){
+            if('undefined' != typeof(frontdesk_list)) {
+              frontdesk_list.show_number = val;
+            }
+
+            if('undefined' != typeof(studio_app)) {
+              studio_app.show_number = val;
+            }
+          }
+        // search orderы by customer of brand
+        }else{
+          this.search_mode = 'customer';
+          var search = this.all_customers.filter(e=>{
+            return vm.value.toLowerCase() == e.name.toLowerCase();
+          });
+
+          if(search.length == 1){
+            vm.value   = search[0].name;
+            vm.user_id = search[0].user_id;
+
+            Vue.nextTick(function(){
+              vm.focused = false;
+            })
+          }
+        }
+       },
      },
 
      computed:{
@@ -5878,74 +6062,70 @@ if(document.getElementById('search-field')){
 
      methods:{
 
+      // search action on form submit
       exec_search: function(){
+        var vm = this;
+        vm.focused = false;
 
-        this.focused = false;
-
-        if(this.value.length < 2){
-          alert('Enter some text to search, please');
+        if(vm.value.length < 2){
+          alert('Enter some text to search, please. At least 3 symbols');
           return;
         }
 
-        if(this._users_found.length == 0 && this.user_id < 0){
+        if(vm._users_found.length == 0 && vm.user_id < 0 && vm.search_mode == 'customer'){
           alert('No Customers found, please try another request');
           return;
         }
-        block();
 
-        slog('Search order by user', 'blue');
-        clog(this.get_data());
+        block();
+        slog('Search order by '+ vm.search_mode, 'blue');
+        clog(vm.get_data());
+
+        var data = {action: '', data: vm.get_data()};
+
+        data.action = vm.search_mode == 'customer'? 'get_orders_by_user' : 'get_order_by_number';
 
         jQuery.ajax({
           url: WP_URLS.ajax,
           type: 'POST',
           dataType: 'json',
-          data: {action: 'get_orders_by_user', data: this.get_data()},
+          data: data,
         })
+
         .done(function(e) {
           clog('response', 'green')
 
-
-          if('undefined' != typeof(frontdesk_list)) {
-            frontdesk_list.visible = true;
-            filters.visible = true;
-            frontdesk_order_new.visible = false;
-            frontdesk_order.visible = false;
-
-            Vue.nextTick(function(){
-              frontdesk_list.items = e.items;
-              filters.filter_values = e.filters;
-            })
+          if(e.search_mode == 'customer'){
+            vm.apply_items_frontdesk(e.items, e.filters);
+            vm.apply_items_studio(e.items, e.filters);
           }
 
-          if('undefined' != typeof(studio_app)) {
-            studio_app.visible.columns = true;
-            studio_app.visible.filters = true;
-            studio_app.$refs.detailed_view.visible = false;
-
-            Vue.nextTick(function(){
-              studio_app.items = e.items;
-              studio_app.filter_values = e.filters;
-            })
+          if(e.search_mode == 'order'){
+            if(e.error){
+              alert(e.error);
+            }else{
+              vm.may_be_add_item(e.item)
+            }
           }
-
-
         })
+
         .fail(function(e) {
           alert('Search Failed');
         })
-        .always(function() {
+
+        .always(function(e) {
+          clog(e);
           unblock();
           elog();
         });
-
       },
 
       get_data: function(){
         return {
-          customer_name:   this.value,
+          search_value:    this.value,
           user_id:         this.user_id,
           users_found:     this._users_found,
+          search_mode:     this.search_mode,
         }
       },
 
@@ -5955,6 +6135,7 @@ if(document.getElementById('search-field')){
         }
       },
 
+     // updates customer data;
       update_customer: function(customer){
         var vm = this;
         vm.value   = customer.name;
@@ -5964,13 +6145,70 @@ if(document.getElementById('search-field')){
           vm.focused = false;
         })
       },
-     },
+
+      // changes item data for studio after search
+      // hides detailed view and shows list and filters
+      apply_items_studio: function(_items, _filters){
+        if('undefined' != typeof(studio_app)) {
+          studio_app.visible.columns = true;
+          studio_app.visible.filters = true;
+          studio_app.$refs.detailed_view.visible = false;
+
+          Vue.nextTick(function(){
+            studio_app.items = _items;
+            studio_app.filter_values = _filters;
+          })
+        }
+      },
+
+      // changes item data for frontdesk after search
+      // hides detailed view and shows list and filters
+      apply_items_frontdesk: function(_items, _filters){
+        if('undefined' != typeof(frontdesk_list)) {
+          frontdesk_list.visible = true;
+          frontdesk_order_new.visible = false;
+          frontdesk_order.visible = false;
+
+          if(typeof(filters) == 'object'){
+            filters.set_prop('visible', true);
+          }
+
+          Vue.nextTick(function(){
+            frontdesk_list.items = _items;
+            filters.filter_values = _filters;
+          })
+         }
+       },
+
+
+      may_be_add_item:function(item){
+        if('undefined' != typeof(frontdesk_list)) {
+          frontdesk_list.visible = true;
+          frontdesk_order_new.visible = false;
+          frontdesk_order.visible = false;
+
+          Vue.nextTick(function(){
+            frontdesk_list.may_be_add_item(item);
+          });
+        }
+
+        if('undefined' != typeof(studio_app)) {
+          studio_app.visible.columns = true;
+          studio_app.visible.filters = true;
+          studio_app.$refs.detailed_view.visible = false;
+
+          Vue.nextTick(function(){
+            studio_app.may_be_add_item(item);
+          });
+        }
+      }
+    },
   })
 }
 if(document.getElementById('studio-vue-app')){
   var studio_app = new Vue({
     el: '#studio-vue-app',
-    mixins: [list_filter_mixin],
+    mixins: [list_filter_mixin, get_item],
     data:{
       visible: {
         filters: true,
@@ -5995,12 +6233,6 @@ if(document.getElementById('studio-vue-app')){
         var comments_count = 0;
         var items = this.items;
 
-        // var _items = Object.values(items)
-        //               .map(function(e){
-        //                 return e.data.gallery.comments;
-        //               })
-        //               .filter(e => { return e > 0});
-
         var __items = Object.values(items).filter(e=>{
           if(!e.data.wfp_images){
             return false;
@@ -6011,9 +6243,8 @@ if(document.getElementById('studio-vue-app')){
           if(typeof(data) == 'object'){
             data = Object.values(data);
           }
-
           var count = data.filter(e=>{
-            return typeof(e.request) != 'undefined';
+            return typeof(e.request) != 'undefined' && e.is_active == 0;
           }).map(
           e=>{return e.request.length}
           ).reduce((a, b) => a + b, 0);
@@ -6048,34 +6279,6 @@ if(document.getElementById('studio-vue-app')){
     },
 
     methods:{
-      /**
-      * gets item data by provided value
-      *
-      * @param key - string - key inside searching item object
-      * @param value - mixed - the value to be searched by
-      *
-      * @return item object
-      */
-      get_item_by: function(key, value){
-        var item = this.items.filter(obj => {
-          return obj.data[key] === value
-        });
-
-        return item[0];
-      },
-
-      /**
-      * gets index of item among this.items
-      *
-      * @param key - string - key inside searching item object
-      * @param value - mixed - the value to be searched by
-      *
-      * @return item index, integer
-      */
-      get_index_of_item_by: function(key, value){
-        return this.items.map(function(e) { return e[key]; }).indexOf(value);
-      },
-
       /**
       * opens order details
       *
@@ -6170,7 +6373,7 @@ if(document.getElementById('popup_shoot')){
 
       color: function(){
         var id = tracker_options['orders_misc']['shoot'];
-        return tracker_options.orders[id].text_color;
+        return tracker_options.orders[id].bg_color;
       },
 
       due_date_formatted: function(){
@@ -6234,6 +6437,14 @@ if(document.getElementById('popup_quality')){
     },
 
     watch: {
+      visible : function(v){
+        if(!v){
+          this.check_notes  = false;
+          this.check_sizes  = false;
+          this.check_product  = false;
+        }
+      },
+
       check_notes: function(val){
         if(val){
           this.$refs.check_notes.classList.remove('error');
@@ -6263,13 +6474,13 @@ if(document.getElementById('popup_quality')){
         ];
 
         for(var index of check){
-          console.log(index);
           if(!this[index]){
             this.$refs[index].classList.add('error');
           }else{
             this.$refs[index].classList.remove('error');
           }
         }
+
         return this.check_notes && this.check_sizes && this.check_product;
       },
     },

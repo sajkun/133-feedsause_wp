@@ -5499,6 +5499,7 @@ if(document.getElementById('new-frontdesk-order')){
         for(var id in data.val){
           this.order_data.order.addons[key][id] = data.val[id];
         }
+        console.log(strip(this.order_data.order.addons));
       },
 
       update_coupon: function(data){

@@ -33,7 +33,7 @@ if(!function_exists('exec_clog')){
   function exec_clog(){
     global $clog_data;
 
-    if(!$clog_data) return;
+    // if(!$clog_data) return;
 
     foreach ($clog_data as $key => $data) {
       switch ($data['color']){
@@ -208,6 +208,8 @@ if(!function_exists('unregister_scripts_n_styles')){
   * removes styles and scripts
   */
   function unregister_scripts_n_styles(){
+
+    clog(wp_scripts());
 
     $styles = apply_filters('allow_theme_styles', wp_styles()->queue);
 

@@ -7,7 +7,7 @@
  */
 ?>
 
-<?php if (get_current_user_id() >0): ?>
+<?php if (get_current_user_id() >0 && function_exists('get_google_client_id')): ?>
 
 <script>
 var auth2; // The Sign-In object.
