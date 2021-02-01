@@ -51,7 +51,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 </div><!-- container-fluid -->
 
 <div id="frontdesk_list">
-  <div class="horizontal-scroll" v-show="visible">
+  <div class="horizontal-scroll" ref="scroll" v-show="visible">
     <div class="row no-gutters justify-content-center" ref="column_container">
       <frontdesk-column
         v-for="(column, index) in columns"
