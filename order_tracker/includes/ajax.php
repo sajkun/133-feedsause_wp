@@ -480,7 +480,7 @@ if(!class_exists('tracker_ajax')){
          'filters' => $filters,
          'post'    => $_POST,
          'orders'    => wc_get_orders($args),
-         'search_mode' => $POST['data']['search_mode'],
+         'search_mode' => $_POST['data']['search_mode'],
       ));
     }
 

@@ -1547,6 +1547,8 @@ var upload_item_mixin = {
         return;
       }
 
+      console.log(data);
+
       var data = JSON.stringify({
         "path": data.dropbox_path
       });
@@ -1560,6 +1562,7 @@ var upload_item_mixin = {
           elog();
         }
       });
+
 
       xhr.open("POST", "https://api.dropboxapi.com/2/files/get_temporary_link", false);
       xhr.setRequestHeader("authorization", "Bearer "+ dropbox.token);
@@ -2835,6 +2838,7 @@ Vue.component('single-studio-content', {
       var data = JSON.stringify({
         "path": dropbox_path
       });
+      console.log(dropbox_path);
 
       var xhr = new XMLHttpRequest();
 
@@ -2845,6 +2849,7 @@ Vue.component('single-studio-content', {
           elog();
         }
       });
+
 
       xhr.open("POST", "https://api.dropboxapi.com/2/files/get_temporary_link", false);
       xhr.setRequestHeader("authorization", "Bearer "+ dropbox.token);
@@ -2899,7 +2904,7 @@ Vue.component('single-studio-content', {
       item = item[0];
 
       var data = JSON.stringify({
-        "path": "/duh/" + path,
+        "path": "/Feedsauce Team/Hub/" + path,
         "mode": "add",
         "autorename": true,
         "mute": false,
@@ -3226,6 +3231,9 @@ Vue.component('single-studio-content', {
 
   template: '#studio-single-content',
 });
+
+
+console.log('test');
 Vue.component('upload-item', {
   data: function(){
     return {
@@ -5499,7 +5507,6 @@ if(document.getElementById('new-frontdesk-order')){
         for(var id in data.val){
           this.order_data.order.addons[key][id] = data.val[id];
         }
-        console.log(strip(this.order_data.order.addons));
       },
 
       update_coupon: function(data){
@@ -6064,6 +6071,7 @@ if(document.getElementById('search-field')){
 
       // search action on form submit
       exec_search: function(){
+        console.log('exec_search');
         var vm = this;
         vm.focused = false;
 
@@ -6084,6 +6092,9 @@ if(document.getElementById('search-field')){
         var data = {action: '', data: vm.get_data()};
 
         data.action = vm.search_mode == 'customer'? 'get_orders_by_user' : 'get_order_by_number';
+
+
+        console.log(data);
 
         jQuery.ajax({
           url: WP_URLS.ajax,
@@ -6149,6 +6160,7 @@ if(document.getElementById('search-field')){
       // changes item data for studio after search
       // hides detailed view and shows list and filters
       apply_items_studio: function(_items, _filters){
+        console.log(typeof(studio_app));
         if('undefined' != typeof(studio_app)) {
           studio_app.visible.columns = true;
           studio_app.visible.filters = true;
@@ -6164,6 +6176,7 @@ if(document.getElementById('search-field')){
       // changes item data for frontdesk after search
       // hides detailed view and shows list and filters
       apply_items_frontdesk: function(_items, _filters){
+        console.log(typeof(frontdesk_list));
         if('undefined' != typeof(frontdesk_list)) {
           frontdesk_list.visible = true;
           frontdesk_order_new.visible = false;
