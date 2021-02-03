@@ -120,7 +120,7 @@
 
     <script src="<?php echo THEME_URL ?>/order_tracker/assets/libs/sortable/sortable.js"></script>
     <script src="<?php echo THEME_URL ?>/order_tracker/assets/libs/drag/drag.js"></script>
-    <script defer src="<?php echo THEME_URL ?>/order_tracker/assets/script/main.min5.js"></script>
+    <script defer src="<?php echo THEME_URL ?>/order_tracker/assets/script/main.min6.js"></script>
  </head>
  <body  id="site-body" class="not-ready">
   <div class="site-container">
