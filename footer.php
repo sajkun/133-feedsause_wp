@@ -38,12 +38,14 @@ var auth2; // The Sign-In object.
 <?php
   do_action('finish_page');
  ?>
- <div class="video-popup-wrapper">
-   <div class="inner">
-      <i class="icon-close">×</i>
-     <div class="video-block"></div>
+ <?php if(!theme_construct_page::is_page_type( 'new-styles' )): ?>
+   <div class="video-popup-wrapper">
+     <div class="inner">
+        <i class="icon-close">×</i>
+       <div class="video-block"></div>
+     </div>
    </div>
- </div>
+ <?php endif ?>
 </body>
 </html>
 

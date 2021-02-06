@@ -15,9 +15,14 @@ class theme_construct_page{
   * Adds hooks for different pages
   */
   public static function init(){
-    add_filter('print_header_class', array(__CLASS__, 'detect_header_classes'));
-    add_action('do_theme_header', array('theme_content_output','print_header'));
-    add_action('do_theme_footer', array('theme_content_output','print_footer'));
+
+    if(self::is_page_type( 'new-styles' )){
+      add_action('do_theme_header', array('theme_content_output','print_new_header'));
+    }else{
+      add_filter('print_header_class', array(__CLASS__, 'detect_header_classes'));
+      add_action('do_theme_header', array('theme_content_output','print_header'));
+      add_action('do_theme_footer', array('theme_content_output','print_footer'));
+    }
 
     if(self::is_page_type( 'fronted-page' )){
       add_action('do_fly_basket', array('theme_content_output','print_fly_basket'), 10);
@@ -47,15 +52,15 @@ class theme_construct_page{
 
     elseif(self::is_page_type( 'woocommerce' )){
 
+      if(!self::is_page_type( 'new-styles' )){
+        remove_action( 'woocommerce_cart_is_empty', 'wc_empty_cart_message', 10 );
 
+        remove_action( 'woocommerce_thankyou', 'woocommerce_order_details_table', 10 );
 
-      remove_action( 'woocommerce_cart_is_empty', 'wc_empty_cart_message', 10 );
+        add_action('do_theme_content', array('theme_content_output','print_woo_content'), 10);
 
-      remove_action( 'woocommerce_thankyou', 'woocommerce_order_details_table', 10 );
-
-      add_action('do_theme_content', array('theme_content_output','print_woo_content'), 10);
-
-      add_action('print_thank_you_estimates', array('theme_content_output','print_checkout_estimates'), 10);
+        add_action('print_thank_you_estimates', array('theme_content_output','print_checkout_estimates'), 10);
+      }
 
 
       if(self::is_page_type( 'woo-shop' ) || self::is_page_type( 'woo-shop-category' )){
@@ -64,7 +69,7 @@ class theme_construct_page{
         add_action('do_fly_basket', array('theme_content_output','print_fly_basket'), 10);
       }
 
-      elseif(self::is_page_type( 'woo-product' ) || self::is_page_type( 'woo-shop-category' )){
+      elseif( self::is_page_type( 'woo-shop-category' )){
         add_action('do_theme_after_content', array('theme_content_output','print_pre_footer_cta'), 90);
         add_action('do_fly_basket', array('theme_content_output','print_fly_basket'), 10);
       }
@@ -121,6 +126,9 @@ class theme_construct_page{
   */
   public static function is_page_type( $type ){
     switch ($type){
+      case 'new-styles':
+        return function_exists('is_product') && is_product();
+        break;
       case 'blog':
         return is_home();
         break;
@@ -441,37 +449,37 @@ class theme_construct_page{
     /*replaces output of a product notifications*/
     remove_action('woocommerce_before_single_product', 'woocommerce_output_all_notices', 10);
 
-    add_action('theme_before_add_to_cart_form', 'woocommerce_output_all_notices', 28);
+   //  add_action('theme_before_add_to_cart_form', 'woocommerce_output_all_notices', 28);
 
 
-    /*prints product's title in case if user is not premium one*/
-    add_action('woocommerce_single_product_summary_prem','woocommerce_template_single_title', 5);
+   //  /*prints product's title in case if user is not premium one*/
+   //  add_action('woocommerce_single_product_summary_prem','woocommerce_template_single_title', 5);
 
-    /*prints product's short description in case if user is not premium one*/
-    add_action('woocommerce_single_product_summary_prem','woocommerce_template_single_excerpt', 20);
+   //  /*prints product's short description in case if user is not premium one*/
+   //  add_action('woocommerce_single_product_summary_prem','woocommerce_template_single_excerpt', 20);
 
-    /*prints text block with approximate deadlines for an order in case if user is not premium one*/
-    add_action('woocommerce_single_product_summary_prem',array('theme_content_output','print_single_product_estimates'), 25);
+   //  /*prints text block with approximate deadlines for an order in case if user is not premium one*/
+   //  add_action('woocommerce_single_product_summary_prem',array('theme_content_output','print_single_product_estimates'), 25);
 
-    /*prints text block with buy premium button*/
-    add_action('woocommerce_single_product_summary_prem',array('theme_content_output','print_woo_single_product_unlock_premium'), 35);
+   //  /*prints text block with buy premium button*/
+   //  add_action('woocommerce_single_product_summary_prem',array('theme_content_output','print_woo_single_product_unlock_premium'), 35);
 
-   /*prints unlock premium button in a premium product*/
-    add_action('do_theme_purchase_premium', 'woocommerce_template_single_add_to_cart');
+   // /*prints unlock premium button in a premium product*/
+   //  add_action('do_theme_purchase_premium', 'woocommerce_template_single_add_to_cart');
 
-    /*prints upsells*/
-    add_action('woocommerce_after_single_product', 'woocommerce_upsell_display', 15);
+   //  /*prints upsells*/
+   //  add_action('woocommerce_after_single_product', 'woocommerce_upsell_display', 15);
 
-    /*prints crosselss*/
-    add_action('woocommerce_after_single_product', 'woocommerce_output_related_products', 20);
+   //  /*prints crosselss*/
+   //  add_action('woocommerce_after_single_product', 'woocommerce_output_related_products', 20);
 
-    add_action('wp_footer', array('theme_content_output','print_product_attributes_sidebar'), 20);
+   //  add_action('wp_footer', array('theme_content_output','print_product_attributes_sidebar'), 20);
 
-    add_action('woocommerce_after_single_product', array('theme_content_output','print_ingredients'), 11);
+   //  add_action('woocommerce_after_single_product', array('theme_content_output','print_ingredients'), 11);
 
-    add_action('woocommerce_before_single_product_summary', array('theme_content_output', 'print_single_product_images_after'),30);
+   //  add_action('woocommerce_before_single_product_summary', array('theme_content_output', 'print_single_product_images_after'),30);
 
-    add_action('finish_page', array('theme_content_output','print_single_product_guidlines'));
+   //  add_action('finish_page', array('theme_content_output','print_single_product_guidlines'));
   }
 
 

@@ -171,6 +171,67 @@ class theme_content_output{
     <?php
   }
 
+  public static function print_new_header(){
+
+    $custom_logo_id = get_theme_mod( 'custom_logo' );
+    $custom_logo_url = wp_get_attachment_image_url( $custom_logo_id , 'full' );
+
+     $logo = (empty(get_theme_mod( 'custom_logo' ))) ?
+              sprintf('<a href="%s"  class="logo"><img src="%s/images/logo.svg" alt=""></a>',get_home_url(), THEME_URL):
+              sprintf('<a  href="%s" class="logo"><img src="%s" alt=""></a>',get_home_url(),  esc_url( $custom_logo_url ));
+
+    $user_id = get_current_user_id();
+
+    if(theme_construct_page::is_page_type('woo-cart')){
+      $main_menu = '';
+    }
+
+    $header_class = '';
+    $user_name  = '';
+
+    if(function_exists('wc_get_account_endpoint_url')){
+      $orders_url = wc_get_account_endpoint_url('orders');
+      $customer   = new WC_Customer($user_id);
+      $user_name  = $customer->get_first_name();
+    }
+
+    $my_account_id = get_option('woocommerce_myaccount_page_id');
+
+    if(wp_is_mobile()):
+
+    else:
+    $main_menu = wp_nav_menu( array(
+      'theme_location'  => 'main_menu',
+      'menu'            => '',
+      'container'       => 'nav',
+      'container_class' => 'main-menu',
+      'container_id'    => '',
+      'menu_class'      => 'menu',
+      'menu_id'         => '',
+      'echo'            => false,
+      // 'fallback_cb'     => '',
+      'before'          => '',
+      'after'           => '',
+      'link_before'     => '',
+      'link_after'      => '',
+      'items_wrap'      => '<ul id="%1$s" class="%2$s">%3$s</ul>',
+      'depth'           => 2,
+      'walker'          => new main_menu_walker(),
+    ) );
+
+    $args = array(
+      'logo'   => $logo,
+      'main_menu'   => $main_menu,
+      'user_id'     => $user_id,
+      'user_name'   => $user_name,
+      'avatar_url'   => $user_id >0 ? get_avatar_url($user_id) : '',
+      'account_url'      => $my_account_id? get_permalink( $my_account_id) : false,
+    );
+
+    print_theme_template_part('header-desktop-new', 'globals', $args);
+    endif;
+  }
+
 
   /*
   * prints header button
