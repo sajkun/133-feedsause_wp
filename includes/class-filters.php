@@ -563,15 +563,15 @@ class theme_filter_class{
   */
   public static function woocommerce_billing_fields( $address_fields, $country ){
     $fields_allowed  = array(
-      // 'billing_company',
-      // 'billing_address_1',
-      // 'billing_address_2',
-      // 'billing_city',
-      // 'billing_state',
-      // 'billing_postcode',
-      // 'billing_country',
-      // 'billing_first_name',
-      // 'billing_last_name',
+      'billing_company',
+      'billing_address_1',
+      'billing_address_2',
+      'billing_city',
+      'billing_state',
+      'billing_postcode',
+      'billing_country',
+      'billing_first_name',
+      'billing_last_name',
     );
 
     foreach ($address_fields as $key => $value) {
