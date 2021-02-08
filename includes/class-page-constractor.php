@@ -31,13 +31,13 @@ class theme_construct_page{
       self::hook_frontend_page_functions();
     }
 
-    elseif(self::is_page_type( 'constructor' )){
-      if(!isset($_GET['product_id'])){
-        wp_safe_redirect(get_permalink(woocommerce_get_page_id( 'shop' )) );
-      }
+    // elseif(self::is_page_type( 'constructor' )){
+    //   if(!isset($_GET['product_id'])){
+    //     wp_safe_redirect(get_permalink(woocommerce_get_page_id( 'shop' )) );
+    //   }
 
-       add_action('do_theme_content', array('theme_content_output','print_product_contructor'), 10);
-    }
+    //    add_action('do_theme_content', array('theme_content_output','print_product_contructor'), 10);
+    // }
     elseif(self::is_page_type( 'blog' )){
 
       add_action('do_fly_basket', array('theme_content_output','print_fly_basket'), 10);

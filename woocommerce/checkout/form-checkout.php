@@ -39,8 +39,6 @@ switch ($options['type']) {
 
 	do_action( 'woocommerce_before_checkout_form', $checkout );
 
-	do_action('print_constructor');
-	return;
 ?>
 <div class="checkout">
 	<div class="container container_sm">
