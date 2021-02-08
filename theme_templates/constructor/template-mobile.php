@@ -774,8 +774,8 @@
 
         </div><!-- card-selector -->
        */ ?>
-
-       <form enctype="multipart/form-data" action="<?php echo esc_url( wc_get_checkout_url() ); ?>" method="POST" id="checkout_form"  name="checkout" method="post" class="checkout woocommerce-checkout" >
+      <div class="checkout">
+       <form enctype="multipart/form-data" action="<?php echo esc_url( wc_get_checkout_url() ); ?>" method="POST" id="checkout_form"  name="checkout" class="checkout woocommerce-checkout" >
 
           <?php
 
@@ -790,7 +790,7 @@
           <div class="spacer-h-10"></div>
           <input type="text" class="input-field" placeholder="Coupon Code" name="coupon">
         </form>
-
+      </div>
         <div class="spacer-h-30"></div>
 
         <div class="warning">

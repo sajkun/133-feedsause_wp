@@ -3550,7 +3550,6 @@ class theme_content_output{
   public static function print_product_content(){
 
 
-
     if(!function_exists('get_field')){
       echo 'Install ACF PLUGIN';
       return;
@@ -3578,6 +3577,8 @@ class theme_content_output{
     }
 
     $product_id = $product->get_id();
+    wc()->cart->empty_cart();
+    wc()->cart->add_to_cart((int)$product_id , 1, (int)$product_id);
 
     $args = array(
       'img_url' => $img_url,
