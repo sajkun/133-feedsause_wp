@@ -3549,6 +3549,8 @@ class theme_content_output{
 
   public static function print_product_content(){
 
+
+
     if(!function_exists('get_field')){
       echo 'Install ACF PLUGIN';
       return;
@@ -3631,6 +3633,7 @@ class theme_content_output{
   }
 
   public static function print_product_contructor(){
+
     global $theme_init;
 
     $product_id = (int)$_GET['product_id'];

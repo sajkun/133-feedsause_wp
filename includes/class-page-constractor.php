@@ -24,6 +24,8 @@ class theme_construct_page{
       add_action('do_theme_footer', array('theme_content_output','print_footer'));
     }
 
+     add_action('print_constructor', array('theme_content_output','print_product_contructor'), 10);
+
     if(self::is_page_type( 'fronted-page' )){
       add_action('do_fly_basket', array('theme_content_output','print_fly_basket'), 10);
       self::hook_frontend_page_functions();
@@ -142,7 +144,7 @@ class theme_construct_page{
     $obj = get_queried_object();
     switch ($type){
       case 'new-styles':
-        return (function_exists('is_product') && is_product()) || ($obj->ID == (int)get_option('theme_page_constructor'))  || ( is_checkout() && !empty( is_wc_endpoint_url('order-received') ) );
+        return (function_exists('is_product') && is_product()) || ($obj->ID == (int)get_option('theme_page_constructor'))  || ( is_checkout() && !empty( is_wc_endpoint_url('order-received') ) || is_checkout());
         break;
       case 'constructor':
       return $obj->ID == (int)get_option('theme_page_constructor');

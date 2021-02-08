@@ -120,7 +120,7 @@
       $item['data']->set_price($total);
     }
 
-    wc()->checkout->process_checkout();
+    // wc()->checkout->process_checkout();
 
     wp_send_json(array(
       'total'=>$total,

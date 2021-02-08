@@ -132,6 +132,8 @@ class velesh_init_theme{
 
       wp_enqueue_style('theme-fancybox', THEME_URL.'/assets/fancybox2/jquery.fancybox.css' );
 
+      wp_enqueue_style('theme-fancybox', THEME_URL.'/assets/fancybox2/jquery.fancybox.css' );
+
       wp_enqueue_script('theme-fancybox', THEME_URL.'/assets/fancybox2/jquery.fancybox.js', array('jquery'), THEME_VERSION, true);
 
       wp_enqueue_style('theme-fancybox-thumbs', THEME_URL.'/assets/fancybox2/helpers/jquery.fancybox-thumbs.css' );

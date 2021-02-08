@@ -676,7 +676,8 @@
           </div><!-- card-selector -->
         */?>
 
-         <form action="#" method="POST" id="checkout_form">
+         <form enctype="multipart/form-data" action="<?php echo esc_url( wc_get_checkout_url() ); ?>" method="POST" id="checkout_form"  name="checkout" method="post" class="checkout woocommerce-checkout" >
+
 
 
           <?php
@@ -685,7 +686,7 @@
               wc_get_template( 'checkout/payment-method.php', array( 'gateway' => $gateway, 'count' => count( $gateways ) ) );
             }
           ?>
-          <?php wp_nonce_field( 'woocommerce-process_checkout', 'woocommerce-process-checkout-nonce' ); ?>
+          <?php  wp_nonce_field( 'woocommerce-process_checkout', 'woocommerce-process-checkout-nonce' ); ?>
 
           <div class="spacer-h-10"></div>
           <input type="text" class="input-field" placeholder="Contact Number" name="contact">
