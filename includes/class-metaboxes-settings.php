@@ -516,7 +516,54 @@ class velesh_theme_meta{
               </th>
               <td>
                  <input type="text" class="medium-text" id="<?php echo $slug; ?>[single_product_price]" name="<?php echo $slug; ?>[single_product_price]" value="<?php echo (isset($o['single_product_price']))? esc_attr($o['single_product_price']):''; ?>"> <br>
-                  <span class="description">Used to display in Basic Feedsauce plan on billing details</span ><br>
+
+                  <span class="description">Type only price without currency symbol</span ><br>
+                 <br>
+              </td>
+            </tr>
+            <tr>
+              <th>
+
+                <label for="<?php echo $slug; ?>[name]">Single Product Name Price</label> <br>
+              </th>
+              <td>
+                 <input type="text" class="medium-text" id="<?php echo $slug; ?>[name]" name="<?php echo $slug; ?>[name]" value="<?php echo (isset($o['name']))? esc_attr($o['name']):''; ?>"> <br>
+
+                  <span class="description">Type only price without currency symbol</span ><br>
+                 <br>
+              </td>
+            </tr>
+            <tr>
+              <th>
+
+                <label for="<?php echo $slug; ?>[sizes]">Size Price</label> <br>
+              </th>
+              <td>
+                 <input type="text" class="medium-text" id="<?php echo $slug; ?>[sizes]" name="<?php echo $slug; ?>[sizes]" value="<?php echo (isset($o['sizes']))? esc_attr($o['sizes']):''; ?>"> <br>
+
+                  <span class="description">Type only price without currency symbol</span ><br>
+                 <br>
+              </td>
+            </tr>
+            <tr>
+              <th>
+
+                <label for="<?php echo $slug; ?>[color]">Color Price</label> <br>
+              </th>
+              <td>
+                 <input type="text" class="medium-text" id="<?php echo $slug; ?>[color]" name="<?php echo $slug; ?>[color]" value="<?php echo (isset($o['color']))? esc_attr($o['color']):''; ?>"> <br>
+
+                  <span class="description">Type only price without currency symbol</span ><br>
+                 <br>
+              </td>
+            </tr>
+            <tr>
+              <th>
+
+                <label for="<?php echo $slug; ?>[color]">Custom Shoot Price</label> <br>
+              </th>
+              <td>
+                 <input type="text" class="medium-text" id="<?php echo $slug; ?>[shoot]" name="<?php echo $slug; ?>[shoot]" value="<?php echo (isset($o['shoot']))? esc_attr($o['shoot']):''; ?>"> <br>
                   <span class="description">Type only price without currency symbol</span ><br>
                  <br>
               </td>
@@ -673,7 +720,96 @@ class velesh_theme_meta{
    * @hookedto admin_menu -10
    */
   public static function add_woo_attributes_images(){
-    add_submenu_page( 'edit.php?post_type=product',  __('Attributes data', 'theme-translations'), __('Attributes data', 'theme-translations'), 'manage_options', 'theme_attributes_images', array('velesh_theme_meta', 'print_woo_attributes_images_form'));
+    // add_submenu_page( 'edit.php?post_type=product',  __('Attributes data', 'theme-translations'), __('Attributes data', 'theme-translations'), 'manage_options', 'theme_attributes_images', array('velesh_theme_meta', 'print_woo_attributes_images_form'));
+
+    add_submenu_page( 'edit.php?post_type=product',  __('Global Features', 'theme-translations'), __('Global Features', 'theme-translations'), 'manage_options', 'product_global_features', array('velesh_theme_meta', 'print_product_global_features'));
+  }
+
+  public static function print_product_global_features(){
+    $slug="product_global_blocks";
+    if(isset($_POST['do_save'])){
+      update_option($slug, $_POST[$slug]);
+    }
+    $option = get_option($slug);
+
+    ?>
+
+    <form action="<?php echo admin_url('edit.php?post_type=product&page=product_global_features')?>" method="POST">
+
+      <input type="radio" id="customize_and_create" name="option" checked class="duh-hide-check">
+      <input type="radio" id="good_2_know" name="option" class="duh-hide-check">
+      <input type="radio" id="show_bespoke" name="option" class="duh-hide-check">
+
+      <ul class="duh-tabs">
+        <li>
+        <label for="customize_and_create">Customize and Create</label></li>
+        <li> <label for="good_2_know">Good to Know</label></li>
+         <li><label for="show_bespoke">100% BESPOKE</label></li>
+      </ul>
+
+      <div class="duh-page-settings-content customize_and_create">
+        <h3>Customize and Create items</h3>
+
+        <div class="spacer-h-20"></div>
+
+        <?php
+          for ($i=0; $i < 4; $i++) {
+
+            printf('<h4>Item #%s</h4>', $i);
+
+            echo "<h4>Title</h4>";
+
+            printf('<input name="%s[customize_and_create][%s][title]" value="%s" class="fullwidth">', $slug, $i, isset($option['customize_and_create'][$i]['title'])? $option['customize_and_create'][$i]['title'] : '' );
+
+            echo "<h4>Text</h4>";
+
+             printf('<textarea name="%s[customize_and_create][%s][text]" rows="6" class="fullwidth">%s</textarea>', $slug, $i, isset($option['customize_and_create'][$i]['text'])? stripslashes($option['customize_and_create'][$i]['text'] ): '' );
+
+          }
+
+          ?>
+      </div>
+
+      <div class="duh-page-settings-content good_2_know">
+        <h3>Good to Know</h3>
+
+        <div class="spacer-h-20"></div>
+
+        <?php
+          for ($i=0; $i < 4; $i++) {
+
+            printf('<h4>Item #%s</h4>', $i);
+
+            echo "<h4>Title</h4>";
+
+            printf('<input name="%s[good_2_know][%s][title]" value="%s" class="fullwidth">', $slug, $i, isset($option['good_2_know'][$i]['title'])? $option['good_2_know'][$i]['title'] : '' );
+
+            echo "<h4>Text</h4>";
+
+             printf('<textarea name="%s[good_2_know][%s][text]" rows="6" class="fullwidth">%s</textarea>', $slug, $i, isset($option['good_2_know'][$i]['text'])?stripslashes($option['good_2_know'][$i]['text']) : '' );
+          }
+
+          ?>
+      </div>
+
+      <div class="duh-page-settings-content show_bespoke">
+        <h3>100% BESPOKE</h3>
+        <h4>Title</h4>
+
+        <input type="text" class="fullwidth" name="<?php echo $slug?>[bespoke][title]" value="<?php echo isset( $option['bespoke']['title'])? $option['bespoke']['title'] : ''; ?>">
+
+        <h4>Text</h4>
+
+        <textarea name="<?php echo $slug?>[bespoke][text]" id="" class="fullwidth" rows="6"><?php echo isset( $option['bespoke']['text'])? $option['bespoke']['title'] : ''; ?></textarea>
+
+      </div>
+
+
+      <input type="hidden" name="do_save" value="yes">
+      <input type="submit" value="save" class="button">
+    </form>
+
+    <?php
   }
 
 
@@ -748,9 +884,9 @@ class velesh_theme_meta{
 
           <div class="rad-icon trigger-show">
             <br>
-            <label><input type="radio" style="vertical-align: -2px" name="theme_attributes_images[attribute_pa_<?php echo $attr->attribute_name ?>][icon]" value="layout" <?php echo (isset($o[$name]['icon']) && $o[$name]['icon'] === 'layout')? 'checked="checked"' : ''; ?>><img src="<?php echo THEME_URL.'/images/admin/layout.svg'?>" alt=""></label><br>
+            <label><input type="radio" <?php echo 'style="vertical-align: -2px"'; ?> name="theme_attributes_images[attribute_pa_<?php echo $attr->attribute_name ?>][icon]" value="layout" <?php echo (isset($o[$name]['icon']) && $o[$name]['icon'] === 'layout')? 'checked="checked"' : ''; ?>><img src="<?php echo THEME_URL.'/images/admin/layout.svg'?>" alt=""></label><br>
 
-            <label><input type="radio" style="vertical-align: -2px" name="theme_attributes_images[attribute_pa_<?php echo $attr->attribute_name ?>][icon]" value="items" <?php echo (isset($o[$name]['icon']) && $o[$name]['icon'] === 'items')? 'checked="checked"' : ''; ?>><img src="<?php echo THEME_URL.'/images/admin/items.svg'?>" alt=""></label>
+            <label><input type="radio" <?php echo 'style="vertical-align: -2px"';?>  name="theme_attributes_images[attribute_pa_<?php echo $attr->attribute_name ?>][icon]" value="items" <?php echo (isset($o[$name]['icon']) && $o[$name]['icon'] === 'items')? 'checked="checked"' : ''; ?>><img src="<?php echo THEME_URL.'/images/admin/items.svg'?>" alt=""></label>
 
           </div>
 
@@ -849,6 +985,9 @@ class velesh_theme_meta{
       'showcase' => __('Showcase', 'theme-translations'),
       'support'  => __('Support', 'theme-translations'),
       'customers'  => __('Customers', 'theme-translations'),
+      'constructor'  => __('Constructor', 'theme-translations'),
+      'product_guid'  => __('Product Guidelines', 'theme-translations'),
+      'redo_policy'  => __('Redo Policy', 'theme-translations'),
     );
 
     foreach ($options as $key => $name) {

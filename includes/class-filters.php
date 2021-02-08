@@ -21,6 +21,7 @@ class theme_filter_class{
     add_filter('loop_shop_columns', '__return_false');
 
 
+
     /*sets product thumbnail sizes for gallery in product loop*/
     add_filter('single_product_archive_thumbnail_size', array($this, 'single_product_archive_thumbnail_size'));
 
@@ -111,6 +112,7 @@ class theme_filter_class{
     /*removing srcset*/
       add_filter('wp_calculate_image_srcset_meta', '__return_null' );
       add_filter('wp_calculate_image_sizes', '__return_false',  99 );
+
       remove_filter('the_content', 'wp_make_content_images_responsive' );
       add_filter('wp_get_attachment_image_attributes', array($this, 'unset_attach_srcset_attr'), 99 ,3 );
 
@@ -488,6 +490,16 @@ class theme_filter_class{
           case get_option('theme_page_customers'):
               $states[] = __('Theme Customers\' Page');
             break;
+
+          case get_option('theme_page_constructor'):
+              $states[] = __('Shooting Constructor Page');
+            break;
+          case get_option('theme_page_product_guid'):
+              $states[] = __('Product Guidelines');
+            break;
+          case get_option('theme_page_redo_policy'):
+              $states[] = __('Redo Policy');
+            break;
         }
       }
       return $states;
@@ -551,15 +563,15 @@ class theme_filter_class{
   */
   public static function woocommerce_billing_fields( $address_fields, $country ){
     $fields_allowed  = array(
-      'billing_company',
-      'billing_address_1',
-      'billing_address_2',
-      'billing_city',
-      'billing_state',
-      'billing_postcode',
-      'billing_country',
-      'billing_first_name',
-      'billing_last_name',
+      // 'billing_company',
+      // 'billing_address_1',
+      // 'billing_address_2',
+      // 'billing_city',
+      // 'billing_state',
+      // 'billing_postcode',
+      // 'billing_country',
+      // 'billing_first_name',
+      // 'billing_last_name',
     );
 
     foreach ($address_fields as $key => $value) {
@@ -1076,6 +1088,10 @@ new theme_filter_class();
 add_action('woocommerce_checkout_create_order_line_item', 'theme_save_additional_item_data', 10, 4);
 
 function theme_save_additional_item_data($item, $cart_item_key, $values, $order ){
+
+  if(isset($values['shooting_data'])){
+    $item['shooting_data'] = $values['shooting_data'];
+  }
 
   if(isset($values['extra_data'])){
     $item['extra_data'] = $values['extra_data'];

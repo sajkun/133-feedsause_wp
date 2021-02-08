@@ -47,5 +47,55 @@ var auth2; // The Sign-In object.
    </div>
  <?php endif ?>
 </body>
+<?php if (get_queried_object_id() == (int)get_option('theme_page_constructor') && !isset($_GET['no_reload'])):?>
+<script>
+document.onreadystatechange = function(e) {
+  if(document.readyState=="interactive")
+  {
+    var all = document.getElementsByTagName("*");
+    for (var i=0, max=all.length; i < max; i++)
+    {
+      set_ele(all[i]);
+    }
+  }
+}
+
+function check_element(ele)
+{
+  var all = document.getElementsByTagName("div");
+  var totalele=all.length;
+  var per_inc=100/all.length;
+
+  if(jQuery(ele).on('load'))
+  {
+    var prog_width= per_inc + Number(document.getElementById("progress_width").value);
+
+    document.getElementById("progress_width").value=prog_width;
+
+    jQuery("#bar1").animate({width:prog_width+"%"},1,function(){
+      if(document.getElementById("bar1").style.width=="100%")
+      {
+        //trigger action
+
+        jQuery('.load-page').addClass('hidden');
+        jQuery('.site-header').removeClass('visuallyhidden');
+        jQuery('#studio-content').removeClass('hidden');
+        jQuery('#studio-content').removeClass('visuallyhidden');
+      }
+    });
+  }
+
+  else
+  {
+    set_ele(ele);
+  }
+}
+
+function set_ele(set_element)
+{
+  check_element(set_element);
+}
+  </script>
+<?php endif ?>
 </html>
 

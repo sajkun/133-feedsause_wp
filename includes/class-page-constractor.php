@@ -29,7 +29,15 @@ class theme_construct_page{
       self::hook_frontend_page_functions();
     }
 
+    elseif(self::is_page_type( 'constructor' )){
+      if(!isset($_GET['product_id'])){
+        wp_safe_redirect(get_permalink(woocommerce_get_page_id( 'shop' )) );
+      }
+
+       add_action('do_theme_content', array('theme_content_output','print_product_contructor'), 10);
+    }
     elseif(self::is_page_type( 'blog' )){
+
       add_action('do_fly_basket', array('theme_content_output','print_fly_basket'), 10);
        self::hook_blog_functions();
     }
@@ -69,7 +77,13 @@ class theme_construct_page{
         add_action('do_fly_basket', array('theme_content_output','print_fly_basket'), 10);
       }
 
-      elseif( self::is_page_type( 'woo-shop-category' )){
+      elseif( self::is_page_type( 'woo-product' )){
+
+        add_action('do_theme_header', array('theme_content_output','print_product_notification'), 5);
+
+        add_action('do_theme_content', array('theme_content_output','print_product_content'), 10);
+
+      }elseif( self::is_page_type( 'woo-shop-category' )){
         add_action('do_theme_after_content', array('theme_content_output','print_pre_footer_cta'), 90);
         add_action('do_fly_basket', array('theme_content_output','print_fly_basket'), 10);
       }
@@ -125,9 +139,13 @@ class theme_construct_page{
   * @return bool
   */
   public static function is_page_type( $type ){
+    $obj = get_queried_object();
     switch ($type){
       case 'new-styles':
-        return function_exists('is_product') && is_product();
+        return (function_exists('is_product') && is_product()) || ($obj->ID == (int)get_option('theme_page_constructor'))  || ( is_checkout() && !empty( is_wc_endpoint_url('order-received') ) );
+        break;
+      case 'constructor':
+      return $obj->ID == (int)get_option('theme_page_constructor');
         break;
       case 'blog':
         return is_home();
@@ -139,7 +157,6 @@ class theme_construct_page{
         return is_category();
         break;
       case 'blog-post':
-        $obj = get_queried_object();
         return (is_single() && ('post' === $obj->post_type));
         break;
       case 'post-tag':

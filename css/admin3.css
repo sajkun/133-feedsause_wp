@@ -883,3 +883,30 @@ border: 1px solid  #000;
 #roles:checked ~ .roles{
   display: block;
 }
+
+#customize_and_create:checked ~ .duh-tabs [for="customize_and_create"]{
+  background: #fff;
+  border-bottom-color:#fff;
+}
+
+#customize_and_create:checked ~ .customize_and_create{
+  display: block;
+}
+
+#good_2_know:checked ~ .duh-tabs [for="good_2_know"]{
+  background: #fff;
+  border-bottom-color:#fff;
+}
+
+#good_2_know:checked ~ .good_2_know{
+  display: block;
+}
+
+#show_bespoke:checked ~ .duh-tabs [for="show_bespoke"]{
+  background: #fff;
+  border-bottom-color:#fff;
+}
+
+#show_bespoke:checked ~ .show_bespoke{
+  display: block;
+}

@@ -1,4 +1,8 @@
-<header class="site-header">
+<header class="site-header
+<?php if (get_queried_object_id() == (int)get_option('theme_page_constructor') && !isset($_GET['no_reload'])): ?>
+  visuallyhidden
+<?php endif ?>
+" >
   <div class="container-lg">
     <div class="row">
       <div class="col-md-9 valign-center">

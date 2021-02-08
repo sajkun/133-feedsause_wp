@@ -33,7 +33,7 @@ if(!function_exists('exec_clog')){
   function exec_clog(){
     global $clog_data;
 
-    // if(!$clog_data) return;
+    if(!$clog_data) return;
 
     foreach ($clog_data as $key => $data) {
       switch ($data['color']){

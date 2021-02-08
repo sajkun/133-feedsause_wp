@@ -24,6 +24,111 @@
 
     add_action('wp_ajax_add_coupon', array($this, 'add_coupon_cb'));
     add_action('wp_ajax_nopriv_add_coupon', array($this, 'add_coupon_cb'));
+
+    add_action('wp_ajax_finish_shooting', array($this, 'finish_shooting_cb'));
+  }
+
+  public static function finish_shooting_cb(){
+    add_filter('woocommerce_cart_needs_shipping_address', '__return_false',  99 );
+    add_filter('woocommerce_cart_needs_shipping', '__return_false',  99 );
+    // add_filter('woocommerce_cart_needs_payment', '__return_false',  99 );
+
+    $titles = array_map(function($el){return $el['title'];}, $_POST['products']);
+
+    $cart_item_data = array(
+
+     'name' => array(
+        'value' => implode(', ', $titles),
+        'label' => 'Products',
+        'name'  => 'printed_name',
+      ),
+     'sizes' => array(
+       'value' => $_POST['customize']['sizes'],
+       'label' => 'Sizes',
+       'name'  => 'sizes',
+      ),
+     'colors' => array(
+       'value' => $_POST['customize']['color_pref'],
+       'label' => 'Color',
+       'name'  => 'color'
+     ),
+     'position' => array(
+       'value' => $_POST['customize']['position'],
+       'label' => 'Position',
+       'name'  => 'position'
+     ),
+
+     'props' => array(
+       'value' => $_POST['customize']['props'],
+       'label' => 'Props',
+       'name'  => 'props'
+     ),
+
+     'image_count' => array(
+       'value' => $_POST['image_count'],
+       'label' => 'Number of Images',
+       'name'  => 'image_count'
+     ),
+
+     'send_products' => array(
+       'value' => $_POST['handling']['send'],
+       'label' => 'Send products',
+       'name'  => 'send_products'
+     ),
+    );
+
+    if(is_array($_POST['notes']['data'])){
+       $cart_item_data[ 'comment_type'] = array(
+       'value' => $_POST['notes']['title'],
+       'label' => 'Type of notes',
+       'name'  => 'comment_type'
+      );
+
+      foreach ($_POST['notes']['data'] as $key => $info) {
+        $cart_item_data['Shoot #'.$key] = array(
+         'value' => $info['text'],
+         'label' => 'Shoot #'.$key. ' product "'.$info['product'].'"',
+         'name'  => 'comment_'.$key
+        );
+      }
+    }else{
+       $cart_item_data[ 'comment'] = array(
+       'value' => $_POST['notes']['data'],
+       'label' => 'Notes',
+       'name'  => 'comment'
+      );
+    }
+
+
+    $additional_data = array(
+      'extra_data' =>  $cart_item_data,
+      'shoot_data' =>  $_POST,
+    );
+
+    wc()->cart->empty_cart();
+    wc()->cart->add_to_cart((int)$_POST['product_id'], 1, (int)$_POST['product_id'], array(),$additional_data);
+
+    $fattrack = get_option('wfp_priority_delivery_product_id');
+    $handle   = get_option('wfp_return_product_id');
+    $prices   = get_option('theme_settings');
+    $prices   = array_map(function($el){return (int)$el;}, $prices);
+
+    foreach (wc()->cart->get_cart() as $key => $item) {
+      $total = $prices['single_product_price'] * (int)$_POST['image_count'] + $prices['name'] * (count($_POST['products']) - 1) + $prices['sizes'] * (count($_POST['customize']['sizes']) - 1);
+      $total += ($_POST['customize']['color_pref'] != 'none')? $prices['color'] : 0;
+      $total += is_array($_POST['notes']['data'] )? count($_POST['notes']['data'] ) * $prices['shoot'] : 0;
+      $item['data']->set_price($total);
+    }
+
+    wc()->checkout->process_checkout();
+
+    wp_send_json(array(
+      'total'=>$total,
+      'post'=>$_POST,
+      'items'=> wc()->cart->get_cart(),
+      'needs_shipping' => WC()->cart->needs_shipping(),
+      'needs_payment' => WC()->cart->needs_payment(),
+    ));
   }
 
 

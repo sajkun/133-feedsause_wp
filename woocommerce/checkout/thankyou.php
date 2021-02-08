@@ -19,7 +19,31 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
 ?>
+
+<div class="thank-you">
+  <div class="spacer-h-50"></div>
+  <img src="<?php echo THEME_URL ?>/images/thx.svg" alt="" class="thank-you__img1">
+  <div class="spacer-h-30"></div>
+  <h2 class="thank-you__title">Your order
+has been placed</h2>
+  <p class="thank-you__text">
+    We’re getting the cameras ready now.
+We’ll notify you once your shoot has been accepted by one of our photographers.
+  </p>
+  <img src="<?php echo THEME_URL ?>/images/colors.svg" alt="" class="thank-you__img2">
+  <div class="spacer-h-140"></div>
+  <div class="spacer-h-10"></div>
+
+  <div class="thank-you__buttons">
+    <a href="<?php echo get_permalink(woocommerce_get_page_id( 'shop' ))  ?>" class="thank-you__buttons-item start">Start another shoot</a>
+    <a href="<?php echo (wc_get_account_endpoint_url( 'orders' ))  ?>" class="thank-you__buttons-item dashboard">Go to Dashboard</a>
+  </div>
+</div>
+
+
+<?php /*
 
 <div class="checkout thank-you">
 	<div class="container container_sm">
@@ -121,3 +145,5 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	</div>
 </div>
+
+*/?>

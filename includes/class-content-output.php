@@ -14,6 +14,8 @@ class theme_content_output{
   * @hookedto do_theme_header on home page 10
   */
   public static function print_header(){
+
+
     $main_menu = wp_nav_menu( array(
       'theme_location'  => 'main_menu',
       'menu'            => '',
@@ -173,6 +175,11 @@ class theme_content_output{
 
   public static function print_new_header(){
 
+
+    // if( is_checkout() && !empty( is_wc_endpoint_url('order-received') ) ){
+    //   return;
+    // }
+
     $custom_logo_id = get_theme_mod( 'custom_logo' );
     $custom_logo_url = wp_get_attachment_image_url( $custom_logo_id , 'full' );
 
@@ -198,6 +205,33 @@ class theme_content_output{
     $my_account_id = get_option('woocommerce_myaccount_page_id');
 
     if(wp_is_mobile()):
+        $login_url =  $my_account_id? get_permalink( $my_account_id) : false;
+        $login_text =  $user_id == 0 ? "Log In" : 'My Account';
+        $addon = $login_url? sprintf('<li class="menu-item last-item"> <a href="%s">%s</a> </li>', $login_url,  $login_text) : '';
+        $main_menu = wp_nav_menu( array(
+          'theme_location'  => 'main_menu',
+          'menu'            => '',
+          'container'       => '',
+          'container_class' => '',
+          'container_id'    => '',
+          'menu_class'      => 'mobile-menu__list',
+          'menu_id'         => '',
+          'echo'            => false,
+          // 'fallback_cb'     => '',
+          'before'          => '',
+          'after'           => '',
+          'link_before'     => '',
+          'link_after'      => '',
+          'items_wrap'      => '<ul id="%1$s" class="%2$s">%3$s'. $addon .'</ul>',
+          'depth'           => 2,
+          'walker'          => new main_menu_walker(),
+        ) );
+
+      $args = array(
+        'logo'   => $logo,
+      );
+
+      print_theme_template_part('header-mobile-new', 'globals', $args);
 
     else:
     $main_menu = wp_nav_menu( array(
@@ -341,7 +375,7 @@ class theme_content_output{
       $queried = get_queried_object();
       $o = get_post_meta($queried->ID, '_header_style', true);
 
-        if(!is_home() && ('contrast' !== $o)  && !is_front_page() && !theme_construct_page::is_page_type('woo-my-account') && !theme_construct_page::is_page_type('showcase') && !theme_construct_page::is_page_type('customer')){
+        if(!is_home() && ('contrast' !== $o)  && !is_front_page() && !theme_construct_page::is_page_type('woo-my-account') && !theme_construct_page::is_page_type('showcase') && !theme_construct_page::is_page_type('customer') && ! ( is_checkout() && !empty( is_wc_endpoint_url('order-received') ) )){
           echo '<div class="spacer-h-40"></div>';
         }
 
@@ -359,7 +393,7 @@ class theme_content_output{
           echo '</div>';
         }
 
-        if(!is_home() && !is_front_page() && !theme_construct_page::is_page_type('woo-my-account') && !theme_construct_page::is_page_type('showcase') && !theme_construct_page::is_page_type('customer')){
+        if(!is_home() && !is_front_page() && !theme_construct_page::is_page_type('woo-my-account') && !theme_construct_page::is_page_type('showcase') && !theme_construct_page::is_page_type('customer')  && ! ( is_checkout() && !empty( is_wc_endpoint_url('order-received') ) )){
             echo '<div class="spacer-h-50"></div>';
         }
         break;
@@ -2070,11 +2104,11 @@ class theme_content_output{
   */
   public static function print_checkout_sidebar_regular(){
     ?>
-    <?php do_action( 'woocommerce_checkout_before_order_review' ); ?>
+    <?php  do_action( 'woocommerce_checkout_before_order_review' ); ?>
 
-    <?php do_action( 'woocommerce_checkout_order_review' ); ?>
+    <?php  do_action( 'woocommerce_checkout_order_review' ); ?>
 
-    <?php do_action( 'woocommerce_checkout_after_order_review' ); ?>
+    <?php  do_action( 'woocommerce_checkout_after_order_review' ); ?>
     <?php
   }
 
@@ -3420,8 +3454,6 @@ class theme_content_output{
   }
 
 
-
-
   public static function print_showcase_on_home(){
     $subtitle  = get_option('static_home_page_showcases_subtitle');
     $title     = get_option('static_home_page_showcases_title');
@@ -3499,6 +3531,142 @@ class theme_content_output{
     echo '<div class="container container_sm">';
     the_content();
     echo '</div>';
+  }
+
+
+  public static function print_product_notification(){
+    $args = array(
+      'url' => HOME_URL,
+
+    );
+    if(wp_is_mobile()):
+    else:
+      print_theme_template_part('studio-notification', 'woocommerce', $args);
+    endif;
+  }
+
+
+
+  public static function print_product_content(){
+
+    if(!function_exists('get_field')){
+      echo 'Install ACF PLUGIN';
+      return;
+    }
+
+    global $product;
+    global $theme_init;
+
+    $img_url = wp_get_attachment_image_url($product->get_image_id(), wp_is_mobile()? 'full' : 'full');
+
+    $constructor_url = get_permalink(get_option('theme_page_constructor'));
+
+    $gallery_ids = $product->get_gallery_image_ids();
+
+
+    $counter = 1;
+
+    $gallery = array();
+
+    foreach ($gallery_ids as $id) {
+      $size = wp_is_mobile() ? 'gallery_'.$counter : 'full';
+      $gallery[] = wp_get_attachment_image_url($id, $size);
+      $counter++;
+      $counter = $counter > 3? 0 : $counter;
+    }
+
+    $product_id = $product->get_id();
+
+    $args = array(
+      'img_url' => $img_url,
+
+      'gallery' => $gallery,
+
+      'constructor_url' => $constructor_url.'?product_id='.$product_id,
+
+      'title'   => $product->get_name(),
+
+      'description_short'   => $product->get_short_description(),
+
+      'bg_color'  => get_post_meta($product->get_id(), 'bg_color', true)? : '#000',
+
+      'cta_text'  => get_post_meta($product->get_id(), 'cta_text', true)? : '<b> Customise Blocks to match your brand.</b>Order now and download your photos in <span class="green">72 hours</span>',
+
+      'photo_price' => strip_tags(wc_price(30)),
+
+      'rate' => array(
+        'value' => get_post_meta($product->get_id(), 'rate_value', true)? :  4.5,
+        'title' => get_post_meta($product->get_id(), 'rate_title', true)? :'Excellent',
+      ),
+
+      'expect' => array(
+        'display'         => get_field('expect_display', $product_id),
+        'expect_for'      => get_field('expect_for', $product_id),
+        'elements' => get_field('expect_elements', $product_id),
+      ),
+
+      'for' => array(
+        'display' => get_field('for_display', $product_id),
+        'title'   => get_field('for_title', $product_id),
+        'text'    => get_field('for_text', $product_id),
+      ),
+
+      'show_blocks' => array(
+        'show_customize_and_create' => get_field('show_customize_and_create', $product_id),
+        'show_good_2_know' => get_field('show_good_2_know', $product_id),
+        'show_bespoke' => get_field('show_bespoke', $product_id),
+      ),
+
+      'pgb' => get_option('product_global_blocks'),
+
+    );
+
+    wp_localize_script($theme_init->main_script_slug, 'gallery_items', $gallery);
+
+    if(wp_is_mobile()):
+      print_theme_template_part('product-mobile', 'woocommerce', $args);
+    else:
+      print_theme_template_part('product-desktop', 'woocommerce', $args);
+    endif;
+  }
+
+  public static function print_product_contructor(){
+    global $theme_init;
+
+    $product_id = (int)$_GET['product_id'];
+    wp_localize_script($theme_init->main_script_slug, 'product_id', array($product_id));
+
+    $product = wc_get_product($product_id);
+
+    $fattrack = wc_get_product(get_option('wfp_priority_delivery_product_id'));
+    $handle   = wc_get_product(get_option('wfp_return_product_id'));
+
+    $prices = get_option('theme_settings');
+    $prices['image'] = $prices['single_product_price'] ;
+    $prices['fasttrack'] = $fattrack->get_price() ;
+    $prices['handle']    = $handle->get_price()  ;
+
+    $prices = array_map(function($el){return (int)$el;}, $prices);
+    wp_localize_script($theme_init->main_script_slug, 'theme_prices', $prices);
+
+    $colors = get_field('constructor_color',  $product_id)? : array();
+    wp_localize_script($theme_init->main_script_slug, 'theme_colors', $colors);
+
+    $args = array(
+      'product_guid_url' =>get_option('theme_page_product_guid')? get_permalink( get_option('theme_page_product_guid')) : false,
+      'redo_policy_url' => get_option('theme_page_redo_policy')? get_permalink( get_option('theme_page_redo_policy')) : '',
+      'terms_page_url' => get_option('woocommerce_terms_page_id')? get_permalink( get_option('woocommerce_terms_page_id')) : '',
+      'img_url' => wp_get_attachment_image_url($product->get_image_id(), wp_is_mobile()? 'full' : 'full'),
+      'gateways' => WC()->payment_gateways->get_available_payment_gateways(),
+      'title'    => $product->get_title(),
+      'bg_color'  => get_post_meta( $product_id, 'bg_color', true)? : '#000',
+    );
+
+    if(wp_is_mobile()):
+      print_theme_template_part('mobile', 'constructor', $args);
+    else:
+      print_theme_template_part('desktop', 'constructor', $args);
+    endif;
   }
 }
 

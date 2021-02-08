@@ -64,7 +64,6 @@ switch ($options['type']) {
 		<form name="checkout" method="post" class="checkout woocommerce-checkout" action="<?php echo esc_url( wc_get_checkout_url() ); ?>" enctype="multipart/form-data">
 
 			<?php
-
 				if (isset($_GET['fast_order_id'])){
 					printf('<input type="hidden" name="fast_order_id" value="%s">', $_GET['fast_order_id']);
 				}
