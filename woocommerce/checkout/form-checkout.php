@@ -39,12 +39,12 @@ switch ($options['type']) {
 
 	do_action( 'woocommerce_before_checkout_form', $checkout );
 
+	do_action('print_constructor');
+	return;
 ?>
 <div class="checkout">
 	<div class="container container_sm">
 	<?php
-
-
 
 		// If checkout registration is disabled and not logged in, the user cannot checkout.
 
