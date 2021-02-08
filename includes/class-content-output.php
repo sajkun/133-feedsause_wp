@@ -3584,7 +3584,7 @@ class theme_content_output{
 
       'gallery' => $gallery,
 
-      'constructor_url' => $constructor_url.'?product_id='.$product_id,
+      'constructor_url' => $constructor_url.'?product_id='.$product_id.'?add_to_cart='.$product_id,
 
       'title'   => $product->get_name(),
 

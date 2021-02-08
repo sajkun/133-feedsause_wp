@@ -775,7 +775,8 @@
         </div><!-- card-selector -->
        */ ?>
 
-        <form action="#" method="POST" id="checkout_form">
+       <form enctype="multipart/form-data" action="<?php echo esc_url( wc_get_checkout_url() ); ?>" method="POST" id="checkout_form"  name="checkout" method="post" class="checkout woocommerce-checkout" >
+
           <?php
 
             foreach ( $gateways as $gateway ) {
