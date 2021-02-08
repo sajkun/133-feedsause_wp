@@ -154,7 +154,7 @@ class velesh_init_theme{
       if(wp_is_mobile()){
         wp_enqueue_script($this->main_script_slug, THEME_URL.'/script/new/mobile.main.min.js', array('jquery'), THEME_VERSION, true);
       }else{
-        wp_enqueue_script($this->main_script_slug, THEME_URL.'/script/new/main.min.js', array('jquery'), THEME_VERSION, true);
+        wp_enqueue_script($this->main_script_slug, THEME_URL.'/script/new/desktop.main.min.js', array('jquery'), THEME_VERSION, true);
       }
 
 
