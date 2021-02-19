@@ -611,13 +611,16 @@ class theme_content_output{
   */
   public static function print_pricing() {
     $o = get_option('theme_settings');
-    if(function_exists('wc_get_product') && $o){
-      $subscription = wc_get_product((int)$o['subscription']);
-      $price_per = get_post_meta( $subscription->get_id(), '_ywsbs_price_is_per', '1' );
-      $price_per_period_name = get_post_meta( $subscription->get_id(), '_ywsbs_price_time_option', 'days' );
-    } else{
-      $subscription = false;
-    }
+    // if(function_exists('wc_get_product') && $o){
+    //   $subscription = wc_get_product((int)$o['subscription']);
+    //   if($subscription){
+    //     $price_per = get_post_meta( $subscription->get_id(), '_ywsbs_price_is_per', '1' );
+    //   $price_per_period_name = get_post_meta( $subscription->get_id(), '_ywsbs_price_time_option', 'days' );
+    //   }
+    // } else{
+    //   $subscription = false;
+    // }
+    $subscription = false;
     $title   = esc_attr(get_option('pricing_title'));
     $search  = esc_attr(get_option('pricing_title_marked'));
     $replace = sprintf('<span class="marked marked_blue">%s</span>',$search );
@@ -3338,15 +3341,15 @@ class theme_content_output{
     $o = get_option('theme_settings');
     if(function_exists('wc_get_product')){
       $subscription = wc_get_product((int)$o['subscription']);
-      $price_per = get_post_meta( $subscription->get_id(), '_ywsbs_price_is_per', '1' );
-      $price_per_period_name = get_post_meta( $subscription->get_id(), '_ywsbs_price_time_option', 'days' );
+      if($subscription){
+        $price_per = get_post_meta( $subscription->get_id(), '_ywsbs_price_is_per', '1' );
+        $price_per_period_name = get_post_meta( $subscription->get_id(), '_ywsbs_price_time_option', 'days' );
+      }
     } else{
       $subscription = false;
     }
 
     ?>
-
-
     <section class="vc_section vc_custom_1576165770692 vc_section-has-fill"><div class="vc_row wpb_row vc_row-fluid container container_sm"><div class="wpb_column vc_column_container vc_col-sm-12"><div class="vc_column-inner"><div class="wpb_wrapper"><div class="vc_row wpb_row vc_inner vc_row-fluid vc_column-gap-15 vc_row-o-equal-height vc_row-flex"><div class="wpb_column vc_column_container vc_col-sm-8 vc_col-has-fill"><div class="smartstudio__box vc_column-inner vc_custom_1576077396675"><div class="wpb_wrapper"><div class="vc_empty_space" <?php echo 'style="height: 55px"' ?>><span class="vc_empty_space_inner"></span></div>
       <div class="wpb_single_image wpb_content_element vc_align_center">
 
