@@ -158,8 +158,6 @@ class velesh_init_theme{
       }else{
         wp_enqueue_script($this->main_script_slug, THEME_URL.'/script/new/desktop.main.min.js', array('jquery'), THEME_VERSION, true);
       }
-
-
     }else{
 
       /*********************************/
@@ -625,6 +623,7 @@ class velesh_init_theme{
 
     $locations = array(
       'main_menu'     => __('Menu in header', 'theme-translations'),
+      'main_menu_footer'     => __('Menu in footer', 'theme-translations'),
       'main_menu_mobile'     => __('Main menu for mobiles', 'theme-translations'),
     );
 

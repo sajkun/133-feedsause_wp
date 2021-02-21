@@ -209,8 +209,6 @@ if(!function_exists('unregister_scripts_n_styles')){
   */
   function unregister_scripts_n_styles(){
 
-    clog(wp_scripts());
-
     $styles = apply_filters('allow_theme_styles', wp_styles()->queue);
 
     $scripts = apply_filters('allow_theme_scripts', wp_scripts()->queue);

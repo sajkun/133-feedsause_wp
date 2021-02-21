@@ -302,13 +302,6 @@ class velesh_theme_meta{
       }
     }
     $order = wc_get_order($post->ID);
-    clog($order->get_shipping_methods());
-
-    foreach ($order->get_shipping_methods() as $key => $m) {
-      clog($m->get_data());
-      clog($m->get_instance_id());
-    }
-    clog($active_methods);
 
     $date = false;
 

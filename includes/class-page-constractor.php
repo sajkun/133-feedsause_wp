@@ -18,6 +18,7 @@ class theme_construct_page{
 
     if(self::is_page_type( 'new-styles' )){
       add_action('do_theme_header', array('theme_content_output','print_new_header'));
+      add_action('do_theme_footer', array('theme_content_output','print_footer_new'));
     }else{
       add_filter('print_header_class', array(__CLASS__, 'detect_header_classes'));
       add_action('do_theme_header', array('theme_content_output','print_header'));
@@ -25,6 +26,7 @@ class theme_construct_page{
     }
 
      add_action('print_constructor', array('theme_content_output','print_product_contructor'), 10);
+     add_action('print_constructor', array('theme_content_output','print_popup_address'), 30);
 
     if(self::is_page_type( 'fronted-page' )){
       add_action('do_fly_basket', array('theme_content_output','print_fly_basket'), 10);

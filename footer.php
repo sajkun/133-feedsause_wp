@@ -79,6 +79,7 @@ function check_element(ele)
 
         jQuery('.load-page').addClass('hidden');
         jQuery('.site-header').removeClass('visuallyhidden');
+        jQuery('.site-footer').removeClass('visuallyhidden');
         jQuery('#studio-content').removeClass('hidden');
         jQuery('#studio-content').removeClass('visuallyhidden');
       }

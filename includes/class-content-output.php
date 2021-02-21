@@ -3201,26 +3201,22 @@ class theme_content_output{
                       <img src="<?php echo $image_url ?>" alt="<?php echo $taxonomy_name ?>">
                   </div>
                 </div>
-
               <?php endforeach ?>
-
             </div>
-
             <div class="inner__footer">
               <div class="row">
+                <div class="col-6">
+                  <b> Need help choosing?</b>
+                  <p>Speak to our team of experts</p>
+                </div>
+                <div class="col-6">
+                  <?php
+                   $active_plugins = get_option('active_plugins');
+                   $button_intercom = (in_array('intercom/bootstrap.php', $active_plugins))? '<a href="javascript:void(0)" class="button button_chat" onclick="Intercom(\'show\')"> <span class="item item1"></span> <span class="item item2"></span> <span class="item item3"></span> Live Support </a>' : "";
 
-              <div class="col-6">
-                <b> Need help choosing?</b>
-                <p>Speak to our team of experts</p>
-              </div>
-              <div class="col-6">
-                <?php
-                 $active_plugins = get_option('active_plugins');
-                 $button_intercom = (in_array('intercom/bootstrap.php', $active_plugins))? '<a href="javascript:void(0)" class="button button_chat" onclick="Intercom(\'show\')"> <span class="item item1"></span> <span class="item item2"></span> <span class="item item3"></span> Live Support </a>' : "";
-
-                 echo $button_intercom;
-                ?>
-              </div>
+                   echo $button_intercom;
+                  ?>
+                </div>
               </div>
             </div>
           </div>
@@ -3327,8 +3323,6 @@ class theme_content_output{
 
 
   public static function print_home_social_about(){
-
-
     $subtitle = get_option('static_home_page_social_media_subtitle');
     $title    = get_option('static_home_page_social_media_title');
     $text     = get_option('static_home_page_social_media_text');
@@ -3551,8 +3545,6 @@ class theme_content_output{
 
 
   public static function print_product_content(){
-
-
     if(!function_exists('get_field')){
       echo 'Install ACF PLUGIN';
       return;
@@ -3637,9 +3629,7 @@ class theme_content_output{
   }
 
   public static function print_product_contructor(){
-
     global $theme_init;
-
     $product_id = (int)$_GET['product_id'];
     wp_localize_script($theme_init->main_script_slug, 'product_id', array($product_id));
 
@@ -3657,7 +3647,34 @@ class theme_content_output{
     wp_localize_script($theme_init->main_script_slug, 'theme_prices', $prices);
 
     $colors = get_field('constructor_color',  $product_id)? : array();
+
+    $colors = array_map(function($el){
+      $el['bg'] = $el['bg_img']?'url('.$el['bg_img'].')': $el['bg'];
+      return $el;
+    }, $colors);
+
     wp_localize_script($theme_init->main_script_slug, 'theme_colors', $colors);
+
+    $countries = new WC_Countries();
+
+    $col = array_map(function($el){
+      $country_name = '';
+      $regexp = '/\([\s\S]*\)/';
+
+      $country_name = $el;
+
+      $country_name = preg_replace($regexp, '', $country_name);
+
+      $country_flag_url = str_replace(' ', '_', trim($country_name)).'.png';
+
+       return array(
+        'name' => trim($el),
+        'published' =>  $el =="United Kingdom (UK)"? 1 : 0,
+        'flag' => THEME_URL.'/images/flags/'.$country_flag_url,
+      ); }, $countries->get_countries());
+
+    wp_localize_script($theme_init->main_script_slug, 'all_countries_flags', $col);
+    wp_localize_script($theme_init->main_script_slug, 'all_countries', $countries->get_countries());
 
     $args = array(
       'product_guid_url' =>get_option('theme_page_product_guid')? get_permalink( get_option('theme_page_product_guid')) : false,
@@ -3669,10 +3686,46 @@ class theme_content_output{
       'bg_color'  => get_post_meta( $product_id, 'bg_color', true)? : '#000',
     );
 
+
     if(wp_is_mobile()):
       print_theme_template_part('mobile', 'constructor', $args);
     else:
       print_theme_template_part('desktop', 'constructor', $args);
+    endif;
+  }
+
+  public static function print_popup_address(){
+    $args = array();
+    print_theme_template_part('popup-address', 'constructor', $args);
+  }
+
+  public static function print_footer_new(){
+    $main_menu = wp_nav_menu( array(
+      'theme_location'  => 'main_menu',
+      'menu'            => '',
+      'container'       => 'nav',
+      'container_class' => 'footer-nav',
+      'container_id'    => '',
+      'menu_class'      => 'menu',
+      'menu_id'         => '',
+      'echo'            => false,
+      // 'fallback_cb'     => '',
+      'before'          => '',
+      'after'           => '',
+      'link_before'     => '',
+      'link_after'      => '',
+      'items_wrap'      => '<ul id="%1$s" class="%2$s">%3$s</ul>',
+      'depth'           => 2,
+      'walker'          => new main_menu_walker(),
+    ) );
+
+    $args = array(
+      'main_menu' => $main_menu,
+    );
+    if(wp_is_mobile()):
+      // print_theme_template_part('mobile', 'constructor', $args);
+    else:
+      print_theme_template_part('footer-desktop-new', 'globals', $args);
     endif;
   }
 }

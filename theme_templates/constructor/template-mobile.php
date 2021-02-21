@@ -198,7 +198,7 @@
         <div class="spacer-h-20"></div>
         <h2 class="block-title">Build your shoot with <?php echo $title; ?></h2>
         <div class="spacer-h-20"></div>
-        <p class="regular-text">Get started by telling us which products you’d like to include in this shoot.</p>
+        <p class="regular-text">So, which products would you like to include in this shoot?</p>
         <div class="spacer-h-30"></div>
 
         <div class="studio-content__body">
@@ -222,13 +222,27 @@
                v-on:input="check_product_name(key, product.title)"
                v-model="product.title" :ref="'product-name'">
                <a href="#" class="remove" v-if="key > 0" v-on:click="remove_product(key)">×</a>
-              <div class="spacer-h-20"></div>
+
+              <div class="spacer-h-10"></div>
+
+              <select-imitation-type
+                :class="'fullwidth'"
+                :_selected = "'Type Of product'"
+                :_options = 'product_types'
+                :_select_name = "'product_type'"
+                @update_list = 'change_product_type($event, key)'
+                :ref="'product_type'"
+              ></select-imitation-type>
+              <div class="spacer-h-10"></div>
             </div>
+
           </transition-group>
           <div class="text-center">
             <span class="studio-content__add" v-on:click.prevent="add_product_name()">Add another product</span>
             <span class="price-marker">+ £{{prices.name}}</span>
           </div>
+          <div class="spacer-h-20"></div>
+          <div class="warning">One item counts as one product. For example, if you sell a gift box or hamper and would like all the contents inside to be shot, you would need to add each item as a product.</div>
         </div><!-- studio-content__page -->
       </div><!-- studio-content__page -->
 
@@ -251,7 +265,7 @@
         <div class="studio-content__body">
           <label class="studio-content__label">
             <svg class="icon svg-icon-number"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-number"></use> </svg> Select number of photos
-            <span class="price-marker">£30 /photo</span>
+            <span class="price-marker">£{{prices.image}} /photo</span>
           </label>
 
           <div class="spacer-h-20"></div>
@@ -370,7 +384,7 @@
         <div class="studio-content__body"  v-show="customize_step == 4">
           <label class="studio-content__label">
             Additional photo sizes
-            <span class="price-marker">£2/size</span>
+            <span class="price-marker">£{{prices.sizes}}/size</span>
           </label>
           <p class="regular-text">Default square size is free and included in your recipe.</p>
 
@@ -421,9 +435,9 @@
         <div class="studio-content__body" v-show="customize_step == 1">
           <label class="studio-content__label">
             Any colour preference?
-            <span class="price-marker">+£5</span>
+            <span class="price-marker">+£{{prices.color}}/theme</span>
           </label>
-          <p class="regular-text">The colours below are all the colours we have available and we’re unable to accept custom colour requests.</p>
+          <p class="regular-text">You can choose one theme for <span class="marked">free</span>. If you select additional themes and want them to be used with specific products, please specify in the next step, Studio Notes.</p>
 
           <div class="spacer-h-20"></div>
 
@@ -455,7 +469,7 @@
           <div class="spacer-h-30"></div>
 
           <div class="warning">
-            Please check you’ve made all your customisations before continuing as you can’t make changes later.
+            Please check you’ve made all your customisations before continuing as you’ll be unable to make changes once your shoot has been confirmed.
           </div>
         </div><!-- studio-content__body -->
 
@@ -566,38 +580,49 @@
          <p class="regular-text">Personalise your requirements for each shot.</p>
 
         <div class="studio-content__body">
+          <transition-group
+            name="notes-content"
+            tag="div"
+            v-bind:css="false"
+            v-on:before-enter="beforeEnter"
+            v-on:enter="enter"
+            v-on:leave="leave"
+            v-on:after-enter="enterAfter"
+            v-on:after-leave="leaveAfter"
+          >
 
-        <transition-group
-          name="notes-content"
-          tag="div"
-          v-bind:css="false"
-          v-on:before-enter="beforeEnter"
-          v-on:enter="enter"
-          v-on:leave="leave"
-          v-on:after-enter="enterAfter"
-          v-on:after-leave="leaveAfter"
-        >
+            <div class="clearfix note-block-shoot" :class="{collapsed: !notes.show}" v-for="notes, key in notes.data" :key="'note-blok'+key" v-on:click="expand_collapse_notes(key)">
+              <div class="spacer-h-30"></div>
+              <label class="studio-content__label">
+                <svg class="icon svg-icon-notes"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-notes"></use> </svg> Shot {{key + 1}}
 
-          <div class="clearfix" v-for="notes, key in notes.data" :key="'note-blok'+key">
-            <div class="spacer-h-30"></div>
-            <label class="studio-content__label">
-              <svg class="icon svg-icon-notes"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-notes"></use> </svg> Shot {{key + 1}}
+                <a href="#" class="remove" v-if="key > 0" v-on:click="remove_note(key)">×</a>
+              </label>
 
-              <a href="#" class="remove" v-if="key > 0" v-on:click="remove_note(key)">×</a>
-            </label>
-            <div class="spacer-h-10"></div>
+              <transition
+                name="notes-content"
+                tag="div"
+                v-bind:css="false"
+                v-on:before-enter="beforeEnter"
+                v-on:enter="enter"
+                v-on:leave="leave"
+                v-on:after-enter="enterAfter"
+                v-on:after-leave="leaveAfter"
 
-            <product-select
-              :_products = "products"
-              :ref = "'notes-product'"
-              v-on:change_value = 'change_value_cb($event, key)'
-            ></product-select>
-
-            <div class="spacer-h-20"></div>
-
-            <input type="text" :ref = "'notes-text'" v-on:input="remove_error('notes-text', key, notes.text)" class="input-field" placeholder="Direction (max 140 characters)" v-model="notes.text">
-          </div><!-- clearfix -->
-        </transition-group>
+              >
+                <div v-show="notes.show">
+                  <div class="spacer-h-10" ></div>
+                  <product-select
+                    :_products = "products"
+                    :ref = "'notes-product'"
+                    v-on:change_value = 'change_value_cb($event, key)'
+                  ></product-select>
+                  <div class="spacer-h-20" ></div>
+                  <input type="text"  :ref = "'notes-text'" v-on:input="remove_error('notes-text', key, notes.text)" class="input-field" placeholder="Direction (max 140 characters)" v-model="notes.text">
+                </div>
+              </transition>
+            </div><!-- clearfix -->
+          </transition-group>
 
           <div class="spacer-h-20"></div>
           <div class="text-center" v-if="notes.data.length < image_count">
@@ -728,18 +753,56 @@
               </span>
             </span>
           </label>
-          <label class="radio-imitation props-options col-1-2 not-act">
-            <span class="radio-imitation__view flex text-center">
-              <span class="radio-imitation__longtext">
-                <b>Free Collection * </b>Not available in city
+            <label class="radio-imitation props-options col-1-2 not-act">
+              <input type="radio" name="sendvia" value="free" v-model="handling.send">
+              <span class="radio-imitation__view flex text-center">
+                <span class="radio-imitation__longtext">
+                  <b>Free Collection * </b> Selected Countries
+                </span>
               </span>
-            </span>
-          </label>
+            </label>
         </div>
+
+          <transition
+            name="notes-content"
+            tag="div"
+            v-bind:css="false"
+            v-on:before-enter="beforeEnter"
+            v-on:enter="enter"
+            v-on:leave="leave"
+            v-on:after-enter="enterAfter"
+            v-on:after-leave="leaveAfter"
+          >
+
+          <div class="" v-if="handling.send == 'free'">
+             <div class="spacer-h-20"></div>
+             <select-imitation-country
+              :_selected = "'Select a country'"
+              :_options = 'countries'
+              :_select_name = "'countries'"
+              @update_list = 'change_country($event)'
+              ref="countries_select"
+            ></select-imitation-country>
+
+            <div class="spacer-h-20"></div>
+
+            <div class="address-wrapper" v-on:click.prevent.stop = "show_drop_address">
+              <div class="spacer-h-20"></div>
+              <span class="address-wrapper__title">Collection Address </span>
+              <span class="address-wrapper__value">{{_collection_address}}</span>
+              <div class="address-wrapper__dropdown" v-show="show_addresses_drop">
+                <ul class="address-wrapper__list">
+                  <li v-on:click.prevent="show_popup_address">+  Add new address</li>
+                  <li v-for="addr, key in addresses" v-bind:key="'addr_'+key" v-on:click.prevent.stop="collection_address = addr">{{addr}}</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </transition>
 
         <div class="spacer-h-20"></div>
 
-        <p class="regular-text">* Free Collection requires access to a printer so you can print the postage label we provide you with.</p>
+        <p class="warning">* Free Collection requires access to a printer so you can print the postage label we provide you with.</p>
       </div><!-- studio-content__page -->
       <!-- **************
            STEP 6 END
