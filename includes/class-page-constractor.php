@@ -83,7 +83,7 @@ class theme_construct_page{
 
       elseif( self::is_page_type( 'woo-product' )){
 
-        add_action('do_theme_header', array('theme_content_output','print_product_notification'), 5);
+        // add_action('do_theme_header', array('theme_content_output','print_product_notification'), 5);
 
         add_action('do_theme_content', array('theme_content_output','print_product_content'), 10);
 

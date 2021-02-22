@@ -13,14 +13,14 @@
     <div class="clearfix">
       <label>Collection address</label>
 
-      <select-imitation
+      <select-imitation-country
         ref="country"
         v-bind:class="'fullwidth'"
         v-bind:_select_name="'country'"
         v-bind:_options="countries"
         v-bind:_selected="'United Kingdom'"
         v-on:update_list="update_data($event)"
-      ></select-imitation>
+      ></select-imitation-country>
 
     </div>
 

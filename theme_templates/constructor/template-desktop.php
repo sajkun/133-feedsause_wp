@@ -34,7 +34,6 @@
 <?php endif ?>
 
 <div class="visuallyhidden" id="studio-content">
-  <div class="spacer-h-40"></div>
   <div class="container-lg">
 
   <div class="row">
@@ -947,5 +946,3 @@
   </div><!-- row -->
   </div>
 </div>
-
-<div class="spacer-h-30"></div>

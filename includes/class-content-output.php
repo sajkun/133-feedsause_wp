@@ -3575,12 +3575,16 @@ class theme_content_output{
     wc()->cart->empty_cart();
     wc()->cart->add_to_cart((int)$product_id , 1, (int)$product_id);
 
+    $myaccount_page = get_option( 'woocommerce_myaccount_page_id' );
+    $myaccount_page_url = get_permalink( $myaccount_page );
+    $constructor_url = is_user_logged_in() ? $constructor_url.'?product_id='.$product_id.'?add_to_cart='.$product_id : $myaccount_page_url.'?product_id='.$product_id ;
+
     $args = array(
       'img_url' => $img_url,
 
       'gallery' => $gallery,
 
-      'constructor_url' => $constructor_url.'?product_id='.$product_id.'?add_to_cart='.$product_id,
+      'constructor_url' => $constructor_url,
 
       'title'   => $product->get_name(),
 

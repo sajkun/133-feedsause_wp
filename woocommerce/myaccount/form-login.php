@@ -108,7 +108,16 @@ do_action( 'woocommerce_before_customer_login_form' ); ?>
 	       <?php _e('Don’t have an account','theme-translations');?>?  <a href="?create_account=do" class="link-blue"> <?php _e('Sign up for free','theme-translations');?></a>.
       </p>
       <?php endif; ?>
-      <input type="hidden" name="redirect" value="<?php echo esc_url(wc_get_account_endpoint_url( 'orders' )) ?>">
+
+      <?php
+        if(isset($_GET['product_id'])){
+          $constructor_url = get_permalink(get_option('theme_page_constructor'));
+          $product_url = $constructor_url.'?product_id='.$_GET['product_id'].'&add_to_cart='.$_GET['product_id'];
+        }
+        $redirect = !isset($_GET['product_id'])? esc_url(wc_get_account_endpoint_url( 'orders' )) : $product_url;
+      ?>
+      <input type="hidden" name="redirect" value="<?php echo $redirect;  ?>">
+
 			<?php do_action( 'woocommerce_login_form_end' ); ?>
 
 		</form>

@@ -1891,6 +1891,10 @@ fieldset {
   max-width: 100% !important;
 }
 
+.select-imitation.select-country .select-imitation__dropdown {
+  margin-top: 40px !important;
+}
+
 .select-imitation .comming-soon {
   font-family: "PoppinsFont", sans-serif;
   font-size: 9px;

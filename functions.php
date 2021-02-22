@@ -143,7 +143,6 @@ class velesh_init_theme{
       if(wp_is_mobile()){
         wp_enqueue_style('theme-style-desktop', THEME_URL.'/css/mobile.main.min.css' );
 
-
       }else{
         wp_enqueue_style('theme-style-desktop', THEME_URL.'/css/desktop.main.min.css' );
       }

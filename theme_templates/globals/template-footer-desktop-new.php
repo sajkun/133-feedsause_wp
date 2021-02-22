@@ -3,6 +3,7 @@
   visuallyhidden
 <?php endif ?>
 " >
+<div class="spacer-h-10"></div>
 <div class="container">
   <img src="<?php echo THEME_URL; ?>/images/feed-black.png" alt="">
   <span class="copyrights">© 2021</span>
