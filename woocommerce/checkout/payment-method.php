@@ -22,7 +22,7 @@ $options = get_theme_checkout_content();
 $class = ('regular' === $options['type'])? 'checkout__aside-block no-margin' : '';
 
 ?>
-<div class="<?php echo $class ?> checkout-block wc_payment_method payment_method_<?php echo esc_attr( $gateway->id ); ?>">
+<li class="<?php echo $class ?> checkout-block wc_payment_method payment_method_<?php echo esc_attr( $gateway->id ); ?>">
   <?php $title_class = ('regular' === $options['type'])?  'checkout__aside-subtitle' : 'checkout-block__title'; ?>
 	<div class="<?php echo $title_class ?>">
 
@@ -38,4 +38,4 @@ $class = ('regular' === $options['type'])? 'checkout__aside-block no-margin' : '
 			<?php $gateway->payment_fields(); ?>
 	<?php endif; ?>
 	</div>
-</div>
+</li>

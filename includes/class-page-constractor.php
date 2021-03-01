@@ -18,7 +18,7 @@ class theme_construct_page{
 
     if(self::is_page_type( 'new-styles' )){
       add_action('do_theme_header', array('theme_content_output','print_new_header'));
-      add_action('do_theme_footer', array('theme_content_output','print_footer_new'));
+      // add_action('do_theme_footer', array('theme_content_output','print_footer_new'));
     }else{
       add_filter('print_header_class', array(__CLASS__, 'detect_header_classes'));
       add_action('do_theme_header', array('theme_content_output','print_header'));

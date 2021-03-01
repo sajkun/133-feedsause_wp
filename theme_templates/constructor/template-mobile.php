@@ -290,7 +290,10 @@
               </span>
             </label>
             <div class="photo_count">
-             <input type="text"  v-model="image_count" ref="image_count_input" v-on:click="image_count = 1"  >
+             <input type="text"  ref="image_count_input" value="-"
+               v-on:blur="handle_image_count"
+               v-on:input="handle_image_count"
+              >
             </div>
           </div>
         </div><!-- studio-content__page -->
@@ -444,7 +447,11 @@
           <div class="horisontal-slider">
             <div class="color-switcher" >
               <label class="color-item">
-                <input type="radio" name="color" value="none" v-model="customize.color_pref">
+                <input type="radio" name="discard_colors"
+                  checked="checked"
+                  ref="discard_colors"
+                  v-on:click="toggle_color_pref('discard')"
+                >
                 <span class="color-item__border">
                   <span class="color-item__color">
                      <svg class="icon svg-icon-mind"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-mind">
@@ -454,9 +461,10 @@
               </label><!-- color-item -->
 
               <label class="color-item" v-for="color, key in colors" :key="'color-'+key">
-                <input type="radio" name="color"
+                <input type="checkbox" name="color"
                  :value="color.name"
-                 v-model="customize.color_pref">
+                 v-on:change="toggle_color_pref(color.name)"
+                 >
                 <span class="color-item__border">
                   <span class="color-item__color" :style="'background:'+ color.bg">
                   </span>
@@ -839,6 +847,7 @@
        */ ?>
       <div class="checkout">
        <form enctype="multipart/form-data" action="<?php echo esc_url( wc_get_checkout_url() ); ?>" method="POST" id="checkout_form"  name="checkout" class="checkout woocommerce-checkout" >
+        <ul class="wc_payment_methods payment_methods methods unstyled-list">
 
           <?php
 
@@ -846,6 +855,7 @@
               wc_get_template( 'checkout/payment-method.php', array( 'gateway' => $gateway, 'count' => count( $gateways ) ) );
             }
           ?>
+        </ul>
           <?php wp_nonce_field( 'woocommerce-process_checkout', 'woocommerce-process-checkout-nonce' ); ?>
 
           <div class="spacer-h-10"></div>

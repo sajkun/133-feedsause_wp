@@ -24,8 +24,6 @@
 
 .image-placeholder img{
   display: block;
-
-
 }
 
 .icon {
@@ -909,4 +907,28 @@ border: 1px solid  #000;
 
 #show_bespoke:checked ~ .show_bespoke{
   display: block;
+}
+
+#prices:checked ~ .duh-tabs [for="prices"]{
+  background: #fff;
+  border-bottom-color:#fff;
+}
+
+#prices:checked ~ .prices{
+  display: block;
+}
+
+
+#product_types:checked ~ .duh-tabs [for="product_types"]{
+  background: #fff;
+  border-bottom-color:#fff;
+}
+
+#product_types:checked ~ .product_types{
+  display: block;
+}
+
+
+.display_meta td{
+  white-space: pre-line;
 }

@@ -163,7 +163,7 @@ if(!function_exists('add_svg_sprite')){
   function add_svg_sprite($name, $url){
     $name_symbol = $name;
     $name_data = $name.'_rev';
-    printf('<script> ( function( window, document ) {var file =\'%s\', revision = 1; if( !document.createElementNS || !document.createElementNS( \'http://www.w3.org/2000/svg\', \'svg\' ).createSVGRect ){return true; }; var isLocalStorage = \'localStorage\' in window && window[ \'localStorage\' ] !== null, request, data, insertIT = function() {document.body.insertAdjacentHTML( \'afterbegin\', data ); }, insert = function() {if( document.body ) insertIT(); else document.addEventListener( \'DOMContentLoaded\', insertIT )}; if( isLocalStorage && localStorage.getItem( \'%2$s\' ) == revision ) {data = localStorage.getItem( \'%3$s\' ); if( data ) {insert(); return true; } }; try {request = new XMLHttpRequest(); request.open( \'GET\', file, true ); request.onload = function(){if( request.status >= 200 && request.status < 400 ) {data = request.responseText; insert(); if( isLocalStorage ) {localStorage.setItem( \'%3$s\',  data ); localStorage.setItem( \'%2$s\', revision ); } } }; request.send(); }catch( e ){}; }( window, document ) ); </script>',  $url, $name_symbol, $name_data);
+    printf('<script> ( function( window, document ) {var file =\'%1$s\', revision = 1; if( !document.createElementNS || !document.createElementNS( \'http://www.w3.org/2000/svg\', \'svg\' ).createSVGRect ){return true; }; var isLocalStorage = \'localStorage\' in window && window[ \'localStorage\' ] !== null, request, data, insertIT = function() {document.body.insertAdjacentHTML( \'afterbegin\', data ); }, insert = function() {if( document.body ) insertIT(); else document.addEventListener( \'DOMContentLoaded\', insertIT )}; if( isLocalStorage && localStorage.getItem( \'%2$s\' ) == revision ) {data = localStorage.getItem( \'%3$s\' ); if( data ) {insert(); return true; } }; try {request = new XMLHttpRequest(); request.open( \'GET\', file, true ); request.onload = function(){if( request.status >= 200 && request.status < 400 ) {data = request.responseText; insert(); if( isLocalStorage ) {localStorage.setItem( \'%3$s\',  data ); localStorage.setItem( \'%2$s\', revision ); } } }; request.send(); }catch( e ){}; }( window, document ) ); </script>',  $url, $name_symbol, $name_data);
   }
 }
 
@@ -1585,4 +1585,17 @@ if(!function_exists('include_php_from_dir')){
       }
     }
   }
+}
+
+
+/**
+ * prints passed data to a file
+ *
+ * @param $log - mixed string|bool|integer|object
+ */
+function print_theme_log($log){
+
+  if(!THEME_DEBUG) return;
+  $log = (is_array($log) || is_object($log))? print_r($log, true) : $log;
+  file_put_contents(THEME_PATH.'/logs/post_'.date("j.n.Y").'.txt', $log, FILE_APPEND);
 }

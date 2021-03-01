@@ -155,7 +155,7 @@ class velesh_init_theme{
       if(wp_is_mobile()){
         wp_enqueue_script($this->main_script_slug, THEME_URL.'/script/new/mobile.main.min.js', array('jquery'), THEME_VERSION, true);
       }else{
-        wp_enqueue_script($this->main_script_slug, THEME_URL.'/script/new/desktop.main.min.js', array('jquery'), THEME_VERSION, true);
+        wp_enqueue_script($this->main_script_slug, THEME_URL.'/script/new/desktop.main2.min.js', array('jquery'), THEME_VERSION, true);
       }
     }else{
 
@@ -232,7 +232,7 @@ class velesh_init_theme{
 
     wp_enqueue_script('theme-script', THEME_URL.'/script/admin.js', array('jquery'), THEME_VERSION, true);
 
-    wp_enqueue_style( 'theme-admin-style', THEME_URL.'/css/admin3.css', THEME_VERSION );
+    wp_enqueue_style( 'theme-admin-style', THEME_URL.'/css/admin4.css', THEME_VERSION );
 
     $settings_pages = array(
 
@@ -456,9 +456,9 @@ class velesh_init_theme{
    */
   public function print_inline_data_body(){
     if(theme_construct_page::is_page_type( 'new-styles' )){
-      add_svg_sprite('theme_sprite_svg_133_new',THEME_URL.'/svg_sprite/new/symbol_sprite.html');
+      add_svg_sprite('theme_sprite_svg_133_3_new',THEME_URL.'/svg_sprite/new/symbol_sprite_2.html');
     }else{
-      add_svg_sprite('theme_sprite_svg_133',THEME_URL.'/svg_sprite/symbol_sprite.html');
+      add_svg_sprite('theme_sprite_svg_133_2',THEME_URL.'/svg_sprite/symbol_sprite.html');
     }
   }
 

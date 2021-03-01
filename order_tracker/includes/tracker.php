@@ -337,7 +337,6 @@ if(!class_exists('theme_order_tracker')){
         'logged_in_user'          => array('name'=>$user->display_name, 'user_id'=> $user->ID),
       );
 
-      clog($data);
 
       foreach ($data as $name => $value) {
         print_javascript_data($name, $value);
@@ -408,7 +407,6 @@ if(!class_exists('theme_order_tracker')){
           'order_statuses' => $order_statuses ,
         );
 
-        clog($o);
 
         print_duh_template_part('settings', 'order_tracker/templates/admin', $args);
       }

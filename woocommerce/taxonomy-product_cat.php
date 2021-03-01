@@ -15,7 +15,6 @@
  * @version     1.6.4
  */
 
-clog(1);
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly

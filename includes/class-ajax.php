@@ -25,30 +25,49 @@
     add_action('wp_ajax_add_coupon', array($this, 'add_coupon_cb'));
     add_action('wp_ajax_nopriv_add_coupon', array($this, 'add_coupon_cb'));
 
+    add_action('wp_ajax_get_coupons', array($this, 'get_coupons_cb'));
+    add_action('wp_ajax_nopriv_get_coupons', array($this, 'get_coupons_cb'));
+
+    add_action('wp_ajax_apply_may_be_coupon', array($this, 'apply_may_be_coupon_cb'));
+    add_action('wp_ajax_nopriv_apply_may_be_coupon', array($this, 'apply_may_be_coupon_cb'));
+
     add_action('wp_ajax_finish_shooting', array($this, 'finish_shooting_cb'));
   }
 
   public static function finish_shooting_cb(){
+
     add_filter('woocommerce_cart_needs_shipping_address', '__return_false',  99 );
     add_filter('woocommerce_cart_needs_shipping', '__return_false',  99 );
     // add_filter('woocommerce_cart_needs_payment', '__return_false',  99 );
 
-    $titles = array_map(function($el){return $el['title'];}, $_POST['products']);
+    $titles = array_map(function($el){return $el['title'] . ' - ' . $el['type'];}, $_POST['products']);
+
+
+    $prices   = get_option('theme_settings');
+    $prices   = array_map(function($el){return (int)$el;}, $prices);
+
+    $total = $prices['single_product_price'] * (int)$_POST['image_count'] + $prices['name'] * (count($_POST['products']) - 1) + $prices['sizes'] * (count($_POST['customize']['sizes']) - 1);
+
+      $total += isset($_POST['customize']['color_pref'])? $prices['color'] * count($_POST['customize']['color_pref'])  : 0;
+
+      $total += is_array($_POST['notes']['data'] )? count($_POST['notes']['data'] ) * $prices['shoot'] : 0;
 
     $cart_item_data = array(
 
      'name' => array(
-        'value' => implode(', ', $titles),
+        'value' => implode(PHP_EOL, $titles),
         'label' => 'Products',
         'name'  => 'printed_name',
       ),
+
      'sizes' => array(
        'value' => $_POST['customize']['sizes'],
        'label' => 'Sizes',
        'name'  => 'sizes',
       ),
+
      'colors' => array(
-       'value' => $_POST['customize']['color_pref'],
+       'value' =>  isset($_POST['customize']['color_pref']) ? implode(PHP_EOL,  $_POST['customize']['color_pref']) : '',
        'label' => 'Color',
        'name'  => 'color'
      ),
@@ -99,31 +118,30 @@
       );
     }
 
-
     $additional_data = array(
       'extra_data' =>  $cart_item_data,
       'shoot_data' =>  $_POST,
+      'custom_price'      => $total,
+      'subtotal'          => $total,
     );
 
     wc()->cart->empty_cart();
     wc()->cart->add_to_cart((int)$_POST['product_id'], 1, (int)$_POST['product_id'], array(),$additional_data);
 
-    $fattrack = get_option('wfp_priority_delivery_product_id');
-    $handle   = get_option('wfp_return_product_id');
-    $prices   = get_option('theme_settings');
-    $prices   = array_map(function($el){return (int)$el;}, $prices);
+    $fattrack = (int)get_option('wfp_priority_delivery_product_id');
+    $handle   = (int)get_option('wfp_return_product_id');
 
-    foreach (wc()->cart->get_cart() as $key => $item) {
-      $total = $prices['single_product_price'] * (int)$_POST['image_count'] + $prices['name'] * (count($_POST['products']) - 1) + $prices['sizes'] * (count($_POST['customize']['sizes']) - 1);
-      $total += ($_POST['customize']['color_pref'] != 'none')? $prices['color'] : 0;
-      $total += is_array($_POST['notes']['data'] )? count($_POST['notes']['data'] ) * $prices['shoot'] : 0;
-      $item['data']->set_price($total);
+    if($_POST['handling']['handle'] == 'return'){
+      wc()->cart->add_to_cart((int)$handle, 1, (int)$handle);
     }
 
-    // wc()->checkout->process_checkout();
+    if($_POST['turnaround'] == 'fasttrack'){
+      wc()->cart->add_to_cart((int)$fattrack, 1, (int)$fattrack);
+    }
 
     wp_send_json(array(
-      'total'=>$total,
+      'total'=> wc()->cart->get_total(),
+      'titles'=>implode(PHP_EOL, $titles),
       'post'=>$_POST,
       'items'=> wc()->cart->get_cart(),
       'needs_shipping' => WC()->cart->needs_shipping(),
@@ -132,6 +150,34 @@
   }
 
 
+
+  public static function get_coupons_cb(){
+    $args = array(
+        'posts_per_page'   => -1,
+        'orderby'          => 'title',
+        'order'            => 'asc',
+        'post_type'        => 'shop_coupon',
+        'post_status'      => 'publish',
+    );
+
+    $coupons = array_map(function($el){
+      return $el->post_title;
+    },get_posts( $args ));
+
+    wp_send_json(array(
+      '$_POST' => $_POST,
+      'coupons' => $coupons,
+    ));
+  }
+
+  public static function apply_may_be_coupon_cb(){
+    $applied = wc()->cart->apply_coupon($_POST['coupon']);
+
+    wp_send_json(array(
+       'applied' => $applied,
+       'discount' => wc()->cart->get_discount_total(),
+    ));
+  }
 
   public static function add_coupon_cb(){
     $applied = wc()->cart->apply_coupon($_POST['coupon']);

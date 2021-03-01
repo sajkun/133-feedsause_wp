@@ -3642,13 +3642,32 @@ class theme_content_output{
     $fattrack = wc_get_product(get_option('wfp_priority_delivery_product_id'));
     $handle   = wc_get_product(get_option('wfp_return_product_id'));
 
-    $prices = get_option('theme_settings');
-    $prices['image'] = $prices['single_product_price'] ;
-    $prices['fasttrack'] = $fattrack->get_price() ;
-    $prices['handle']    = $handle->get_price()  ;
+    $options = get_option('theme_settings');
 
-    $prices = array_map(function($el){return (int)$el;}, $prices);
+    $options['image'] = $options['single_product_price'] ;
+    $options['fasttrack'] = $fattrack->get_price() ;
+    $options['handle']    = $handle->get_price()  ;
+
+    $prices = array_map(function($el){return (int)$el;}, $options);
+
     wp_localize_script($theme_init->main_script_slug, 'theme_prices', $prices);
+
+    if(isset($options['product_types'])){
+      $product_types_published = isset($options['product_types']['published'])?  explode(PHP_EOL, $options['product_types']['published']): array();
+
+      $product_types_published = array_map(function($el){return array('name'=>$el, 'published' => 1);}, $product_types_published);
+
+      $product_types_soon = isset($options['product_types']['soon'])?  explode(PHP_EOL, $options['product_types']['soon']): array();
+      $product_types_soon = array_map(function($el){return array('name'=>$el, 'published' => 0);}, $product_types_soon);
+
+      $product_types = array_merge( $product_types_published, $product_types_soon);
+
+
+      wp_localize_script($theme_init->main_script_slug, 'product_types', $product_types);
+    }else{
+      wp_localize_script($theme_init->main_script_slug, 'product_types', array());
+    }
+
 
     $colors = get_field('constructor_color',  $product_id)? : array();
 

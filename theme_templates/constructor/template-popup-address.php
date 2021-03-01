@@ -9,8 +9,9 @@
     </div>
 
     <div class="spacer-h-20"></div>
+<?php /*
 
-    <div class="clearfix">
+    <div class="clearfix" v-if="!country">
       <label>Collection address</label>
 
       <select-imitation-country
@@ -21,10 +22,9 @@
         v-bind:_selected="'United Kingdom'"
         v-on:update_list="update_data($event)"
       ></select-imitation-country>
+      <div class="spacer-h-20"></div>
+    </div> */ ?>
 
-    </div>
-
-    <div class="spacer-h-20"></div>
 
     <div class="clearfix">
       <input type="text" class="popup-inner__field" placeholder="Address line 1" v-model="line_1" ref="line_1">

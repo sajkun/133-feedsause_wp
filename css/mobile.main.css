@@ -2015,6 +2015,43 @@ fieldset {
   text-decoration: underline;
 }
 
+.unstyled-list {
+  margin: 0;
+  padding: 0;
+}
+
+.stripe-source-errors ul {
+  padding: 0;
+  margin: 0;
+  color: #ef4e4e;
+  font-family: "HelveticaFont_", sans-serif;
+  border-top: 0;
+  width: 100%;
+  border-radius: 18px;
+  background-color: #ffe3e3;
+  padding: 1em 2em 1em 3.5em;
+  position: relative;
+}
+
+.stripe-source-errors ul:before {
+  content: '';
+  position: absolute;
+  left: 1.5em;
+  content: '';
+  width: 15px !important;
+  height: 15px !important;
+  top: 14px !important;
+  background-size: 100%;
+  display: inline-block;
+  background-image: url(data:image/svg+xml;base64,PHN2ZyBpZD0iU1ZHRG9jIiB3aWR0aD0iMjEiIGhlaWdodD0iMjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmVyc2lvbj0iMS4xIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeG1sbnM6YXZvY29kZT0iaHR0cHM6Ly9hdm9jb2RlLmNvbS8iIHZpZXdCb3g9IjAgMCAyMSAyMSI+PGRlZnM+PHBhdGggZD0iTTU4Mi41MDA2NiwzNDIuNzgxMjVjLTAuNzIyNTIsMCAtMS4zMTA1NiwwLjU4ODA0IC0xLjMxMDU2LDEuMzExMTVjMCwwLjcyMTg3IDAuNTg4MDQsMS4zMDk5IDEuMzEwNTYsMS4zMDk5YzAuNzIyNTMsMCAxLjMwOTkxLC0wLjU4ODAzIDEuMzA5OTEsLTEuMzA5OWMtMC4wMDAwOCwtMC43MjMxOSAtMC41ODczOCwtMS4zMTExNSAtMS4zMDk5MSwtMS4zMTExNXpNNTgyLjUwMDY2LDMzMy42MDQ4OWMtMC43NTIwNCwwIC0xLjMyMTA2LDAuMzkyNDYgLTEuMzIxMDYsMS4wMjYzOHY1LjgxNDM2YzAsMC42MzQ1OCAwLjU2ODk1LDEuMDI1NzMgMS4zMjEwNiwxLjAyNTczYzAuNzMzNjksMCAxLjMyMTA2LC0wLjQwNzUyIDEuMzIxMDYsLTEuMDI1NzN2LTUuODE0MzZjLTAuMDAwMDcsLTAuNjE4ODcgLTAuNTg3MzcsLTEuMDI2MzggLTEuMzIxMDYsLTEuMDI2Mzh6TTU4Mi41LDM0OC4wMzEyMmMtNC43MTE4NSwwIC04LjUzMTIyLC0zLjgxOTM3IC04LjUzMTIyLC04LjUzMTIyYzAsLTQuNzExODUgMy44MTkzNywtOC41MzEyMiA4LjUzMTIyLC04LjUzMTIyYzQuNzExODUsMCA4LjUzMTIyLDMuODE5MzcgOC41MzEyMiw4LjUzMTIyYzAsNC43MTE4NSAtMy44MTkzNyw4LjUzMTIyIC04LjUzMTIyLDguNTMxMjJ6TTU4Mi41LDMyOWMtNS43OTg2NSwwIC0xMC41LDQuNzAxMzUgLTEwLjUsMTAuNWMwLDUuNzk5MzEgNC43MDEzNSwxMC41IDEwLjUsMTAuNWM1Ljc5OTMxLDAgMTAuNSwtNC43MDAwMyAxMC41LC0xMC41YzAsLTUuNzk4NjUgLTQuNzAwNzYsLTEwLjUgLTEwLjUsLTEwLjV6IiBpZD0iUGF0aC0wIi8+PC9kZWZzPjxkZXNjPkdlbmVyYXRlZCB3aXRoIEF2b2NvZGUuPC9kZXNjPjxnIHRyYW5zZm9ybT0ibWF0cml4KDEsMCwwLDEsLTU3MiwtMzI5KSI+PGc+PHRpdGxlPlNoYXBlPC90aXRsZT48dXNlIHhsaW5rOmhyZWY9IiNQYXRoLTAiIGZpbGw9IiNlZjRlNGUiIGZpbGwtb3BhY2l0eT0iMSIvPjwvZz48L2c+PC9zdmc+);
+}
+
+.stripe-source-errors li {
+  display: block;
+  margin: 0 0 10px;
+  color: #ef4e4e;
+}
+
 /*
   Table of Contents
 
@@ -3036,6 +3073,10 @@ fieldset {
 
 .load-page {
   display: flex;
+}
+
+.load-page.content-fullheight {
+  min-height: calc(100vh - 242px);
 }
 
 .load-page__content {

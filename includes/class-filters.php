@@ -139,9 +139,7 @@ class theme_filter_class{
 
 
     add_filter( 'woocommerce_is_purchasable', array($this,'price_0_is_purchasable') , 10, 2 );
-
   }
-
    /**
     * makes product with 0 price purchaseable
     *
@@ -1089,6 +1087,13 @@ add_action('woocommerce_checkout_create_order_line_item', 'theme_save_additional
 
 function theme_save_additional_item_data($item, $cart_item_key, $values, $order ){
 
+
+  if(isset($values['custom_price'])){
+    $item->set_subtotal((int)$values['custom_price']);
+
+    // $item->set_total((int)$values['custom_price']);
+  }
+
   if(isset($values['shooting_data'])){
     $item['shooting_data'] = $values['shooting_data'];
   }
@@ -1105,6 +1110,8 @@ function theme_save_additional_item_data($item, $cart_item_key, $values, $order 
     $item['fast_order_id'] = array( $_POST['fast_order_id'] );
 
     $order_id = $order->get_id();
+
+
 
     if(!update_post_meta((int)$_POST['fast_order_id'], 'is_fasttracked', 'yes' )){
 
@@ -1162,18 +1169,14 @@ function print_additional_data_line( $item_id, $item, $order ){
           foreach ($meta as $key => $_m):
           ?>
           <tr>
-            <th><?php echo $_m['label'] ?>:</th>
-            <td>
-              <p>
-                <?php
+            <th><?php echo $_m['label'] ?>: &nbsp;&nbsp;&nbsp;&nbsp;</th>
+            <td> <p> <?php
                 if(is_array($_m['value'] )){
                   echo(implode(',', $_m['value']));
                 }else{
-                 echo $_m['value'];
+                 echo trim($_m['value']);
                 }
-                ?>
-              </p>
-            </td>
+                ?> </p> </td>
           </tr>
         <?php
          endforeach;
@@ -1186,3 +1189,24 @@ function print_additional_data_line( $item_id, $item, $order ){
   <?php
 }
 
+
+
+
+add_action( 'woocommerce_before_calculate_totals', 'set_cart_item_calculated_price', 10, 1 );
+
+function set_cart_item_calculated_price( $cart ) {
+    if ( is_admin() && ! defined( 'DOING_AJAX' ) )
+        return;
+
+    // Required since Woocommerce version 3.2 for cart items properties changes
+    if ( did_action( 'woocommerce_before_calculate_totals' ) >= 2 )
+        return;
+
+    // Loop through cart items
+    foreach ( $cart->get_cart() as $cart_item ) {
+        // Set the new calculated price based on lenght
+        if( isset($cart_item['custom_price']) ) {
+            $cart_item['data']->set_price( $cart_item['custom_price']);
+        }
+    }
+}
