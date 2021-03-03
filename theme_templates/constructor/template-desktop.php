@@ -107,7 +107,7 @@
                       <div class="spacer-h-15"></div>
                       <select-imitation-type
                         :class="'fullwidth'"
-                        :_selected = "'Type Of product'"
+                        :_selected = "'Type of product'"
                         :_options = 'product_types'
                         :_select_name = "'product_type'"
                         @update_list = 'change_product_type($event, key)'
@@ -230,6 +230,8 @@
               </span>
             </div>
 
+            <div class="spacer-h-30"></div>
+            <div class="line-fw"></div>
             <div class="spacer-h-30"></div>
 
             <transition-group
@@ -445,57 +447,57 @@
         <!-- **************
              STEP 4
         *****************-->
-              <div class="studio-content__page" :key="'step-4'" v-show="step==4">
-                <div class="step-label">
-                  <svg class="icon svg-icon-notes">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-notes"></use>
-                    <span class="step-label__text">Studio Notes</span>
-                  </svg>
-                </div>
-                <div class="spacer-h-20"></div>
-                <h2 class="block-title">Studio <span class="styled">Notes</span></h2>
-                <div class="spacer-h-20"></div>
+          <div class="studio-content__page" :key="'step-4'" v-show="step==4">
+            <div class="step-label">
+              <svg class="icon svg-icon-notes">
+                <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-notes"></use>
+                <span class="step-label__text">Studio Notes</span>
+              </svg>
+            </div>
+            <div class="spacer-h-20"></div>
+            <h2 class="block-title">Studio <span class="styled">Notes</span></h2>
+            <div class="spacer-h-20"></div>
 
-                 <p class="regular-text">Notes are a great way to communicate your vision with the photographer.</p>
-                <div class="spacer-h-30"></div>
+             <p class="regular-text">Notes are a great way to communicate your vision with the photographer.</p>
+            <div class="spacer-h-30"></div>
 
-                <div class="studio-content__body">
-                  <label class="radio-imitation props-options">
-                    <input type="radio" name="notes" v-on:click="set_notes('simple')">
-                    <span class="radio-imitation__view flex text-left">
+            <div class="studio-content__body">
+              <label class="radio-imitation props-options">
+                <input type="radio" name="notes" v-model="notes.type" value="simple">
+                <span class="radio-imitation__view flex text-left">
 
-                      <span class="radio-imitation__longtext valign-center">
-                        <b> Quick Note</b>
-                        Is there anything we should consider?
-                      </span>
+                  <span class="radio-imitation__longtext valign-center">
+                    <b> Quick Note</b>
+                    Is there anything we should consider?
+                  </span>
 
-                      <span class="radio-imitation__icon valign-center">
-                        <span class="price-marker">Free</span>
-                      </span>
-                      <span class="text-editor">
-                        <textarea type="text" ref="simple_note" placeholder="E.g. Shoot product from the front" v-model="simple_note"></textarea>
-                        <span class="counter">{{simple_note.length}}/140</span>
-                      </span>
-                    </span>
-                  </label>
+                  <span class="radio-imitation__icon valign-center">
+                    <span class="price-marker">Free</span>
+                  </span>
+                  <span class="text-editor">
+                    <textarea type="text" ref="simple_note" placeholder="E.g. Shoot product from the front" v-model="simple_note"></textarea>
+                    <span class="counter">{{simple_note.length}}/140</span>
+                  </span>
+                </span>
+              </label>
 
-                  <div class="spacer-h-20"></div>
+              <div class="spacer-h-20"></div>
 
-                  <label class="radio-imitation props-options">
-                    <input type="radio" name="notes"  v-on:click="set_notes('custom')">
+              <label class="radio-imitation props-options">
+                <input type="radio" name="notes" v-model="notes.type" value="custom" >
 
-                    <span class="radio-imitation__view flex text-left">
+                <span class="radio-imitation__view flex text-left">
 
-                      <span class="radio-imitation__longtext valign-center">
-                        <b>Custom Shot List</b> Specify which products should be shot together and how.
-                      </span>
-                      <span class="radio-imitation__icon valign-center">
-                        <span class="price-marker">+ £9 /photo</span>
-                      </span>
-                    </span>
-                  </label>
-                </div><!-- studio-content__body -->
-              </div><!-- studio-content__page -->
+                  <span class="radio-imitation__longtext valign-center">
+                    <b>Custom Shot List</b> Specify which products should be shot together and how.
+                  </span>
+                  <span class="radio-imitation__icon valign-center">
+                    <span class="price-marker">+ £9 /photo</span>
+                  </span>
+                </span>
+              </label>
+            </div><!-- studio-content__body -->
+          </div><!-- studio-content__page -->
         <!-- **************
              STEP 4 END
         *****************-->
@@ -504,68 +506,68 @@
              STEP 4 - 1
         *****************-->
         <div class="studio-content__page" :key="'step-custom'" v-show="step==5">
-                <div class="step-label">
-                  <svg class="icon svg-icon-notes">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-notes"></use>
-                    <span class="step-label__text">Studio Notes</span>
-                  </svg>
-                </div>
-                <div class="spacer-h-20"></div>
-                <h2 class="block-title">Custom <span class="styled">Shot</span> List</h2>
-                <div class="spacer-h-20"></div>
+          <div class="step-label">
+            <svg class="icon svg-icon-notes">
+              <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-notes"></use>
+              <span class="step-label__text">Studio Notes</span>
+            </svg>
+          </div>
+          <div class="spacer-h-20"></div>
+          <h2 class="block-title">Custom <span class="styled">Shot</span> List</h2>
+          <div class="spacer-h-20"></div>
 
-                 <p class="regular-text">You can personalise your requirements for each shot.</p>
+           <p class="regular-text">You can personalise your requirements for each shot.</p>
 
-                <div class="studio-content__body">
+          <div class="studio-content__body">
 
-                <transition-group
-                  name="notes-content"
-                  tag="div"
-                  v-bind:css="false"
-                  v-on:before-enter="beforeEnter"
-                  v-on:enter="enter"
-                  v-on:leave="leave"
-                  v-on:after-enter="enterAfter"
-                  v-on:after-leave="leaveAfter"
-                >
+          <transition-group
+            name="notes-content"
+            tag="div"
+            v-bind:css="false"
+            v-on:before-enter="beforeEnter"
+            v-on:enter="enter"
+            v-on:leave="leave"
+            v-on:after-enter="enterAfter"
+            v-on:after-leave="leaveAfter"
+          >
 
-                  <div class="clearfix width420" v-for="notes, key in notes.data" :key="'note-blok'+key">
-                    <div class="spacer-h-30"></div>
-                    <label class="studio-content__label">
-                      <svg class="icon svg-icon-notes"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-notes"></use> </svg> Shot {{key + 1}}
+            <div class="clearfix width420" v-for="notes, key in notes.data" :key="'note-blok'+key">
+              <div class="spacer-h-30"></div>
+              <label class="studio-content__label">
+                <svg class="icon svg-icon-notes"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-notes"></use> </svg> Shot {{key + 1}}
 
-                      <a href="#" class="remove" v-if="key > 0" v-on:click="remove_note(key)">×</a>
-                    </label>
-                    <div class="spacer-h-10"></div>
+                <a href="#" class="remove" v-if="key > 0" v-on:click="remove_note(key)">×</a>
+              </label>
+              <div class="spacer-h-10"></div>
 
-                    <product-select
-                      :_products = "products"
-                      :ref = "'notes-product'"
-                      v-on:change_value = 'change_value_cb($event, key)'
-                    ></product-select>
+              <product-select
+                :_products = "products"
+                :ref = "'notes-product'"
+                v-on:change_value = 'change_value_cb($event, key)'
+              ></product-select>
 
-                    <div class="spacer-h-20"></div>
+              <div class="spacer-h-20"></div>
 
-                    <input type="text" :ref = "'notes-text'" v-on:input="remove_error('notes-text', key, notes.text)" class="input-field" placeholder="Direction (max 140 characters)" v-model="notes.text">
-                  </div><!-- clearfix -->
-                </transition-group>
+              <input type="text" :ref = "'notes-text'" v-on:input="remove_error('notes-text', key, notes.text)" class="input-field" placeholder="Direction (max 140 characters)" v-model="notes.text">
+            </div><!-- clearfix -->
+          </transition-group>
 
-                  <div class="spacer-h-20"></div>
-                  <div class="text-left" v-if="notes.data.length < image_count">
-                    <span class="studio-content__add" v-on:click.prevent="add_note_custom" >Add another shot</span>
-                    <span class="price-marker">+ £9</span>
-                  </div>
+            <div class="spacer-h-20"></div>
+            <div class="text-left" v-if="notes.data.length < image_count">
+              <span class="studio-content__add" v-on:click.prevent="add_note_custom" >Add another shot</span>
+              <span class="price-marker">+ £9</span>
+            </div>
 
-                  <div class="spacer-h-20"></div>
-                  <div class="warning">
-                    You have personalised {{notes.data.length}} of {{total_images}} photos. <span v-if="total_images > notes.data.length">The remaining {{total_images - notes.data.length}} photos will be left to the photographer’s creativity.</span>
-                  </div>
+            <div class="spacer-h-20"></div>
+            <div class="warning">
+              You have personalised {{notes.data.length}} of {{total_images}} photos. <span v-if="total_images > notes.data.length">The remaining {{total_images - notes.data.length}} photos will be left to the photographer’s creativity.</span>
+            </div>
 
-                </div><!-- studio-content__body -->
-              </div><!-- studio-content__page -->
-        <!-- **************
-             STEP 4 - 1END
-        *****************-->
+          </div><!-- studio-content__body -->
+        </div><!-- studio-content__page -->
+      <!-- **************
+           STEP 4 - 1END
+      *****************-->
 
 
         <!-- **************
@@ -581,10 +583,11 @@
             <div class="spacer-h-20"></div>
             <h2 class="block-title">Turnaround <span class="styled">time</span></h2>
             <div class="spacer-h-20"></div>
+            <p class="regular-text">Use our standard turnaround or upgrsde for a faster delivery of your photos.</p>
+            <div class="spacer-h-20"></div>
             <label class="studio-content__label">
-              How fast do you want your photos?
+              How soon do you want your photos?
             </label>
-            <div class="spacer-h-10"></div>
 
             <div class="studio-content__body">
               <label class="radio-imitation props-options">
@@ -628,81 +631,78 @@
         <!-- **************
              STEP 6
         *****************-->
-       <div class="studio-content__page" :key="'step-7'" v-show="step==7">
-                <div class="step-label">
-                  <svg class="icon svg-icon-handling">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-handling"></use>
-                    <span class="step-label__text">Handling</span>
-                  </svg>
-                </div>
-                <div class="spacer-h-20"></div>
-                <h2 class="block-title">Finalise your shoot</h2>
-                <div class="spacer-h-20"></div>
-                <label class="studio-content__label">
-                    How should we handle your product?
-                </label>
-                <div class="spacer-h-10"></div>
+          <div class="studio-content__page" :key="'step-7'" v-show="step==7">
+            <div class="step-label">
+              <svg class="icon svg-icon-handling">
+                <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-handling"></use>
+                <span class="step-label__text">Handling</span>
+              </svg>
+            </div>
+            <div class="spacer-h-20"></div>
+            <h2 class="block-title">Finalise your shoot</h2>
+            <div class="spacer-h-20"></div>
+            <label class="studio-content__label">
+                How should we handle your product?
+            </label>
+            <div class="spacer-h-10"></div>
 
-                <div class="studio-content__body">
-                  <label class="radio-imitation props-options">
-                    <input type="radio" name="handling"  value="discard" v-model="handling.handle">
-                    <span class="radio-imitation__view flex text-left">
+            <div class="studio-content__body">
+              <label class="radio-imitation props-options">
+                <input type="radio" name="handling"  value="discard" v-model="handling.handle">
+                <span class="radio-imitation__view flex text-left">
 
-                      <span class="radio-imitation__longtext valign-center">
-                        <b>Discard Products </b>Once shoot is completeds
-                      </span>
+                  <span class="radio-imitation__longtext valign-center">
+                    <b>Discard Products </b>Once shoot is completeds
+                  </span>
 
-                      <span class="radio-imitation__icon valign-center">
-                        <span class="price-marker">Free</span>
-                      </span>
-                    </span>
-                  </label>
+                  <span class="radio-imitation__icon valign-center">
+                    <span class="price-marker">Free</span>
+                  </span>
+                </span>
+              </label>
 
-                  <div class="spacer-h-20"></div>
+              <div class="spacer-h-20"></div>
 
-                  <label class="radio-imitation props-options">
-                    <input type="radio" name="handling" value="return" v-model="handling.handle">
-                    <span class="radio-imitation__view flex text-left">
-                      <span class="radio-imitation__longtext valign-center">
-                        <b>Return Products</b> Once shoot is completeducts
-                      </span>
-                      <span class="radio-imitation__icon valign-center">
-                        <span class="price-marker">+ £{{prices.handle}}</span>
-                      </span>
-                    </span>
-                  </label>
-                </div><!-- studio-content__body -->
+              <label class="radio-imitation props-options">
+                <input type="radio" name="handling" value="return" v-model="handling.handle">
+                <span class="radio-imitation__view flex text-left">
+                  <span class="radio-imitation__longtext valign-center">
+                    <b>Return Products</b> Once shoot is completeducts
+                  </span>
+                  <span class="radio-imitation__icon valign-center">
+                    <span class="price-marker">+ £{{prices.handle}}</span>
+                  </span>
+                </span>
+              </label>
+            </div><!-- studio-content__body -->
 
-                <div class="spacer-h-20"></div>
-                <div class="spacer-h-10"></div>
+            <div class="spacer-h-20"></div>
+            <div class="spacer-h-10"></div>
 
-                <label class="studio-content__label">
-                  How would you like to send your products to Feedsauce?
-                </label>
+            <label class="studio-content__label">
+              How would you like to send your products to Feedsauce?
+            </label>
 
-
-                <div class="flex-row width420">
-                  <label class="radio-imitation props-options col-1-2">
-                    <input type="radio" name="sendvia" value="self" v-model="handling.send">
-                    <span class="radio-imitation__view flex text-center">
-                      <span class="radio-imitation__longtext">
-                        <b>Self Ship</b>WorldWide
-                      </span>
-                    </span>
-                  </label>
-                  <label class="radio-imitation props-options col-1-2 not-act">
-                    <input type="radio" name="sendvia" value="free" v-model="handling.send">
-                    <span class="radio-imitation__view flex text-center">
-                      <span class="radio-imitation__longtext">
-                        <b>Free Collection * </b> Selected Countries
-                      </span>
-                    </span>
-                  </label>
-                </div>
-
-
-                <div class="width420">
-                  <transition
+            <div class="flex-row width420">
+              <label class="radio-imitation props-options col-1-2">
+                <input type="radio" name="sendvia" value="self" v-model="handling.send">
+                <span class="radio-imitation__view flex text-center">
+                  <span class="radio-imitation__longtext">
+                    <b>Self Ship</b>WorldWide
+                  </span>
+                </span>
+              </label>
+              <label class="radio-imitation props-options col-1-2 not-act">
+                <input type="radio" name="sendvia" value="free" v-model="handling.send">
+                <span class="radio-imitation__view flex text-center">
+                  <span class="radio-imitation__longtext">
+                    <b>Free Collection * </b> Selected Countries
+                  </span>
+                </span>
+              </label>
+            </div>
+            <div class="width420">
+              <transition
                     name="notes-content"
                     tag="div"
                     v-bind:css="false"
@@ -713,8 +713,8 @@
                     v-on:after-leave="leaveAfter"
                   >
 
-                <div class="" v-if="handling.send == 'free'">
-                   <div class="spacer-h-20"></div>
+               <div class="" v-if="handling.send == 'free'">
+                 <div class="spacer-h-20"></div>
 
                   <div class="flag-container">
                     <div class="flag-selector activated"
@@ -736,16 +736,17 @@
                     <span class="address-wrapper__value">{{_collection_address}}</span>
                     <div class="address-wrapper__dropdown" v-show="show_addresses_drop">
                       <ul class="address-wrapper__list">
-                        <li v-on:click.prevent="show_popup_address">+  Add new address</li>
+                        <li v-on:click.prevent="show_popup_address">+ Add new address</li>
                         <li v-for="addr, key in addresses" v-bind:key="'addr_'+key" v-on:click.prevent.stop="collection_address = addr">{{addr}}</li>
                       </ul>
                     </div>
                   </div>
                 </div>
               </transition>
-                </div>
-
-              </div><!-- studio-content__page -->
+            </div>
+              <div class="spacer-h-30"></div>
+              <div class="warning">Free Collection requires access to a printer so you can download and print the postage label we send you.</div>
+          </div><!-- studio-content__page -->
         <!-- **************
              STEP 6 END
         *****************-->
@@ -762,10 +763,7 @@
           <p class="regular-text">Everything looks good! Check your Shoot Summary and place your order below.</p>
           <div class="spacer-h-30"></div>
 
-          <div class="spacer-h-20"></div>
-
           <?php /*
-
           <div class="card-selector">
             <div class="card-data">
               <span class="card-data__value">
@@ -775,10 +773,16 @@
 
               <svg class="icon svg-icon-corner-down"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-corner-down"></use> </svg>
             </div>
-
           </div><!-- card-selector -->
         */?>
           <div class="div width420">
+            <label class="studio-content__label">
+              <svg class="icon svg-icon-card">
+                <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-card"></use>
+              </svg>
+              Pay via Card
+              <img src="<?php echo THEME_URL?>/images/card.png" class=card-img alt="">
+            </label>
             <form action="#" v-on:submit.prevent="apply_coupon" class="coupon_form">
               <div class="coupon-wrapper">
                 <input type="text" class="input-field" ref="may_be_coupon" placeholder="Coupon Code" name="coupon" v-model="may_be_coupon">
@@ -790,11 +794,12 @@
                 </div>
               </div>
             </form>
-              <div class="spacer-h-10"></div>
+              <div class="spacer-h-15"></div>
              <form enctype="multipart/form-data" action="<?php echo esc_url( wc_get_checkout_url() ); ?>" method="POST" id="checkout_form"  name="checkout" method="post" class="checkout woocommerce-checkout" >
 
               <input type="text" class="input-field" placeholder="Contact Number" name="contact">
-              <div class="spacer-h-10"></div>
+              <div class="spacer-h-15"></div>
+
               <ul class="wc_payment_methods payment_methods methods unstyled-list">
               <?php
                 foreach ( $gateways as $gateway ) {
@@ -807,7 +812,7 @@
             </form>
           </div>
 
-          <div class="spacer-h-30"></div>
+          <div class="spacer-h-10"></div>
 
 
           <div class="warning">
@@ -829,70 +834,71 @@
           <div class="spacer-h-20"></div>
         </div><!-- studio-content__page -->
         <!-- **************
-             STEP 5 END
+             STEP 7 END
         *****************-->
       </transition-group>
-                 <div class="studio-content__button-holder">
-              <transition
-                v-bind:css="false"
-                v-on:before-enter="beforeEnter"
-                v-on:enter="enter"
-                v-on:leave="leave"
-                v-on:after-enter="enterAfter"
-                v-on:after-leave="leaveAfter"
-                >
 
-                <a href="#" class="prev-step" v-if="step != 1" v-on:click.prevent="change_step('prev')"></a>
-              </transition>
+      <div class="studio-content__button-holder">
+        <transition
+          v-bind:css="false"
+          v-on:before-enter="beforeEnter"
+          v-on:enter="enter"
+          v-on:leave="leave"
+          v-on:after-enter="enterAfter"
+          v-on:after-leave="leaveAfter"
+          >
 
-              <transition
-                v-bind:css="false"
-                v-on:before-enter="beforeEnter"
-                v-on:enter="enter"
-                v-on:leave="leave"
-                v-on:after-enter="enterAfter"
-                v-on:after-leave="leaveAfter"
-              >
+          <a href="#" class="prev-step" v-if="step != 1" v-on:click.prevent="change_step('prev')"></a>
+        </transition>
 
-              <a href="javascript:void(0)"
-               class="studio-content__button"
-               v-if="step != 8"
-               :class="{'not-active': (notes.skip && step == 4)}"
-               v-on:click.prevent="change_step('next')"
-               >
-                {{button_text}}
-                <span v-html="get_html"></span>
+        <transition
+          v-bind:css="false"
+          v-on:before-enter="beforeEnter"
+          v-on:enter="enter"
+          v-on:leave="leave"
+          v-on:after-enter="enterAfter"
+          v-on:after-leave="leaveAfter"
+        >
 
-                <span class="spacer"></span>
-                <span class="arrow"></span>
-               </a>
-              </transition>
+        <a href="javascript:void(0)"
+         class="studio-content__button"
+         v-if="step != 8"
+         :class="{'not-active': (notes.skip && !notes.data && step == 4)}"
+         v-on:click.prevent="change_step('next')"
+         >
+          {{button_text}}
+          <span v-html="get_html"></span>
 
-              <transition
-                v-bind:css="false"
-                v-on:before-enter="beforeEnter"
-                v-on:enter="enter"
-                v-on:leave="leave"
-                v-on:after-enter="enterAfter"
-                v-on:after-leave="leaveAfter"
-              >
-              <a href="javascript:void(0)" class="studio-content__button green" v-if="step == 8 && order_placed"  v-on:click.prevent="place_order_trigger">£{{order_total.total}} &nbsp;&nbsp;&nbsp; Place Order
-                <span class="spacer"></span>
-                <span class="arrow"></span>
-              </a>
+          <span class="spacer"></span>
+          <span class="arrow"></span>
+         </a>
+        </transition>
 
-              </transition>
-              <transition
-                v-bind:css="false"
-                v-on:before-enter="beforeEnter"
-                v-on:enter="enter"
-                v-on:leave="leave"
-                v-on:after-enter="enterAfter"
-                v-on:after-leave="leaveAfter"
-              >
-              <a href="#" class="studio-content__cancel" v-if="step == 4 && !!notes.data" v-on:click.prevent="change_step(6)">Skip Notes</a>
-              </transition>
-            </div>
+        <transition
+          v-bind:css="false"
+          v-on:before-enter="beforeEnter"
+          v-on:enter="enter"
+          v-on:leave="leave"
+          v-on:after-enter="enterAfter"
+          v-on:after-leave="leaveAfter"
+        >
+        <a href="javascript:void(0)" class="studio-content__button green" v-if="step == 8 && order_placed"  v-on:click.prevent="place_order_trigger">£{{order_total.total}} &nbsp;&nbsp;&nbsp; Place Order
+          <span class="spacer"></span>
+          <span class="arrow"></span>
+        </a>
+
+        </transition>
+        <transition
+          v-bind:css="false"
+          v-on:before-enter="beforeEnter"
+          v-on:enter="enter"
+          v-on:leave="leave"
+          v-on:after-enter="enterAfter"
+          v-on:after-leave="leaveAfter"
+        >
+          <a href="#" class="studio-content__cancel" v-if="step == 4 && !!notes.data" v-on:click.prevent="change_step(6); resert_notes()">Skip Notes</a>
+        </transition>
+      </div>
       <div class="spacer-h-150"></div>
     </div><!-- col-md-7 valign-center -->
 

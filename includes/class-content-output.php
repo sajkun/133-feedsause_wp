@@ -255,7 +255,7 @@ class theme_content_output{
 
     $args = array(
       'logo'   => $logo,
-      'main_menu'   => $main_menu,
+      'main_menu'   => is_checkout()? '' : $main_menu,
       'user_id'     => $user_id,
       'user_name'   => $user_name,
       'avatar_url'   => $user_id >0 ? get_avatar_url($user_id) : '',
