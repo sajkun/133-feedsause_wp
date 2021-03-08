@@ -7,17 +7,17 @@
 <?php if (!isset($_GET['no_reload'])): ?>
 <div class="content-fullheight load-page">
   <div class="load-page__content">
-    <div class="spacer-h-20"></div>
 
-    <img src="<?php echo THEME_URL; ?>/images/load.svg" class="load" alt="">
-    <div class="spacer-h-40"></div>
+    <div class="spacer-h-20"></div>
 
     <div class="clearfix text-center">
       <span class="logo">
-          <img src="<?php echo THEME_URL; ?>/images/logo.svg" class="logo__img" alt="">
-          <span class="logo__studi">studi</span>
-          <img src="<?php echo THEME_URL; ?>/images/circles.svg" class="logo__circles" alt="">
+          <img src="<?php echo THEME_URL; ?>/images/logo_contrast.png"  alt="">
       </span>
+
+      <div class="spacer-h-20"></div>
+
+      <h1 class="load-title">Shoot <span class="styled">Builder</span></h1>
     </div>
 
     <div class="load-progress progress" id="progress_div">
@@ -25,7 +25,21 @@
     </div>
     <input type="hidden" id="progress_width" value="0">
 
-    <div class="load-comment"> If Studio doesn’t launch in 5 seconds, <br> please <a href="?product_id=<?php echo $_GET['product_id']?>&no_reload=yes">click here</a> to be redirected </div>
+    <div class="load-statuses" id="load-statuses">
+      <div class="load-statuses__inner">
+        <span class="load-statuses__item">Loading styles…</span>
+        <span class="load-statuses__item">Loading scripts…</span>
+        <span class="load-statuses__item">Fetching colour themes…</span>
+        <span class="load-statuses__item">Preparing environment…</span>
+      </div>
+    </div>
+
+    <div class="spacer-h-20"></div>
+
+    <img src="<?php echo THEME_URL; ?>/images/load.svg" class="load" alt="">
+    <div class="spacer-h-60"></div>
+
+    <div class="load-comment" id="load-comment"> If Studio doesn’t launch in 5 seconds, <br> please <a href="?product_id=<?php echo $_GET['product_id']?>&no_reload=yes">click here</a> to be redirected </div>
 
     <div class="spacer-h-60"></div>
   </div>

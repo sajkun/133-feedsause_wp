@@ -119,8 +119,9 @@
     }
 
     $additional_data = array(
-      'extra_data' =>  $cart_item_data,
-      'shoot_data' =>  $_POST,
+      'extra_data'   =>  $cart_item_data,
+      'shoot_data'   =>  $_POST,
+      'name_array'   =>  $titles,
       'custom_price'      => $total,
       'subtotal'          => $total,
     );

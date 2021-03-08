@@ -518,6 +518,14 @@ class theme_filter_class{
       $classes .= ' lines';
     }
 
+    if(is_checkout() && empty( is_wc_endpoint_url('order-received') )) {
+     $classes .= " contrast ";
+    }
+
+    if(  is_account_page() && is_wc_endpoint_url('orders') ){
+     $classes .= " white ";
+    }
+
     return $classes;
   }
 
@@ -632,6 +640,7 @@ class theme_filter_class{
   */
   public static function woocommerce_account_menu_items($items){
     $items['orders'] = __('My Orders', 'theme-translations');
+    $items['my-gallery'] = __('Gallery', 'theme-translations');
     $items['edit-account'] = __('Edit Profile', 'theme-translations');
     $items['edit-address/billing'] = __('Billing', 'theme-translations');
     return $items;
@@ -1209,4 +1218,10 @@ function set_cart_item_calculated_price( $cart ) {
             $cart_item['data']->set_price( $cart_item['custom_price']);
         }
     }
+}
+
+
+add_action( 'init', 'gallery_add_endpoint' );
+function gallery_add_endpoint() {
+  add_rewrite_endpoint( 'my-gallery', EP_PAGES );
 }

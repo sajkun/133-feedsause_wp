@@ -16,6 +16,9 @@ class theme_construct_page{
   */
   public static function init(){
 
+
+    add_action( 'woocommerce_account_my-gallery_endpoint', array('theme_content_output','print_gallery') );
+
     if(self::is_page_type( 'new-styles' )){
       add_action('do_theme_header', array('theme_content_output','print_new_header'));
       // add_action('do_theme_footer', array('theme_content_output','print_footer_new'));
@@ -146,7 +149,7 @@ class theme_construct_page{
     $obj = get_queried_object();
     switch ($type){
       case 'new-styles':
-        return (function_exists('is_product') && is_product()) || ($obj->ID == (int)get_option('theme_page_constructor'))  || ( is_checkout() && !empty( is_wc_endpoint_url('order-received') ) || is_checkout());
+        return (function_exists('is_product') && is_product()) || ($obj->ID == (int)get_option('theme_page_constructor'))  || ( is_checkout() && !empty( is_wc_endpoint_url('order-received') ) || is_checkout() || (is_account_page() && is_user_logged_in()));
         break;
       case 'constructor':
       return $obj->ID == (int)get_option('theme_page_constructor');

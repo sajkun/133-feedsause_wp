@@ -2,6 +2,8 @@
 <?php if (get_queried_object_id() == (int)get_option('theme_page_constructor') && !isset($_GET['no_reload']) && empty( is_wc_endpoint_url('order-received') ) ): ?>
   visuallyhidden
 <?php endif ?>
+
+<?php echo $header_class; ?>
 " >
   <div class="container-lg">
     <div class="row">

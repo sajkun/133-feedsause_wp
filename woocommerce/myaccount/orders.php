@@ -22,7 +22,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+$fasttrack = wc_get_product((int)get_option('wfp_priority_delivery_product_id'));
+$handle   = wc_get_product((int)get_option('wfp_return_product_id'));
 $product_fast_id = (int)get_option('wfp_priority_delivery_product_id');
+$order_statuses = wc_get_order_statuses();
+$hex_color = '#333';
+$title = '';
+$product_name = '';
+$product_count = '';
 do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 <?php if ( $has_orders ) : ?>
   <div class="container_sm container">
@@ -39,80 +46,102 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
         }
 
         if($continue) continue;
+        $product_name= '';
+        $fasttrack = false;
+
+        foreach ($order->get_items() as $key => $item) {
+
+          if($item->get_product_id() == $fasttrack ){
+            $fasttrack = true;
+          }
+
+          if($item->get_product_id() == (int)get_option('wfp_priority_delivery_product_id') || $item->get_product_id() == (int)get_option('wfp_return_product_id')){
+            continue;
+          }
+
+          $meta = $item->get_meta('extra_data');
+          $customer_id  = $order->get_user_id();
+
+          $title = $item->get_name();
+
+          $customer     = new WC_Customer( $customer_id );
+          $product_name = isset($meta['name']['value'])? explode(PHP_EOL, $meta['name']['value']) : '';
+          $product_count = isset($meta['name']['value'])? count($product_name) : '';
+        }
+
+        if(class_exists('WC_Order_Status_Manager_Order_Status') && function_exists('adjustBrightness')){
+          $status_post = new WC_Order_Status_Manager_Order_Status($order->get_status());
+          $hex_color = $status_post->get_color();
+          $color = adjustBrightness($hex_color, -100);
+        }
       }
+
+      $date = $order->get_date_created();
       ?>
 
-			<div class="col-12 col-md-6 col-lg-4 filtering-item woocommerce-orders-table__row order-summary__item woocommerce-orders-table__row--status-<?php echo esc_attr( $order->get_status() ); ?> order" style="padding-left:15px; padding-right:15px;" data-type="<?php echo esc_attr( $order->get_status() ); ?>">
-				<div class="order-preview">
-            <?php $status = $order->get_status();
-	            $hex_color ='#333';
-	            $color     ='#000';
-						if(class_exists('WC_Order_Status_Manager_Order_Status') && function_exists('adjustBrightness')){
-	            $status_post = new WC_Order_Status_Manager_Order_Status($status);
-	            $hex_color = $status_post->get_color();
-	            $color = adjustBrightness($hex_color, -100);
-	          }
-             ?>
-          <span class="order-preview__tag in-production" style="background-color: <?php echo $hex_color ?>; color: <?php echo $color ?>"><?php echo esc_html( wc_get_order_status_name( $order->get_status() ) ) ?></span>
+      <div class="col-12 col-md-6 col-lg-4 order-previews col-xl-3 <?php echo in_array($order->get_status(), array('completed', 'failed'))? 'completed hidden' : 'processing';?>" data-time="<?php echo $date->date_i18n('Y-m-d').'T'.$date->date_i18n('H:i:s'); ?>">
 
-          <p class="order-preview__title"><?php echo _x( '#', 'hash before order number', 'woocommerce' ) . $order->get_order_number(); ?></p>
-          <p class="order-preview__comment"><?php echo esc_html( wc_format_datetime( $order->get_date_created() ) ); ?></p>
+      <div class="thank-you__order">
+        <div class="thank-you__order-header">
+          <span class="thank-you__order-number">#FS-<?php echo $order->get_order_number();?></span>
+          <span class="thank-you__order-number text-right"> <?php echo $date->date_i18n('d M y'); ?> </span>
+          <div class="clearfix"></div>
+          <div class="spacer-h-10"></div>
+          <span class="thank-you__order-title"><?php echo $title; ?></span>
+          <span class="thank-you__order-name"><?php echo is_array( $product_name)? $product_name[0] : 'No name'  ?>  <?php if ($product_name  && count($product_name) - 1  > 0): ?> <span class="count">
+          + <?php echo count($product_name) - 1; ?></span>
+          <?php endif ?></span>
+        </div><!-- thank-you__order-header -->
 
-          <div class="spacer"></div>
+        <div class="thank-you__order-line clearfix">
+          <div class="thank-you__order-status" <?php printf('style="background-color:%s"', $hex_color); ?>></div><?php echo $order_statuses['wc-'.$order->get_status()];?>
+        </div>
 
-          <?php do_action('print_theme_order_summary', $order) ?>
-
-          <div class="spacer"></div>
-
-          <p class="order-preview__subtitle"><?php _e('Billed to','theme-translations');?></p>
-          <?php
-              $address = $order->get_address('billing');
-              unset($address['first_name']);
-              unset($address['last_name']);
-              unset($address['company']);
-              unset($address['phone']);
-              unset($address['email']);
-            ?>
-          <p class="order-preview__comment">
-           <?php foreach ($address as $key => $value):
-              if($key!= 'country'){
-                echo $value.' ';
-              }
-            endforeach;
-              echo WC()->countries->countries[ $order->get_billing_country() ];
-             ?>
-					</p>
-
-          <div class="clearfix order-preview__actions">
-          	<?php
-							$actions = wc_get_account_orders_actions( $order );
-							if ( ! empty( $actions ) ) {
-								foreach ( $actions as $key => $action ) {
-									switch ($key ) {
-										case 'view':
-										?>
-					            <a href="<?php echo esc_url( $action['url'] ); ?>" class="order-preview__readmore">
-					              <span><?php _e('View Order','theme-translations');?></span>
-					              <svg class="icon svg-icon-arrowr"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-arrowr"></use> </svg>
-					            </a>
-										<?php
-											break;
-										case 'pdf':
-										?>
-						            <a href="<?php echo esc_url( $action['url'] ); ?>" class="invoice"><svg class="icon svg-icon-print"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-print"></use> </svg><?php _e('Invoice','theme-translations');?></a>
-						         <?php
-											break;
-
-										default:
-											echo '<a href="' . esc_url( $action['url'] ) . '" class="woocommerce-button button ' . sanitize_html_class( $key ) . '">' . esc_html( $action['name'] ) . '</a>';
-											break;
-									}
-								}
-							}
-          	?>
+        <div class="thank-you__order-body">
+          <div class="row no-gutters">
+            <div class="col-4">
+              <span class="thank-you__order-label">Products</span>
+              <span class="thank-you__order-value"><?php echo $product_count?:'na'; ?></span>
+            </div>
+            <div class="col-4">
+              <span class="thank-you__order-label">Photos</span>
+              <span class="thank-you__order-value"><?php echo isset( $meta['image_count']['value'] )? $meta['image_count']['value'] : 'na'; ?></span>
+            </div>
+            <div class="col-4">
+              <span class="thank-you__order-label">Delivery</span>
+              <span class="thank-you__order-value"><?php echo $fasttrack? '3 Days' : '10 Days' ?></span>
+            </div>
+          </div><!-- row -->
+          <div class="spacer-h-15"></div>
+          <div class="row no-gutters">
+            <div class="col-12">
+              <span class="thank-you__order-label">Sizes</span>
+              <span class="thank-you__order-value"><?php echo isset($meta['sizes']['value']) ? implode(', ',$meta['sizes']['value']) : 'na'; ?></span>
+            </div>
+          </div><!-- row -->
+          <div class="spacer-h-15"></div>
+          <div class="thank-you__order-hr">
+            <div class="left-dark"></div>
+            <div class="right-dark"></div>
           </div>
-				</div>
-			</div>
+          <div class="spacer-h-15"></div>
+          <div class="text-center">
+            <span class="thank-you__order-label">Paid</span>
+            <span class="thank-you__order-price"><?php echo wc_price($order->get_total());?></span>
+          </div>
+          <div class="spacer-h-25"></div>
+
+          <?php
+            $actions = wc_get_account_orders_actions( $order );
+          ?>
+
+          <a href="<?php echo $actions['view']['url'] ?>" class="thank-you__order-track">Track</a>
+        </div><!-- thank-you__order-body -->
+      </div><!-- thank-you__order -->
+      <div class="spacer-h-40"></div>
+    </div>
+
+
 		<?php endforeach; ?>
 </div>
 	<?php do_action( 'woocommerce_before_account_orders_pagination' ); ?>

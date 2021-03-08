@@ -20,27 +20,125 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+$order_statuses = wc_get_order_statuses();
+$hex_color = '#333';
+
+if(class_exists('WC_Order_Status_Manager_Order_Status') && function_exists('adjustBrightness')){
+  $status_post = new WC_Order_Status_Manager_Order_Status($order->get_status());
+  $hex_color = $status_post->get_color();
+  $color = adjustBrightness($hex_color, -100);
+}
+
+$items = $order->get_items();
+
+$fattrack = wc_get_product(get_option('wfp_priority_delivery_product_id'));
+$handle   = wc_get_product(get_option('wfp_return_product_id'));
+
+$product_name= '';
+
+$fasttrack = false;
+
+foreach ($order->get_items() as $key => $item) {
+
+  if($item->get_product_id() == $fattrack ){
+    $fasttrack = true;
+  }
+
+  if($item->get_product_id() == $fattrack || $item->get_product_id() == $handle ){
+    continue;
+  }
+
+  $meta = $item->get_meta('extra_data');
+  $product      = wc_get_product($item->get_product_id());
+  $customer_id  = $order->get_user_id();
+  $customer     = new WC_Customer( $customer_id );
+  $product_name = explode(PHP_EOL, $meta['name']['value']);
+  $product_count = count($product_name);
+}
+
+$date = $order->get_date_created();
 ?>
 
-<div class="thank-you">
-  <div class="spacer-h-50"></div>
-  <img src="<?php echo THEME_URL ?>/images/thx.svg" alt="" class="thank-you__img1">
-  <div class="spacer-h-30"></div>
-  <h2 class="thank-you__title">Your order
-has been placed</h2>
-  <p class="thank-you__text">
-    We’re getting the cameras ready now.
-We’ll notify you once your shoot has been accepted by one of our photographers.
-  </p>
-  <img src="<?php echo THEME_URL ?>/images/colors.svg" alt="" class="thank-you__img2">
-  <div class="spacer-h-140"></div>
-  <div class="spacer-h-10"></div>
+  <div class="thank-you">
+    <div class="thank-you__inner container-lg">
+      <div class="spacer-h-md-100 spacer-h-50"></div>
 
-  <div class="thank-you__buttons">
-    <a href="<?php echo get_permalink(woocommerce_get_page_id( 'shop' ))  ?>" class="thank-you__buttons-item start">Start another shoot</a>
-    <a href="<?php echo (wc_get_account_endpoint_url( 'orders' ))  ?>" class="thank-you__buttons-item dashboard">Go to Dashboard</a>
-  </div>
-</div>
+      <h2 class="thank-you__title">All <span class="styled">done!</span></h2>
+      <p class="thank-you__text">We’re getting the cameras ready now so start preparing <br> your products! We’ll notify you once your shoot has<br> been accepted by one of our photographers.</p>
+
+      <div class="spacer-h-40"></div>
+
+      <div class="thank-you__holder text-center">
+        <a href="<?php echo (wc_get_account_endpoint_url( 'orders' ))  ?>" class="thank-you__button">My Shoots</a>
+        <a href="<?php echo get_permalink(woocommerce_get_page_id( 'shop' ))  ?>" class="thank-you__button contrast">Get Inspired
+          <span class="spacer"></span>
+          <span class="arrow"></span>
+        </a>
+      </div>
+      <div class="spacer-h-50 spacer-h-lg-80"></div>
+
+      <div class="thank-you__order">
+        <div class="thank-you__order-header">
+          <span class="thank-you__order-number">#FS-<?php echo $order->get_order_number();?></span>
+          <span class="thank-you__order-number text-right"> <?php echo $date->date_i18n('d M y'); ?> </span>
+          <div class="clearfix"></div>
+          <div class="spacer-h-10"></div>
+          <span class="thank-you__order-title"><?php echo $product->get_title(); ?></span>
+          <span class="thank-you__order-name"><?php echo $product_name[0] ?>  <?php if (count($product_name) - 1  > 0): ?> <span class="count">
+          + <?php echo count($product_name) - 1; ?></span>
+          <?php endif ?></span>
+        </div><!-- thank-you__order-header -->
+
+        <div class="thank-you__order-line clearfix">
+          <div class="thank-you__order-status" <?php printf('style="background-color:%s"', $hex_color); ?>></div><?php echo $order_statuses['wc-'.$order->get_status()];?>
+
+        </div>
+
+        <div class="thank-you__order-body">
+          <div class="row no-gutters">
+            <div class="col-4">
+              <span class="thank-you__order-label">Products</span>
+              <span class="thank-you__order-value"><?php echo $product_count; ?></span>
+            </div>
+            <div class="col-4">
+              <span class="thank-you__order-label">Photos</span>
+              <span class="thank-you__order-value"><?php echo  $meta['image_count']['value'] ; ?></span>
+            </div>
+            <div class="col-4">
+              <span class="thank-you__order-label">Delivery</span>
+              <span class="thank-you__order-value"><?php echo $fasttrack? '3 Days' : '10 Days' ?></span>
+            </div>
+          </div><!-- row -->
+          <div class="spacer-h-15"></div>
+          <div class="row no-gutters">
+            <div class="col-12">
+              <span class="thank-you__order-label">Sizes</span>
+              <span class="thank-you__order-value"><?php echo implode(', ',$meta['sizes']['value']); ?></span>
+            </div>
+          </div><!-- row -->
+          <div class="spacer-h-15"></div>
+          <div class="thank-you__order-hr">
+            <div class="left-dark"></div>
+            <div class="right-dark"></div>
+          </div>
+          <div class="spacer-h-15"></div>
+          <div class="text-center">
+            <span class="thank-you__order-label">Paid</span>
+            <span class="thank-you__order-price"><?php echo wc_price($order->get_total());?></span>
+          </div>
+          <div class="spacer-h-25"></div>
+
+          <?php
+            $actions = wc_get_account_orders_actions( $order );
+          ?>
+
+          <a href="<?php echo $actions['view']['url'] ?>" class="thank-you__order-track">View</a>
+        </div><!-- thank-you__order-body -->
+      </div><!-- thank-you__order -->
+
+      <div class="spacer-h-100"></div>
+    </div><!-- thank-you__inner -->
+  </div><!-- thank-you -->
 
 
 <?php /*

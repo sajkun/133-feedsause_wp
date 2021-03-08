@@ -174,18 +174,19 @@ class theme_content_output{
   }
 
   public static function print_new_header(){
+    $page = get_queried_object();
 
-
-    // if( is_checkout() && !empty( is_wc_endpoint_url('order-received') ) ){
-    //   return;
-    // }
+    $header_class = is_checkout() && !empty( is_wc_endpoint_url('order-received') ) ? 'contrast' : '';
 
     $custom_logo_id = get_theme_mod( 'custom_logo' );
-    $custom_logo_url = wp_get_attachment_image_url( $custom_logo_id , 'full' );
 
-     $logo = (empty(get_theme_mod( 'custom_logo' ))) ?
+    $custom_logo_url =  wp_get_attachment_image_url( $custom_logo_id , 'full' );
+
+    $logo = (empty(get_theme_mod( 'custom_logo' ))) ?
               sprintf('<a href="%s"  class="logo"><img src="%s/images/logo.svg" alt=""></a>',get_home_url(), THEME_URL):
               sprintf('<a  href="%s" class="logo"><img src="%s" alt=""></a>',get_home_url(),  esc_url( $custom_logo_url ));
+
+    $logo =  $header_class == 'contrast' ? sprintf('<a href="%s"  class="logo"><img src="%s/images/logo_contrast.png" alt=""></a>', get_home_url(), THEME_URL): $logo;
 
     $user_id = get_current_user_id();
 
@@ -208,13 +209,67 @@ class theme_content_output{
         $login_url =  $my_account_id? get_permalink( $my_account_id) : false;
         $login_text =  $user_id == 0 ? "Log In" : 'My Account';
         $addon = $login_url? sprintf('<li class="menu-item last-item"> <a href="%s">%s</a> </li>', $login_url,  $login_text) : '';
+
+        if( is_account_page()){
+
+        }else{
+          $main_menu = wp_nav_menu( array(
+            'theme_location'  => 'main_menu',
+            'menu'            => '',
+            'container'       => '',
+            'container_class' => '',
+            'container_id'    => '',
+            'menu_class'      => 'mobile-menu__list',
+            'menu_id'         => '',
+            'echo'            => false,
+            // 'fallback_cb'     => '',
+            'before'          => '',
+            'after'           => '',
+            'link_before'     => '',
+            'link_after'      => '',
+            'items_wrap'      => '<ul id="%1$s" class="%2$s">%3$s'. $addon .'</ul>',
+            'depth'           => 2,
+            'walker'          => new main_menu_walker(),
+          ) );
+        }
+
+      $header_class = is_checkout() && !empty( is_wc_endpoint_url('order-received') ) ? ' contrast ' : '';
+      $hide_menu = is_checkout() && !empty( is_wc_endpoint_url('order-received') ) ? true : false;
+
+      $args = array(
+        'header_class'   => $header_class,
+        'logo'   => $logo,
+        'hide_menu'   => $hide_menu,
+        'main_menu'   => $main_menu,
+      );
+
+      print_theme_template_part('header-mobile-new', 'globals', $args);
+
+    else:
+     if( is_account_page()){
+
+      global $wp;
+
+      $url_shoots = wc_get_account_endpoint_url('orders');
+      $url_shoots_active = is_account_page() && is_wc_endpoint_url('orders') ? 'active' : '';
+      $url_gallery = wc_get_account_endpoint_url('my-gallery');
+      $url_gallery_active = isset($wp->query_vars['my-gallery']) ? 'active' : '';
+
+      $main_menu = sprintf('<nav class="main-menu"><ul class="menu"> <li class="%s"><a href="%s"><svg class="icon svg-icon-dots-2"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-dots-2"></use> </svg> Shoots</a></li> <li class="%s"><svg class="icon svg-icon-gallery"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-gallery"></use> </svg><a href="%s">Gallery</a></li> </ul></nav>',
+        $url_shoots_active,
+        $url_shoots,
+        $url_gallery_active,
+        $url_gallery
+     );
+
+     }else{
         $main_menu = wp_nav_menu( array(
           'theme_location'  => 'main_menu',
           'menu'            => '',
-          'container'       => '',
-          'container_class' => '',
+          'container'       => 'nav',
+          'container_class' => 'main-menu',
           'container_id'    => '',
-          'menu_class'      => 'mobile-menu__list',
+          'menu_class'      => 'menu',
           'menu_id'         => '',
           'echo'            => false,
           // 'fallback_cb'     => '',
@@ -222,47 +277,29 @@ class theme_content_output{
           'after'           => '',
           'link_before'     => '',
           'link_after'      => '',
-          'items_wrap'      => '<ul id="%1$s" class="%2$s">%3$s'. $addon .'</ul>',
+          'items_wrap'      => '<ul id="%1$s" class="%2$s">%3$s</ul>',
           'depth'           => 2,
           'walker'          => new main_menu_walker(),
         ) );
+     }
+
+
+      $header_class = is_checkout() && !empty( is_wc_endpoint_url('order-received') ) ? ' contrast ' : '';
+
+      $header_class .=  is_account_page()?  ' underline ' : '';
+
 
       $args = array(
-        'logo'   => $logo,
+        'logo'           => $logo,
+        'header_class'   => $header_class,
+        'main_menu'      => is_checkout()? '' : $main_menu,
+        'user_id'        => $user_id,
+        'user_name'      => $user_name,
+        'avatar_url'     => $user_id >0 ? get_avatar_url($user_id) : '',
+        'account_url'      => $my_account_id? get_permalink( $my_account_id) : false,
       );
 
-      print_theme_template_part('header-mobile-new', 'globals', $args);
-
-    else:
-    $main_menu = wp_nav_menu( array(
-      'theme_location'  => 'main_menu',
-      'menu'            => '',
-      'container'       => 'nav',
-      'container_class' => 'main-menu',
-      'container_id'    => '',
-      'menu_class'      => 'menu',
-      'menu_id'         => '',
-      'echo'            => false,
-      // 'fallback_cb'     => '',
-      'before'          => '',
-      'after'           => '',
-      'link_before'     => '',
-      'link_after'      => '',
-      'items_wrap'      => '<ul id="%1$s" class="%2$s">%3$s</ul>',
-      'depth'           => 2,
-      'walker'          => new main_menu_walker(),
-    ) );
-
-    $args = array(
-      'logo'   => $logo,
-      'main_menu'   => is_checkout()? '' : $main_menu,
-      'user_id'     => $user_id,
-      'user_name'   => $user_name,
-      'avatar_url'   => $user_id >0 ? get_avatar_url($user_id) : '',
-      'account_url'      => $my_account_id? get_permalink( $my_account_id) : false,
-    );
-
-    print_theme_template_part('header-desktop-new', 'globals', $args);
+      print_theme_template_part('header-desktop-new', 'globals', $args);
     endif;
   }
 
@@ -2254,9 +2291,12 @@ class theme_content_output{
         $user_name  = $customer->get_first_name();
       }
 
+      $today = new DateTime();
+
+
+
       ?>
       <div class="my-order__header my-order__header-transparent ">
-        <div class="spacer-h-50"></div>
         <div class="container container_sm">
 
           <?php if (user_is_premium($user)): ?>
@@ -2266,27 +2306,61 @@ class theme_content_output{
             </span>
           <?php endif ?>
           <div class="spacer-h-25"></div>
-          <h2 class="my-order__title">
-            <span class="my-order__title-text xl"><?php _e('Hello','theme-translations');?>
-              <?php if ($customer->get_first_name()): ?>
-              , <?php echo esc_attr($customer->get_first_name()); ?>
-              <?php endif ?>
-              <?php if ($customer->get_last_name()): ?>
-              <?php echo esc_attr($customer->get_last_name()); ?>
-              <?php endif ?>
-            </span>
-          </h2>
 
-          <p class="my-order__comments xl"><?php _e('Welcome to your account. Here you can manage your orders, <br>download your photos and ask for any help','theme-translations');?>.</p>
+          <div class="row">
+            <div class="col-12 col-md-4">
+              <h2 class="my-order__title">
+                <span class="my-order__title-text">Shoots
+                </span>
+              </h2>
+            </div>
 
-          <div class="clearfix"></div>
-          <div class="row no-gutters">
-            <div class="col- my-order__filter">
-              <a href="#all" class="my-order__filter-item active"><?php _e('All','theme-translations');?></a>
-              <a href="#processing" class="my-order__filter-item"><?php _e('Active','theme-translations');?></a>
-              <a href="#completed" class="my-order__filter-item"><?php _e('Completed','theme-translations');?></a>
+            <div class="col-12 col-md-8 text-right-md">
+
+              <?php if (!wp_is_mobile()): ?>
+
+
+              <div class="my-order__date-range-picker">
+                <svg class="icon svg-icon-calendar"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-calendar"></use> </svg>
+
+                <span class="label">All Time</span>
+
+                <span class="dates"> Jan 01 1999 → <?php echo $today->format('M d Y') ?></span>
+
+                <svg class="icon svg-icon-arrows"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-arrows"></use> </svg>
+              </div>
+
+              <a href="" class="my-order__button-add">+ New Shoot</a>
+              <?php endif ?>
             </div>
           </div>
+
+          <div class="spacer-h-20"></div>
+
+          <?php
+            $customer_orders = get_posts( array(
+                'numberposts' => -1,
+                'meta_key'    => '_customer_user',
+                'meta_value'  => get_current_user_id(),
+                'post_type'   => wc_get_order_types(),
+                'post_status' => array_keys( wc_get_order_statuses() ),
+            ) );
+
+            $customer_orders_completed = array_filter( $customer_orders, function($el){
+              return in_array($el->post_status, array('wc-completed', 'wc-failed'));
+            });
+
+            $customer_orders_active = array_filter( $customer_orders, function($el){
+              return !in_array($el->post_status, array('wc-completed', 'wc-failed'));
+            });
+          ?>
+
+          <div class="clearfix"></div>
+
+            <div class="my-order__filter">
+              <a href="#processing" class="my-order__filter-item active"><?php _e('Active','theme-translations');?> <span class="count"><?php echo count($customer_orders_active);?></span></a>
+              <a href="#completed" class="my-order__filter-item"><?php _e('Completed','theme-translations');?> <span class="count"><?php echo count($customer_orders_completed);?></span></a>
+            </div>
           <div class="clearfix"></div>
         </div><!-- container -->
       </div>
@@ -3750,6 +3824,10 @@ class theme_content_output{
     else:
       print_theme_template_part('footer-desktop-new', 'globals', $args);
     endif;
+  }
+
+  public static function print_gallery(){
+
   }
 }
 
