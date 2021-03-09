@@ -104,7 +104,7 @@
       );
 
       foreach ($_POST['notes']['data'] as $key => $info) {
-        $cart_item_data['Shoot #'.$key] = array(
+        $cart_item_data['shoots'][$key] = array(
          'value' => $info['text'],
          'label' => 'Shoot #'.$key. ' product "'.$info['product'].'"',
          'name'  => 'comment_'.$key
@@ -120,6 +120,7 @@
 
     $additional_data = array(
       'extra_data'   =>  $cart_item_data,
+      'theme_prices' =>  get_option('theme_settings'),
       'shoot_data'   =>  $_POST,
       'name_array'   =>  $titles,
       'custom_price'      => $total,

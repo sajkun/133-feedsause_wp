@@ -39,41 +39,35 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 			$order      = wc_get_order( $customer_order );
 			$item_count = $order->get_item_count();
 			$order_items  = $order->get_items( apply_filters( 'woocommerce_purchase_order_item_types', 'line_item' ) );
-      if($item_count === 1){
-        $continue = false;
-        foreach ($order_items as $key => $item) {
-          $continue  = ($item->get_product_id() == $product_fast_id)? true : $continue;
+      $product_name= '';
+      $fasttrack = false;
+
+      foreach ($order_items as $key => $item) {
+
+        if($item->get_product_id() == (int)get_option('wfp_priority_delivery_product_id') ){
+          $fasttrack = true;
         }
 
-        if($continue) continue;
-        $product_name= '';
-        $fasttrack = false;
-
-        foreach ($order->get_items() as $key => $item) {
-
-          if($item->get_product_id() == $fasttrack ){
-            $fasttrack = true;
-          }
-
-          if($item->get_product_id() == (int)get_option('wfp_priority_delivery_product_id') || $item->get_product_id() == (int)get_option('wfp_return_product_id')){
-            continue;
-          }
-
-          $meta = $item->get_meta('extra_data');
-          $customer_id  = $order->get_user_id();
-
-          $title = $item->get_name();
-
-          $customer     = new WC_Customer( $customer_id );
-          $product_name = isset($meta['name']['value'])? explode(PHP_EOL, $meta['name']['value']) : '';
-          $product_count = isset($meta['name']['value'])? count($product_name) : '';
+        if($item->get_product_id() == (int)get_option('wfp_priority_delivery_product_id') || $item->get_product_id() == (int)get_option('wfp_return_product_id')){
+          continue;
         }
 
-        if(class_exists('WC_Order_Status_Manager_Order_Status') && function_exists('adjustBrightness')){
-          $status_post = new WC_Order_Status_Manager_Order_Status($order->get_status());
-          $hex_color = $status_post->get_color();
-          $color = adjustBrightness($hex_color, -100);
-        }
+        $meta = $item->get_meta('extra_data');
+        $customer_id  = $order->get_user_id();
+
+        $product = $item->get_product();
+
+        $title = $product->get_title();
+
+        $customer     = new WC_Customer( $customer_id );
+        $product_name = isset($meta['name']['value'])? explode(PHP_EOL, $meta['name']['value']) : '';
+        $product_count = isset($meta['name']['value'])? count($product_name) : '';
+      }
+
+      if(class_exists('WC_Order_Status_Manager_Order_Status') && function_exists('adjustBrightness')){
+        $status_post = new WC_Order_Status_Manager_Order_Status($order->get_status());
+        $hex_color = $status_post->get_color();
+        $color = adjustBrightness($hex_color, -100);
       }
 
       $date = $order->get_date_created();

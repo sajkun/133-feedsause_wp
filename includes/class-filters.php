@@ -1103,8 +1103,12 @@ function theme_save_additional_item_data($item, $cart_item_key, $values, $order 
     // $item->set_total((int)$values['custom_price']);
   }
 
-  if(isset($values['shooting_data'])){
-    $item['shooting_data'] = $values['shooting_data'];
+  if(isset($values['theme_prices'])){
+    $item['theme_prices'] = $values['theme_prices'];
+  }
+
+  if(isset($values['shoot_data'])){
+    $item['shoot_data'] = $values['shoot_data'];
   }
 
   if(isset($values['extra_data'])){

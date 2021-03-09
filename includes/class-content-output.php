@@ -211,6 +211,20 @@ class theme_content_output{
         $addon = $login_url? sprintf('<li class="menu-item last-item"> <a href="%s">%s</a> </li>', $login_url,  $login_text) : '';
 
         if( is_account_page()){
+          global $wp;
+
+          $url_shoots = wc_get_account_endpoint_url('orders');
+          $url_shoots_active = is_account_page() && is_wc_endpoint_url('orders') || is_wc_endpoint_url('view-order')? 'active' : '';
+          $url_gallery = wc_get_account_endpoint_url('my-gallery');
+          $url_gallery_active = isset($wp->query_vars['my-gallery']) ? 'active' : '';
+
+          $main_menu = sprintf('<nav class="main-menu"><ul class="mobile-menu__list"> <li class="%s"><a href="%s"><svg class=" svg-icon-dots-2"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-dots-2"></use> </svg> Shoots</a></li> <li class="%s"><a href="%s"><svg class=" svg-icon-gallery"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-gallery"></use> </svg> Gallery</a></li> </ul></nav>',
+            $url_shoots_active,
+            $url_shoots,
+            $url_gallery_active,
+            $url_gallery
+         );
+
 
         }else{
           $main_menu = wp_nav_menu( array(
@@ -251,7 +265,7 @@ class theme_content_output{
       global $wp;
 
       $url_shoots = wc_get_account_endpoint_url('orders');
-      $url_shoots_active = is_account_page() && is_wc_endpoint_url('orders') ? 'active' : '';
+      $url_shoots_active = is_account_page() && is_wc_endpoint_url('orders') ||  is_wc_endpoint_url('view-order') ? 'active' : '';
       $url_gallery = wc_get_account_endpoint_url('my-gallery');
       $url_gallery_active = isset($wp->query_vars['my-gallery']) ? 'active' : '';
 

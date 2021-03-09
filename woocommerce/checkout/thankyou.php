@@ -44,7 +44,7 @@ foreach ($order->get_items() as $key => $item) {
     $fasttrack = true;
   }
 
-  if($item->get_product_id() == $fattrack || $item->get_product_id() == $handle ){
+  if($item->get_product_id() == (int)get_option('wfp_priority_delivery_product_id') || $item->get_product_id() == (int)get_option('wfp_return_product_id')){
     continue;
   }
 
