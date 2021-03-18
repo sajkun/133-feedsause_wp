@@ -34,16 +34,17 @@ switch ($options['type']) {
 	  break;
 }
 
+  global $continued_checkout;
+  $continued_checkout = false;
+
+	do_action( 'woocommerce_before_checkout_form', $checkout );
+
+	do_action('print_constructor');
+	return;
 ?>
 <div class="checkout">
 	<div class="container container_sm">
 	<?php
-
-
-	  global $continued_checkout;
-	  $continued_checkout = false;
-
-		do_action( 'woocommerce_before_checkout_form', $checkout );
 
 		// If checkout registration is disabled and not logged in, the user cannot checkout.
 
@@ -64,7 +65,6 @@ switch ($options['type']) {
 		<form name="checkout" method="post" class="checkout woocommerce-checkout" action="<?php echo esc_url( wc_get_checkout_url() ); ?>" enctype="multipart/form-data">
 
 			<?php
-
 				if (isset($_GET['fast_order_id'])){
 					printf('<input type="hidden" name="fast_order_id" value="%s">', $_GET['fast_order_id']);
 				}

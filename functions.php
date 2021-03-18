@@ -111,7 +111,9 @@ class velesh_init_theme{
     add_image_size('blog_feed', 470, 284, true);
     add_image_size('blog_feed_lazy', 156, 94, true);
     add_image_size('showcase_thumb', 596, 862, true);
-
+    add_image_size('gallery_1', 518, 688, true);
+    add_image_size('gallery_2', 518, 357, true);
+    add_image_size('gallery_3', 518, 518, true);
   }
 
 
@@ -122,23 +124,67 @@ class velesh_init_theme{
    * @hookedto - wp_enqueue_scripts 999
    */
   public function enqueue_scripts_styles_front(){
-    wp_enqueue_script('jquery-ui-core');
 
-    wp_enqueue_script('jquery-ui-datepicker');
+      wp_enqueue_style('datepicker', THEME_URL.'/assets/datepicker/daterangepicker.css' );
 
-    wp_enqueue_script('theme-script-fancybox', THEME_URL.'/assets/fancybox/dist/jquery.fancybox.min.js', array('jquery'), THEME_VERSION, true);
+      wp_enqueue_script('moment', THEME_URL.'/assets/datepicker/moment.min.js', array('jquery'), THEME_VERSION, true);
 
+      wp_enqueue_script('datepicker', THEME_URL.'/assets/datepicker/daterangepicker.js', array('jquery'), THEME_VERSION, true);
 
-    wp_enqueue_script('theme-script-owl', THEME_URL.'/assets/owlcarousel/js/owl.carousel.min.js', array('jquery'), THEME_VERSION, true);
-
-    wp_enqueue_script('theme-script-lazy', THEME_URL.'/assets/lazy/lazy.js', array('jquery'), THEME_VERSION, true);
-
-    wp_enqueue_style('select2-style', THEME_URL.'/assets/select2/select2.css' );
-
-    wp_enqueue_script('select2-script', THEME_URL.'/assets/select2/select2.js' , array('jquery') );
+      wp_enqueue_style('theme-fancybox', THEME_URL.'/assets/fancybox2/jquery.fancybox.css' );
 
 
-    wp_enqueue_script($this->main_script_slug, THEME_URL.$this->main_script, array('jquery', 'theme-script-fancybox', 'select2-script'), THEME_VERSION, true);
+    if(theme_construct_page::is_page_type( 'new-styles' )){
+
+      wp_enqueue_style('theme-fancybox', THEME_URL.'/assets/fancybox2/jquery.fancybox.css' );
+
+      wp_enqueue_style('theme-fancybox', THEME_URL.'/assets/fancybox2/jquery.fancybox.css' );
+
+      wp_enqueue_script('theme-fancybox', THEME_URL.'/assets/fancybox2/jquery.fancybox.js', array('jquery'), THEME_VERSION, true);
+
+      wp_enqueue_style('theme-fancybox-thumbs', THEME_URL.'/assets/fancybox2/helpers/jquery.fancybox-thumbs.css' );
+
+      wp_enqueue_script('theme-fancybox-thumbs', THEME_URL.'/assets/fancybox2/helpers/jquery.fancybox-thumbs.js', array('jquery'), THEME_VERSION, true);
+
+      if(wp_is_mobile()){
+        wp_enqueue_style('theme-style-desktop', THEME_URL.'/css/mobile.main4.min.css' );
+      }else{
+        wp_enqueue_style('theme-style-desktop', THEME_URL.'/css/desktop.main4.min.css' );
+      }
+
+      wp_enqueue_script('velocity-min', THEME_URL.'/assets/velocity/velocity.min.js', array('jquery'), THEME_VERSION, true);
+
+      wp_enqueue_script('masonry-min', THEME_URL.'/assets/masonry/masonry.js', array('jquery'), THEME_VERSION, true);
+      wp_enqueue_script('vuejs', THEME_URL.'/assets/vuejs/prod.js', array(), THEME_VERSION, true);
+
+      if(wp_is_mobile()){
+        wp_enqueue_script($this->main_script_slug, THEME_URL.'/script/new/mobile.main4.min.js', array('jquery'), THEME_VERSION, true);
+      }else{
+        wp_enqueue_script($this->main_script_slug, THEME_URL.'/script/new/desktop.main5.min.js', array('jquery'), THEME_VERSION, true);
+      }
+    }else{
+
+      /*********************************/
+      /********* OLD PAGES *************/
+      /*********************************/
+
+      wp_enqueue_script('jquery-ui-core');
+
+      wp_enqueue_script('jquery-ui-datepicker');
+
+      wp_enqueue_script('theme-script-fancybox', THEME_URL.'/assets/fancybox/dist/jquery.fancybox.min.js', array('jquery'), THEME_VERSION, true);
+
+
+      wp_enqueue_script('theme-script-owl', THEME_URL.'/assets/owlcarousel/js/owl.carousel.min.js', array('jquery'), THEME_VERSION, true);
+
+      wp_enqueue_script('theme-script-lazy', THEME_URL.'/assets/lazy/lazy.js', array('jquery'), THEME_VERSION, true);
+
+
+      wp_enqueue_script('select2-script', THEME_URL.'/assets/select2/select2.js' , array('jquery') );
+
+
+      wp_enqueue_script($this->main_script_slug, THEME_URL.$this->main_script, array('jquery', 'theme-script-fancybox', 'select2-script'), THEME_VERSION, true);
+    }
 
 
     unregister_scripts_n_styles();
@@ -152,16 +198,25 @@ class velesh_init_theme{
    */
   public function print_theme_inline_styles(){
 
-    $inline_styles_4_script = array(
-      $this->main_style_slug  => THEME_URL.$this->main_style,
-      'theme_style_fancy' => THEME_URL.'/assets/fancybox/dist/jquery.fancybox.min.css',
-      'theme_style_owl'   => THEME_URL.'/assets/owlcarousel/css/owl.carousel.min.css',
-      'theme_font_style_4'  => THEME_URL.$this->font,
-    );
+    if(theme_construct_page::is_page_type( 'new-styles' )){
+      $inline_styles_4_script = array(
+        'theme_style_owl'   => THEME_URL.'/assets/owlcarousel/css/owl.carousel.min.css',
+        'theme_font_style_4'  => THEME_URL.$this->font,
+      );
+    }else{
+      $inline_styles_4_script = array(
+        $this->main_style_slug  => THEME_URL.$this->main_style,
+        'theme_style_fancy' => THEME_URL.'/assets/fancybox/dist/jquery.fancybox.min.css',
+        'theme_style_owl'   => THEME_URL.'/assets/owlcarousel/css/owl.carousel.min.css',
+        'theme_font_style_4'  => THEME_URL.$this->font,
+      );
+    }
 
     foreach ($inline_styles_4_script as $name => $url) {
        print_inline_style($url, $name);
     }
+
+
   }
 
 
@@ -182,7 +237,7 @@ class velesh_init_theme{
 
     wp_enqueue_script('theme-script', THEME_URL.'/script/admin.js', array('jquery'), THEME_VERSION, true);
 
-    wp_enqueue_style( 'theme-admin-style', THEME_URL.'/css/admin3.css', THEME_VERSION );
+    wp_enqueue_style( 'theme-admin-style', THEME_URL.'/css/admin4.css', THEME_VERSION );
 
     $settings_pages = array(
 
@@ -405,7 +460,11 @@ class velesh_init_theme{
    * prints inline data in body
    */
   public function print_inline_data_body(){
-    add_svg_sprite('theme_sprite_svg_133',THEME_URL.'/svg_sprite/symbol_sprite.html');
+    if(theme_construct_page::is_page_type( 'new-styles' )){
+      add_svg_sprite('theme_sprite_svg_133_8_new',THEME_URL.'/svg_sprite/new/symbol_sprite_2.html');
+    }else{
+      add_svg_sprite('theme_sprite_svg_133_2',THEME_URL.'/svg_sprite/symbol_sprite.html');
+    }
   }
 
 
@@ -568,6 +627,7 @@ class velesh_init_theme{
 
     $locations = array(
       'main_menu'     => __('Menu in header', 'theme-translations'),
+      'main_menu_footer'     => __('Menu in footer', 'theme-translations'),
       'main_menu_mobile'     => __('Main menu for mobiles', 'theme-translations'),
     );
 

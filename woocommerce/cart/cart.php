@@ -22,7 +22,7 @@ $return_product_id            = (int)get_option('wfp_return_product_id');
 
 $helper = new theme_formatted_cart();
 if(count($helper->get_items()) <=0){
-	wc()->cart->empty_cart();
+	// wc()->cart->empty_cart();
 }
 
 

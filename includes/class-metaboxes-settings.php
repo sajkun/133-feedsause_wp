@@ -302,13 +302,6 @@ class velesh_theme_meta{
       }
     }
     $order = wc_get_order($post->ID);
-    clog($order->get_shipping_methods());
-
-    foreach ($order->get_shipping_methods() as $key => $m) {
-      clog($m->get_data());
-      clog($m->get_instance_id());
-    }
-    clog($active_methods);
 
     $date = false;
 
@@ -478,7 +471,7 @@ class velesh_theme_meta{
     $slug = 'theme_settings';
     if (isset($_POST['do-save']) && $_POST['do-save'] === 'yes' ) {
       if(isset($_POST[$slug])){
-        $test = update_option($slug, recursive_sanitize_text_field($_POST[$slug]) );
+        $test = update_option($slug, ($_POST[$slug]) );
       }else{
         delete_option($slug);
       }
@@ -486,7 +479,7 @@ class velesh_theme_meta{
       $slug_opt = 'wfp_priority_delivery_product_id';
 
       if(isset($_POST[$slug_opt])){
-        $test = update_option($slug_opt, recursive_sanitize_text_field($_POST[$slug_opt]) );
+        $test = update_option($slug_opt, ($_POST[$slug_opt]) );
       }else{
         delete_option($slug_opt);
       }
@@ -494,7 +487,7 @@ class velesh_theme_meta{
       $slug_opt = 'wfp_return_product_id';
 
       if(isset($_POST[$slug_opt])){
-        $test = update_option($slug_opt, recursive_sanitize_text_field($_POST[$slug_opt]) );
+        $test = update_option($slug_opt, ($_POST[$slug_opt]) );
       }else{
         delete_option($slug_opt);
       }
@@ -504,93 +497,168 @@ class velesh_theme_meta{
       <p><strong>Settings saved.</strong></p><button type="button" class="notice-dismiss"><span class="screen-reader-text">Dismiss this notice.</span></button></div>';
     }
     $o = get_option($slug);
+
     ?>
     <h3>Theme Settings</h3>
        <form action="" method="post">
-        <table class="form-table">
-          <tbody>
-            <tr>
-              <th>
 
-                <label for="<?php echo $slug; ?>[single_product_price]">Single Image Price</label> <br>
-              </th>
-              <td>
-                 <input type="text" class="medium-text" id="<?php echo $slug; ?>[single_product_price]" name="<?php echo $slug; ?>[single_product_price]" value="<?php echo (isset($o['single_product_price']))? esc_attr($o['single_product_price']):''; ?>"> <br>
-                  <span class="description">Used to display in Basic Feedsauce plan on billing details</span ><br>
-                  <span class="description">Type only price without currency symbol</span ><br>
-                 <br>
-              </td>
-            </tr>
-            <?php if (class_exists('YWSBS_Subscription')): ?>
-            <tr>
-              <th>
-                Use this subscription as main for site
-              </th>
-              <td>
-                <select name="<?php echo $slug; ?>[subscription]" id="<?php echo $slug; ?>[subsciption]">
+        <button class="button button-primary"> Save</button>
+        <div class="spacer-h-10"></div>
+        <input type="radio" id="prices" checked="checked" name="options" class="duh-hide-check">
+        <input type="radio" id="product_types" name="options" class="duh-hide-check">
 
-                  <option value="-1">---Select a subscription ---</option>
-                <?php
-                  $subscriptions = get_all_subscriptions();
-                  foreach ($subscriptions as $key => $s) {
-                    printf('<option value="%1$s" %2$s>%3$s</option>', $s->ID, ( $o['subscription'] == $s->ID)? 'selected="selected"' : '' , $s->post_title);
-                  }
-                 ?>
-                </select>
-              </td>
-            </tr>
+        <ul class="duh-tabs clearfix">
+          <li><label for="prices">Prices</label></li>
+          <li><label for="product_types">Product</label></li>
+          <li>
+          </li>
+        </ul>
 
-            <tr>
-              <th>
-                Url for details about premium plan
-              </th>
-              <td>
-                <input type="text" class="large-text" id="<?php echo $slug; ?>[about_subscription]" name="<?php echo $slug; ?>[about_subscription]" value="<?php echo (isset($o['about_subscription']))? esc_url($o['about_subscription']):''; ?>">
-              </td>
-            </tr>
-            <?php endif ?>
-            <tr>
-              <th>A product for a priority delivery</th>
-              <td>
-                <select name="wfp_priority_delivery_product_id">
-                  <option value="-1">--- select a product ---</option>
+        <div class="product_types duh-page-settings-content">
+          <h4>Product Types Published</h4>
+          <textarea name="<?php echo $slug; ?>[product_types][published]" id="" class="fullwidth" rows="10"><?php echo isset($o['product_types']['published'])? $o['product_types']['published'] : '' ?></textarea>
+          <div class="clearfix"></div>
+          <h4>Product Types Comming Soon</h4>
+          <textarea name="<?php echo $slug; ?>[product_types][soon]" id="" class="fullwidth" rows="10"><?php echo isset($o['product_types']['soon'])? $o['product_types']['soon'] : '' ?></textarea>
+          <div class="clearfix"></div>
+          <i>Place Every product Type on new row</i>
+          <div class="spacer-h-10"></div>
+          <button class="button button-primary"> Save</button>
+        </div>
+
+        <div class="prices duh-page-settings-content">
+          <table class="form-table">
+            <tbody>
+              <tr>
+                <th>
+
+                  <label for="<?php echo $slug; ?>[single_product_price]">Single Image Price</label> <br>
+                </th>
+                <td>
+                   <input type="text" class="medium-text" id="<?php echo $slug; ?>[single_product_price]" name="<?php echo $slug; ?>[single_product_price]" value="<?php echo (isset($o['single_product_price']))? esc_attr($o['single_product_price']):''; ?>"> <br>
+
+                    <span class="description">Type only price without currency symbol</span ><br>
+                   <br>
+                </td>
+              </tr>
+              <tr>
+                <th>
+
+                  <label for="<?php echo $slug; ?>[name]">Single Product Name Price</label> <br>
+                </th>
+                <td>
+                   <input type="text" class="medium-text" id="<?php echo $slug; ?>[name]" name="<?php echo $slug; ?>[name]" value="<?php echo (isset($o['name']))? esc_attr($o['name']):''; ?>"> <br>
+
+                    <span class="description">Type only price without currency symbol</span ><br>
+                   <br>
+                </td>
+              </tr>
+              <tr>
+                <th>
+
+                  <label for="<?php echo $slug; ?>[sizes]">Size Price</label> <br>
+                </th>
+                <td>
+                   <input type="text" class="medium-text" id="<?php echo $slug; ?>[sizes]" name="<?php echo $slug; ?>[sizes]" value="<?php echo (isset($o['sizes']))? esc_attr($o['sizes']):''; ?>"> <br>
+
+                    <span class="description">Type only price without currency symbol</span ><br>
+                   <br>
+                </td>
+              </tr>
+              <tr>
+                <th>
+
+                  <label for="<?php echo $slug; ?>[color]">Color Price</label> <br>
+                </th>
+                <td>
+                   <input type="text" class="medium-text" id="<?php echo $slug; ?>[color]" name="<?php echo $slug; ?>[color]" value="<?php echo (isset($o['color']))? esc_attr($o['color']):''; ?>"> <br>
+
+                    <span class="description">Type only price without currency symbol</span ><br>
+                   <br>
+                </td>
+              </tr>
+              <tr>
+                <th>
+
+                  <label for="<?php echo $slug; ?>[color]">Custom Shoot Price</label> <br>
+                </th>
+                <td>
+                   <input type="text" class="medium-text" id="<?php echo $slug; ?>[shoot]" name="<?php echo $slug; ?>[shoot]" value="<?php echo (isset($o['shoot']))? esc_attr($o['shoot']):''; ?>"> <br>
+                    <span class="description">Type only price without currency symbol</span ><br>
+                   <br>
+                </td>
+              </tr>
+              <?php if (class_exists('YWSBS_Subscription')): ?>
+              <tr>
+                <th>
+                  Use this subscription as main for site
+                </th>
+                <td>
+                  <select name="<?php echo $slug; ?>[subscription]" id="<?php echo $slug; ?>[subsciption]">
+
+                    <option value="-1">---Select a subscription ---</option>
                   <?php
-                    $product_id = (int)get_option('wfp_priority_delivery_product_id');
-                    foreach (wc_get_products(array('limit'=>-1, 'posts_per_page'=>-1)) as $key => $p) {
-                      printf('<option value="%s" %s >%s</option>', $p->get_id(), ( $p->get_id()===$product_id )? 'selected="selected"': '', esc_attr($p->get_title()));
+                    $subscriptions = get_all_subscriptions();
+                    foreach ($subscriptions as $key => $s) {
+                      printf('<option value="%1$s" %2$s>%3$s</option>', $s->ID, ( $o['subscription'] == $s->ID)? 'selected="selected"' : '' , $s->post_title);
                     }
                    ?>
-                </select> <br><br>
+                  </select>
+                </td>
+              </tr>
 
-                <i>Will not be displayed in products' list, <br>used to add a priority delivery to a cart</i>
-              </td>
-            </tr>
+              <tr>
+                <th>
+                  Url for details about premium plan
+                </th>
+                <td>
+                  <input type="text" class="large-text" id="<?php echo $slug; ?>[about_subscription]" name="<?php echo $slug; ?>[about_subscription]" value="<?php echo (isset($o['about_subscription']))? esc_url($o['about_subscription']):''; ?>">
+                </td>
+              </tr>
+              <?php endif ?>
+              <tr>
+                <th>A product for a priority delivery</th>
+                <td>
+                  <select name="wfp_priority_delivery_product_id">
+                    <option value="-1">--- select a product ---</option>
+                    <?php
+                      $product_id = (int)get_option('wfp_priority_delivery_product_id');
+                      foreach (wc_get_products(array('limit'=>-1, 'posts_per_page'=>-1)) as $key => $p) {
+                        printf('<option value="%s" %s >%s</option>', $p->get_id(), ( $p->get_id()===$product_id )? 'selected="selected"': '', esc_attr($p->get_title()));
+                      }
+                     ?>
+                  </select> <br><br>
 
-            <tr>
-              <th>Select a product for "Return products"</th>
-              <td>
-                <select name="wfp_return_product_id">
-                  <option value="-1">--- select a product ---</option>
-                  <?php
-                    $product_id = (int)get_option('wfp_return_product_id');
-                    foreach (wc_get_products(array('limit'=>-1, 'posts_per_page'=>-1)) as $key => $p) {
-                      printf('<option value="%s" %s >%s</option>', $p->get_id(), ( $p->get_id()===$product_id )? 'selected="selected"': '', esc_attr($p->get_title()));
-                    }
-                   ?>
-                </select> <br><br>
-                <i>Will not be displayed in products' list,<br> used to add an option for returning products</i>
-              </td>
-            </tr>
+                  <i>Will not be displayed in products' list, <br>used to add a priority delivery to a cart</i>
+                </td>
+              </tr>
 
-            <tr>
-              <th></th>
-              <td>
-                <button class="button button-primary"> Save</button>
-                <input type="hidden" name="do-save" value="yes">
-              </td>
-            </tr>
-          </tbody>
-        </table>
+              <tr>
+                <th>Select a product for "Return products"</th>
+                <td>
+                  <select name="wfp_return_product_id">
+                    <option value="-1">--- select a product ---</option>
+                    <?php
+                      $product_id = (int)get_option('wfp_return_product_id');
+                      foreach (wc_get_products(array('limit'=>-1, 'posts_per_page'=>-1)) as $key => $p) {
+                        printf('<option value="%s" %s >%s</option>', $p->get_id(), ( $p->get_id()===$product_id )? 'selected="selected"': '', esc_attr($p->get_title()));
+                      }
+                     ?>
+                  </select> <br><br>
+                  <i>Will not be displayed in products' list,<br> used to add an option for returning products</i>
+                </td>
+              </tr>
+
+              <tr>
+                <th></th>
+                <td>
+                  <button class="button button-primary"> Save</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <input type="hidden" name="do-save" value="yes">
        </form>
 
     <?php
@@ -673,7 +741,96 @@ class velesh_theme_meta{
    * @hookedto admin_menu -10
    */
   public static function add_woo_attributes_images(){
-    add_submenu_page( 'edit.php?post_type=product',  __('Attributes data', 'theme-translations'), __('Attributes data', 'theme-translations'), 'manage_options', 'theme_attributes_images', array('velesh_theme_meta', 'print_woo_attributes_images_form'));
+    // add_submenu_page( 'edit.php?post_type=product',  __('Attributes data', 'theme-translations'), __('Attributes data', 'theme-translations'), 'manage_options', 'theme_attributes_images', array('velesh_theme_meta', 'print_woo_attributes_images_form'));
+
+    add_submenu_page( 'edit.php?post_type=product',  __('Global Features', 'theme-translations'), __('Global Features', 'theme-translations'), 'manage_options', 'product_global_features', array('velesh_theme_meta', 'print_product_global_features'));
+  }
+
+  public static function print_product_global_features(){
+    $slug="product_global_blocks";
+    if(isset($_POST['do_save'])){
+      update_option($slug, $_POST[$slug]);
+    }
+    $option = get_option($slug);
+
+    ?>
+
+    <form action="<?php echo admin_url('edit.php?post_type=product&page=product_global_features')?>" method="POST">
+
+      <input type="radio" id="customize_and_create" name="option" checked class="duh-hide-check">
+      <input type="radio" id="good_2_know" name="option" class="duh-hide-check">
+      <input type="radio" id="show_bespoke" name="option" class="duh-hide-check">
+
+      <ul class="duh-tabs">
+        <li>
+        <label for="customize_and_create">Customize and Create</label></li>
+        <li> <label for="good_2_know">Good to Know</label></li>
+         <li><label for="show_bespoke">100% BESPOKE</label></li>
+      </ul>
+
+      <div class="duh-page-settings-content customize_and_create">
+        <h3>Customize and Create items</h3>
+
+        <div class="spacer-h-20"></div>
+
+        <?php
+          for ($i=0; $i < 4; $i++) {
+
+            printf('<h4>Item #%s</h4>', $i);
+
+            echo "<h4>Title</h4>";
+
+            printf('<input name="%s[customize_and_create][%s][title]" value="%s" class="fullwidth">', $slug, $i, isset($option['customize_and_create'][$i]['title'])? $option['customize_and_create'][$i]['title'] : '' );
+
+            echo "<h4>Text</h4>";
+
+             printf('<textarea name="%s[customize_and_create][%s][text]" rows="6" class="fullwidth">%s</textarea>', $slug, $i, isset($option['customize_and_create'][$i]['text'])? stripslashes($option['customize_and_create'][$i]['text'] ): '' );
+
+          }
+
+          ?>
+      </div>
+
+      <div class="duh-page-settings-content good_2_know">
+        <h3>Good to Know</h3>
+
+        <div class="spacer-h-20"></div>
+
+        <?php
+          for ($i=0; $i < 4; $i++) {
+
+            printf('<h4>Item #%s</h4>', $i);
+
+            echo "<h4>Title</h4>";
+
+            printf('<input name="%s[good_2_know][%s][title]" value="%s" class="fullwidth">', $slug, $i, isset($option['good_2_know'][$i]['title'])? $option['good_2_know'][$i]['title'] : '' );
+
+            echo "<h4>Text</h4>";
+
+             printf('<textarea name="%s[good_2_know][%s][text]" rows="6" class="fullwidth">%s</textarea>', $slug, $i, isset($option['good_2_know'][$i]['text'])?stripslashes($option['good_2_know'][$i]['text']) : '' );
+          }
+
+          ?>
+      </div>
+
+      <div class="duh-page-settings-content show_bespoke">
+        <h3>100% BESPOKE</h3>
+        <h4>Title</h4>
+
+        <input type="text" class="fullwidth" name="<?php echo $slug?>[bespoke][title]" value="<?php echo isset( $option['bespoke']['title'])? $option['bespoke']['title'] : ''; ?>">
+
+        <h4>Text</h4>
+
+        <textarea name="<?php echo $slug?>[bespoke][text]" id="" class="fullwidth" rows="6"><?php echo isset( $option['bespoke']['text'])? $option['bespoke']['title'] : ''; ?></textarea>
+
+      </div>
+
+
+      <input type="hidden" name="do_save" value="yes">
+      <input type="submit" value="save" class="button">
+    </form>
+
+    <?php
   }
 
 
@@ -748,9 +905,9 @@ class velesh_theme_meta{
 
           <div class="rad-icon trigger-show">
             <br>
-            <label><input type="radio" style="vertical-align: -2px" name="theme_attributes_images[attribute_pa_<?php echo $attr->attribute_name ?>][icon]" value="layout" <?php echo (isset($o[$name]['icon']) && $o[$name]['icon'] === 'layout')? 'checked="checked"' : ''; ?>><img src="<?php echo THEME_URL.'/images/admin/layout.svg'?>" alt=""></label><br>
+            <label><input type="radio" <?php echo 'style="vertical-align: -2px"'; ?> name="theme_attributes_images[attribute_pa_<?php echo $attr->attribute_name ?>][icon]" value="layout" <?php echo (isset($o[$name]['icon']) && $o[$name]['icon'] === 'layout')? 'checked="checked"' : ''; ?>><img src="<?php echo THEME_URL.'/images/admin/layout.svg'?>" alt=""></label><br>
 
-            <label><input type="radio" style="vertical-align: -2px" name="theme_attributes_images[attribute_pa_<?php echo $attr->attribute_name ?>][icon]" value="items" <?php echo (isset($o[$name]['icon']) && $o[$name]['icon'] === 'items')? 'checked="checked"' : ''; ?>><img src="<?php echo THEME_URL.'/images/admin/items.svg'?>" alt=""></label>
+            <label><input type="radio" <?php echo 'style="vertical-align: -2px"';?>  name="theme_attributes_images[attribute_pa_<?php echo $attr->attribute_name ?>][icon]" value="items" <?php echo (isset($o[$name]['icon']) && $o[$name]['icon'] === 'items')? 'checked="checked"' : ''; ?>><img src="<?php echo THEME_URL.'/images/admin/items.svg'?>" alt=""></label>
 
           </div>
 
@@ -849,6 +1006,9 @@ class velesh_theme_meta{
       'showcase' => __('Showcase', 'theme-translations'),
       'support'  => __('Support', 'theme-translations'),
       'customers'  => __('Customers', 'theme-translations'),
+      'constructor'  => __('Constructor', 'theme-translations'),
+      'product_guid'  => __('Product Guidelines', 'theme-translations'),
+      'redo_policy'  => __('Redo Policy', 'theme-translations'),
     );
 
     foreach ($options as $key => $name) {
@@ -887,7 +1047,6 @@ class velesh_theme_meta{
   * @see $this->add_reading_settings()
   */
   public function add_additional_page_settings($data){
-    // clog($param2);
     // echo '<h3>Theme settings</h3>';
   }
 

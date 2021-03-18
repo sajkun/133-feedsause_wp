@@ -15,10 +15,16 @@ $data = get_queried_object();
     do_action('do_theme_before_header');
     do_action('do_theme_header');
     do_action('do_theme_after_header');
-    $class = (theme_construct_page::is_page_type('woo-product'))? 'white' : '';
-    printf('<div class="spacer-h-40 %s"></div>' , $class);
+    if(!theme_construct_page::is_page_type( 'new-styles' )){
+      $class = (theme_construct_page::is_page_type('woo-product'))? 'white' : '';
+      printf('<div class="spacer-h-40 %s"></div>' , $class);
+    }
+
+    $class = theme_construct_page::is_page_type( 'new-styles' )? 'site-content' : 'site-inner';
+
+
 ?>
-    <main class="site-inner">
+    <main class="<?php echo $class; ?>">
 <?php
     do_action('do_theme_before_content');
     do_action('do_theme_content');

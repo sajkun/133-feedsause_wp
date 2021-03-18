@@ -21,6 +21,7 @@ class theme_filter_class{
     add_filter('loop_shop_columns', '__return_false');
 
 
+
     /*sets product thumbnail sizes for gallery in product loop*/
     add_filter('single_product_archive_thumbnail_size', array($this, 'single_product_archive_thumbnail_size'));
 
@@ -111,6 +112,7 @@ class theme_filter_class{
     /*removing srcset*/
       add_filter('wp_calculate_image_srcset_meta', '__return_null' );
       add_filter('wp_calculate_image_sizes', '__return_false',  99 );
+
       remove_filter('the_content', 'wp_make_content_images_responsive' );
       add_filter('wp_get_attachment_image_attributes', array($this, 'unset_attach_srcset_attr'), 99 ,3 );
 
@@ -137,9 +139,7 @@ class theme_filter_class{
 
 
     add_filter( 'woocommerce_is_purchasable', array($this,'price_0_is_purchasable') , 10, 2 );
-
   }
-
    /**
     * makes product with 0 price purchaseable
     *
@@ -488,6 +488,16 @@ class theme_filter_class{
           case get_option('theme_page_customers'):
               $states[] = __('Theme Customers\' Page');
             break;
+
+          case get_option('theme_page_constructor'):
+              $states[] = __('Shooting Constructor Page');
+            break;
+          case get_option('theme_page_product_guid'):
+              $states[] = __('Product Guidelines');
+            break;
+          case get_option('theme_page_redo_policy'):
+              $states[] = __('Redo Policy');
+            break;
         }
       }
       return $states;
@@ -506,6 +516,14 @@ class theme_filter_class{
 
     if($pricing_id == $data->ID){
       $classes .= ' lines';
+    }
+
+    if(is_checkout() && empty( is_wc_endpoint_url('order-received') )) {
+     $classes .= " contrast ";
+    }
+
+    if(  is_account_page() && is_wc_endpoint_url('orders') ){
+     $classes .= " white ";
     }
 
     return $classes;
@@ -551,15 +569,15 @@ class theme_filter_class{
   */
   public static function woocommerce_billing_fields( $address_fields, $country ){
     $fields_allowed  = array(
-      'billing_company',
-      'billing_address_1',
-      'billing_address_2',
-      'billing_city',
-      'billing_state',
-      'billing_postcode',
-      'billing_country',
-      'billing_first_name',
-      'billing_last_name',
+      // 'billing_company',
+      // 'billing_address_1',
+      // 'billing_address_2',
+      // 'billing_city',
+      // 'billing_state',
+      // 'billing_postcode',
+      // 'billing_country',
+      // 'billing_first_name',
+      // 'billing_last_name',
     );
 
     foreach ($address_fields as $key => $value) {
@@ -622,6 +640,7 @@ class theme_filter_class{
   */
   public static function woocommerce_account_menu_items($items){
     $items['orders'] = __('My Orders', 'theme-translations');
+    $items['my-gallery'] = __('Gallery', 'theme-translations');
     $items['edit-account'] = __('Edit Profile', 'theme-translations');
     $items['edit-address/billing'] = __('Billing', 'theme-translations');
     return $items;
@@ -1077,6 +1096,21 @@ add_action('woocommerce_checkout_create_order_line_item', 'theme_save_additional
 
 function theme_save_additional_item_data($item, $cart_item_key, $values, $order ){
 
+
+  if(isset($values['custom_price'])){
+    $item->set_subtotal((int)$values['custom_price']);
+
+    // $item->set_total((int)$values['custom_price']);
+  }
+
+  if(isset($values['theme_prices'])){
+    $item['theme_prices'] = $values['theme_prices'];
+  }
+
+  if(isset($values['shoot_data'])){
+    $item['shoot_data'] = $values['shoot_data'];
+  }
+
   if(isset($values['extra_data'])){
     $item['extra_data'] = $values['extra_data'];
   }
@@ -1089,6 +1123,8 @@ function theme_save_additional_item_data($item, $cart_item_key, $values, $order 
     $item['fast_order_id'] = array( $_POST['fast_order_id'] );
 
     $order_id = $order->get_id();
+
+
 
     if(!update_post_meta((int)$_POST['fast_order_id'], 'is_fasttracked', 'yes' )){
 
@@ -1146,18 +1182,14 @@ function print_additional_data_line( $item_id, $item, $order ){
           foreach ($meta as $key => $_m):
           ?>
           <tr>
-            <th><?php echo $_m['label'] ?>:</th>
-            <td>
-              <p>
-                <?php
+            <th><?php echo $_m['label'] ?>: &nbsp;&nbsp;&nbsp;&nbsp;</th>
+            <td> <p> <?php
                 if(is_array($_m['value'] )){
                   echo(implode(',', $_m['value']));
                 }else{
-                 echo $_m['value'];
+                 echo trim($_m['value']);
                 }
-                ?>
-              </p>
-            </td>
+                ?> </p> </td>
           </tr>
         <?php
          endforeach;
@@ -1170,3 +1202,30 @@ function print_additional_data_line( $item_id, $item, $order ){
   <?php
 }
 
+
+
+
+add_action( 'woocommerce_before_calculate_totals', 'set_cart_item_calculated_price', 10, 1 );
+
+function set_cart_item_calculated_price( $cart ) {
+    if ( is_admin() && ! defined( 'DOING_AJAX' ) )
+        return;
+
+    // Required since Woocommerce version 3.2 for cart items properties changes
+    if ( did_action( 'woocommerce_before_calculate_totals' ) >= 2 )
+        return;
+
+    // Loop through cart items
+    foreach ( $cart->get_cart() as $cart_item ) {
+        // Set the new calculated price based on lenght
+        if( isset($cart_item['custom_price']) ) {
+            $cart_item['data']->set_price( $cart_item['custom_price']);
+        }
+    }
+}
+
+
+add_action( 'init', 'gallery_add_endpoint' );
+function gallery_add_endpoint() {
+  add_rewrite_endpoint( 'my-gallery', EP_PAGES );
+}

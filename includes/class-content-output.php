@@ -14,6 +14,8 @@ class theme_content_output{
   * @hookedto do_theme_header on home page 10
   */
   public static function print_header(){
+
+
     $main_menu = wp_nav_menu( array(
       'theme_location'  => 'main_menu',
       'menu'            => '',
@@ -171,6 +173,150 @@ class theme_content_output{
     <?php
   }
 
+  public static function print_new_header(){
+    $page = get_queried_object();
+
+    $header_class = is_checkout() && !empty( is_wc_endpoint_url('order-received') ) ? 'contrast' : '';
+
+    $custom_logo_id = get_theme_mod( 'custom_logo' );
+
+    $custom_logo_url =  wp_get_attachment_image_url( $custom_logo_id , 'full' );
+
+    $logo = (empty(get_theme_mod( 'custom_logo' ))) ?
+              sprintf('<a href="%s"  class="logo"><img src="%s/images/logo.svg" alt=""></a>',get_home_url(), THEME_URL):
+              sprintf('<a  href="%s" class="logo"><img src="%s" alt=""></a>',get_home_url(),  esc_url( $custom_logo_url ));
+
+    $logo =  $header_class == 'contrast' ? sprintf('<a href="%s"  class="logo"><img src="%s/images/logo_contrast.png" alt=""></a>', get_home_url(), THEME_URL): $logo;
+
+    $user_id = get_current_user_id();
+
+    if(theme_construct_page::is_page_type('woo-cart')){
+      $main_menu = '';
+    }
+
+    $header_class = '';
+    $user_name  = '';
+
+    if(function_exists('wc_get_account_endpoint_url')){
+      $orders_url = wc_get_account_endpoint_url('orders');
+      $customer   = new WC_Customer($user_id);
+      $user_name  = $customer->get_first_name();
+    }
+
+    $my_account_id = get_option('woocommerce_myaccount_page_id');
+
+    if(wp_is_mobile()):
+        $login_url =  $my_account_id? get_permalink( $my_account_id) : false;
+        $login_text =  $user_id == 0 ? "Log In" : 'My Account';
+        $addon = $login_url? sprintf('<li class="menu-item last-item"> <a href="%s">%s</a> </li>', $login_url,  $login_text) : '';
+
+        if( is_account_page()){
+          global $wp;
+
+          $url_shoots = wc_get_account_endpoint_url('orders');
+          $url_shoots_active = is_account_page() && is_wc_endpoint_url('orders') || is_wc_endpoint_url('view-order')? 'active' : '';
+          $url_gallery = wc_get_account_endpoint_url('my-gallery');
+          $url_gallery_active = isset($wp->query_vars['my-gallery']) ? 'active' : '';
+
+          $main_menu = sprintf('<nav class="main-menu"><ul class="mobile-menu__list"> <li class="%s"><a href="%s"><svg class=" svg-icon-dots-2"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-dots-2"></use> </svg> Shoots</a></li> <li class="%s"><a href="%s"><svg class=" svg-icon-gallery"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-gallery"></use> </svg> Gallery</a></li> </ul></nav>',
+            $url_shoots_active,
+            $url_shoots,
+            $url_gallery_active,
+            $url_gallery
+         );
+
+
+        }else{
+          $main_menu = wp_nav_menu( array(
+            'theme_location'  => 'main_menu',
+            'menu'            => '',
+            'container'       => '',
+            'container_class' => '',
+            'container_id'    => '',
+            'menu_class'      => 'mobile-menu__list',
+            'menu_id'         => '',
+            'echo'            => false,
+            // 'fallback_cb'     => '',
+            'before'          => '',
+            'after'           => '',
+            'link_before'     => '',
+            'link_after'      => '',
+            'items_wrap'      => '<ul id="%1$s" class="%2$s">%3$s'. $addon .'</ul>',
+            'depth'           => 2,
+            'walker'          => new main_menu_walker(),
+          ) );
+        }
+
+      $header_class = is_checkout() && !empty( is_wc_endpoint_url('order-received') ) ? ' contrast ' : '';
+      $hide_menu = is_checkout() && !empty( is_wc_endpoint_url('order-received') ) ? true : false;
+
+      $args = array(
+        'header_class'   => $header_class,
+        'logo'   => $logo,
+        'hide_menu'   => $hide_menu,
+        'main_menu'   => $main_menu,
+      );
+
+      print_theme_template_part('header-mobile-new', 'globals', $args);
+
+    else:
+     if( is_account_page()){
+
+      global $wp;
+
+      $url_shoots = wc_get_account_endpoint_url('orders');
+      $url_shoots_active = is_account_page() && is_wc_endpoint_url('orders') ||  is_wc_endpoint_url('view-order') ? 'active' : '';
+      $url_gallery = wc_get_account_endpoint_url('my-gallery');
+      $url_gallery_active = isset($wp->query_vars['my-gallery']) ? 'active' : '';
+
+      $main_menu = sprintf('<nav class="main-menu"><ul class="menu"> <li class="%s"><a href="%s"><svg class="icon svg-icon-dots-2"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-dots-2"></use> </svg> Shoots</a></li> <li class="%s"><svg class="icon svg-icon-gallery"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-gallery"></use> </svg><a href="%s">Gallery</a></li> </ul></nav>',
+        $url_shoots_active,
+        $url_shoots,
+        $url_gallery_active,
+        $url_gallery
+     );
+
+     }else{
+        $main_menu = wp_nav_menu( array(
+          'theme_location'  => 'main_menu',
+          'menu'            => '',
+          'container'       => 'nav',
+          'container_class' => 'main-menu',
+          'container_id'    => '',
+          'menu_class'      => 'menu',
+          'menu_id'         => '',
+          'echo'            => false,
+          // 'fallback_cb'     => '',
+          'before'          => '',
+          'after'           => '',
+          'link_before'     => '',
+          'link_after'      => '',
+          'items_wrap'      => '<ul id="%1$s" class="%2$s">%3$s</ul>',
+          'depth'           => 2,
+          'walker'          => new main_menu_walker(),
+        ) );
+     }
+
+
+      $header_class = is_checkout() && !empty( is_wc_endpoint_url('order-received') ) ? ' contrast ' : '';
+
+      $header_class .=  is_account_page()?  ' underline ' : '';
+
+
+      $args = array(
+        'logo'           => $logo,
+        'header_class'   => $header_class,
+        'main_menu'      => is_checkout()? '' : $main_menu,
+        'user_id'        => $user_id,
+        'user_name'      => $user_name,
+        'avatar_url'     => $user_id >0 ? get_avatar_url($user_id) : '',
+        'account_url'      => $my_account_id? get_permalink( $my_account_id) : false,
+      );
+
+      print_theme_template_part('header-desktop-new', 'globals', $args);
+    endif;
+  }
+
 
   /*
   * prints header button
@@ -280,7 +426,7 @@ class theme_content_output{
       $queried = get_queried_object();
       $o = get_post_meta($queried->ID, '_header_style', true);
 
-        if(!is_home() && ('contrast' !== $o)  && !is_front_page() && !theme_construct_page::is_page_type('woo-my-account') && !theme_construct_page::is_page_type('showcase') && !theme_construct_page::is_page_type('customer')){
+        if(!is_home() && ('contrast' !== $o)  && !is_front_page() && !theme_construct_page::is_page_type('woo-my-account') && !theme_construct_page::is_page_type('showcase') && !theme_construct_page::is_page_type('customer') && ! ( is_checkout() && !empty( is_wc_endpoint_url('order-received') ) )){
           echo '<div class="spacer-h-40"></div>';
         }
 
@@ -298,7 +444,7 @@ class theme_content_output{
           echo '</div>';
         }
 
-        if(!is_home() && !is_front_page() && !theme_construct_page::is_page_type('woo-my-account') && !theme_construct_page::is_page_type('showcase') && !theme_construct_page::is_page_type('customer')){
+        if(!is_home() && !is_front_page() && !theme_construct_page::is_page_type('woo-my-account') && !theme_construct_page::is_page_type('showcase') && !theme_construct_page::is_page_type('customer')  && ! ( is_checkout() && !empty( is_wc_endpoint_url('order-received') ) )){
             echo '<div class="spacer-h-50"></div>';
         }
         break;
@@ -516,13 +662,16 @@ class theme_content_output{
   */
   public static function print_pricing() {
     $o = get_option('theme_settings');
-    if(function_exists('wc_get_product') && $o){
-      $subscription = wc_get_product((int)$o['subscription']);
-      $price_per = get_post_meta( $subscription->get_id(), '_ywsbs_price_is_per', '1' );
-      $price_per_period_name = get_post_meta( $subscription->get_id(), '_ywsbs_price_time_option', 'days' );
-    } else{
-      $subscription = false;
-    }
+    // if(function_exists('wc_get_product') && $o){
+    //   $subscription = wc_get_product((int)$o['subscription']);
+    //   if($subscription){
+    //     $price_per = get_post_meta( $subscription->get_id(), '_ywsbs_price_is_per', '1' );
+    //   $price_per_period_name = get_post_meta( $subscription->get_id(), '_ywsbs_price_time_option', 'days' );
+    //   }
+    // } else{
+    //   $subscription = false;
+    // }
+    $subscription = false;
     $title   = esc_attr(get_option('pricing_title'));
     $search  = esc_attr(get_option('pricing_title_marked'));
     $replace = sprintf('<span class="marked marked_blue">%s</span>',$search );
@@ -2009,11 +2158,11 @@ class theme_content_output{
   */
   public static function print_checkout_sidebar_regular(){
     ?>
-    <?php do_action( 'woocommerce_checkout_before_order_review' ); ?>
+    <?php  do_action( 'woocommerce_checkout_before_order_review' ); ?>
 
-    <?php do_action( 'woocommerce_checkout_order_review' ); ?>
+    <?php  do_action( 'woocommerce_checkout_order_review' ); ?>
 
-    <?php do_action( 'woocommerce_checkout_after_order_review' ); ?>
+    <?php  do_action( 'woocommerce_checkout_after_order_review' ); ?>
     <?php
   }
 
@@ -2156,9 +2305,12 @@ class theme_content_output{
         $user_name  = $customer->get_first_name();
       }
 
+      $today = new DateTime();
+
+
+
       ?>
       <div class="my-order__header my-order__header-transparent ">
-        <div class="spacer-h-50"></div>
         <div class="container container_sm">
 
           <?php if (user_is_premium($user)): ?>
@@ -2168,27 +2320,61 @@ class theme_content_output{
             </span>
           <?php endif ?>
           <div class="spacer-h-25"></div>
-          <h2 class="my-order__title">
-            <span class="my-order__title-text xl"><?php _e('Hello','theme-translations');?>
-              <?php if ($customer->get_first_name()): ?>
-              , <?php echo esc_attr($customer->get_first_name()); ?>
-              <?php endif ?>
-              <?php if ($customer->get_last_name()): ?>
-              <?php echo esc_attr($customer->get_last_name()); ?>
-              <?php endif ?>
-            </span>
-          </h2>
 
-          <p class="my-order__comments xl"><?php _e('Welcome to your account. Here you can manage your orders, <br>download your photos and ask for any help','theme-translations');?>.</p>
+          <div class="row">
+            <div class="col-12 col-md-4">
+              <h2 class="my-order__title">
+                <span class="my-order__title-text">Shoots
+                </span>
+              </h2>
+            </div>
 
-          <div class="clearfix"></div>
-          <div class="row no-gutters">
-            <div class="col- my-order__filter">
-              <a href="#all" class="my-order__filter-item active"><?php _e('All','theme-translations');?></a>
-              <a href="#processing" class="my-order__filter-item"><?php _e('Active','theme-translations');?></a>
-              <a href="#completed" class="my-order__filter-item"><?php _e('Completed','theme-translations');?></a>
+            <div class="col-12 col-md-8 text-right-md">
+
+              <?php if (!wp_is_mobile()): ?>
+
+
+              <div class="my-order__date-range-picker">
+                <svg class="icon svg-icon-calendar"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-calendar"></use> </svg>
+
+                <span class="label">All Time</span>
+
+                <span class="dates"> Jan 01 1999 → <?php echo $today->format('M d Y') ?></span>
+
+                <svg class="icon svg-icon-arrows"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-arrows"></use> </svg>
+              </div>
+
+              <a href="" class="my-order__button-add">+ New Shoot</a>
+              <?php endif ?>
             </div>
           </div>
+
+          <div class="spacer-h-20"></div>
+
+          <?php
+            $customer_orders = get_posts( array(
+                'numberposts' => -1,
+                'meta_key'    => '_customer_user',
+                'meta_value'  => get_current_user_id(),
+                'post_type'   => wc_get_order_types(),
+                'post_status' => array_keys( wc_get_order_statuses() ),
+            ) );
+
+            $customer_orders_completed = array_filter( $customer_orders, function($el){
+              return in_array($el->post_status, array('wc-completed', 'wc-failed'));
+            });
+
+            $customer_orders_active = array_filter( $customer_orders, function($el){
+              return !in_array($el->post_status, array('wc-completed', 'wc-failed'));
+            });
+          ?>
+
+          <div class="clearfix"></div>
+
+            <div class="my-order__filter">
+              <a href="#processing" class="my-order__filter-item active"><?php _e('Active','theme-translations');?> <span class="count"><?php echo count($customer_orders_active);?></span></a>
+              <a href="#completed" class="my-order__filter-item"><?php _e('Completed','theme-translations');?> <span class="count"><?php echo count($customer_orders_completed);?></span></a>
+            </div>
           <div class="clearfix"></div>
         </div><!-- container -->
       </div>
@@ -3103,26 +3289,22 @@ class theme_content_output{
                       <img src="<?php echo $image_url ?>" alt="<?php echo $taxonomy_name ?>">
                   </div>
                 </div>
-
               <?php endforeach ?>
-
             </div>
-
             <div class="inner__footer">
               <div class="row">
+                <div class="col-6">
+                  <b> Need help choosing?</b>
+                  <p>Speak to our team of experts</p>
+                </div>
+                <div class="col-6">
+                  <?php
+                   $active_plugins = get_option('active_plugins');
+                   $button_intercom = (in_array('intercom/bootstrap.php', $active_plugins))? '<a href="javascript:void(0)" class="button button_chat" onclick="Intercom(\'show\')"> <span class="item item1"></span> <span class="item item2"></span> <span class="item item3"></span> Live Support </a>' : "";
 
-              <div class="col-6">
-                <b> Need help choosing?</b>
-                <p>Speak to our team of experts</p>
-              </div>
-              <div class="col-6">
-                <?php
-                 $active_plugins = get_option('active_plugins');
-                 $button_intercom = (in_array('intercom/bootstrap.php', $active_plugins))? '<a href="javascript:void(0)" class="button button_chat" onclick="Intercom(\'show\')"> <span class="item item1"></span> <span class="item item2"></span> <span class="item item3"></span> Live Support </a>' : "";
-
-                 echo $button_intercom;
-                ?>
-              </div>
+                   echo $button_intercom;
+                  ?>
+                </div>
               </div>
             </div>
           </div>
@@ -3229,8 +3411,6 @@ class theme_content_output{
 
 
   public static function print_home_social_about(){
-
-
     $subtitle = get_option('static_home_page_social_media_subtitle');
     $title    = get_option('static_home_page_social_media_title');
     $text     = get_option('static_home_page_social_media_text');
@@ -3243,15 +3423,15 @@ class theme_content_output{
     $o = get_option('theme_settings');
     if(function_exists('wc_get_product')){
       $subscription = wc_get_product((int)$o['subscription']);
-      $price_per = get_post_meta( $subscription->get_id(), '_ywsbs_price_is_per', '1' );
-      $price_per_period_name = get_post_meta( $subscription->get_id(), '_ywsbs_price_time_option', 'days' );
+      if($subscription){
+        $price_per = get_post_meta( $subscription->get_id(), '_ywsbs_price_is_per', '1' );
+        $price_per_period_name = get_post_meta( $subscription->get_id(), '_ywsbs_price_time_option', 'days' );
+      }
     } else{
       $subscription = false;
     }
 
     ?>
-
-
     <section class="vc_section vc_custom_1576165770692 vc_section-has-fill"><div class="vc_row wpb_row vc_row-fluid container container_sm"><div class="wpb_column vc_column_container vc_col-sm-12"><div class="vc_column-inner"><div class="wpb_wrapper"><div class="vc_row wpb_row vc_inner vc_row-fluid vc_column-gap-15 vc_row-o-equal-height vc_row-flex"><div class="wpb_column vc_column_container vc_col-sm-8 vc_col-has-fill"><div class="smartstudio__box vc_column-inner vc_custom_1576077396675"><div class="wpb_wrapper"><div class="vc_empty_space" <?php echo 'style="height: 55px"' ?>><span class="vc_empty_space_inner"></span></div>
       <div class="wpb_single_image wpb_content_element vc_align_center">
 
@@ -3359,8 +3539,6 @@ class theme_content_output{
   }
 
 
-
-
   public static function print_showcase_on_home(){
     $subtitle  = get_option('static_home_page_showcases_subtitle');
     $title     = get_option('static_home_page_showcases_title');
@@ -3438,6 +3616,232 @@ class theme_content_output{
     echo '<div class="container container_sm">';
     the_content();
     echo '</div>';
+  }
+
+
+  public static function print_product_notification(){
+    $args = array(
+      'url' => HOME_URL,
+
+    );
+    if(wp_is_mobile()):
+    else:
+      print_theme_template_part('studio-notification', 'woocommerce', $args);
+    endif;
+  }
+
+
+
+  public static function print_product_content(){
+    if(!function_exists('get_field')){
+      echo 'Install ACF PLUGIN';
+      return;
+    }
+
+    global $product;
+    global $theme_init;
+
+    $img_url = wp_get_attachment_image_url($product->get_image_id(), wp_is_mobile()? 'full' : 'full');
+
+    $constructor_url = get_permalink(get_option('theme_page_constructor'));
+
+    $gallery_ids = $product->get_gallery_image_ids();
+
+
+    $counter = 1;
+
+    $gallery = array();
+
+    foreach ($gallery_ids as $id) {
+      $size = wp_is_mobile() ? 'gallery_'.$counter : 'full';
+      $gallery[] = wp_get_attachment_image_url($id, $size);
+      $counter++;
+      $counter = $counter > 3? 0 : $counter;
+    }
+
+    $product_id = $product->get_id();
+    wc()->cart->empty_cart();
+    wc()->cart->add_to_cart((int)$product_id , 1, (int)$product_id);
+
+    $myaccount_page = get_option( 'woocommerce_myaccount_page_id' );
+    $myaccount_page_url = get_permalink( $myaccount_page );
+    $constructor_url = is_user_logged_in() ? $constructor_url.'?product_id='.$product_id.'?add_to_cart='.$product_id : $myaccount_page_url.'?product_id='.$product_id ;
+
+    $args = array(
+      'img_url' => $img_url,
+
+      'gallery' => $gallery,
+
+      'constructor_url' => $constructor_url,
+
+      'title'   => $product->get_name(),
+
+      'description_short'   => $product->get_short_description(),
+
+      'bg_color'  => get_post_meta($product->get_id(), 'bg_color', true)? : '#000',
+
+      'cta_text'  => get_post_meta($product->get_id(), 'cta_text', true)? : '<b> Customise Blocks to match your brand.</b>Order now and download your photos in <span class="green">72 hours</span>',
+
+      'photo_price' => strip_tags(wc_price(30)),
+
+      'rate' => array(
+        'value' => get_post_meta($product->get_id(), 'rate_value', true)? :  4.5,
+        'title' => get_post_meta($product->get_id(), 'rate_title', true)? :'Excellent',
+      ),
+
+      'expect' => array(
+        'display'         => get_field('expect_display', $product_id),
+        'expect_for'      => get_field('expect_for', $product_id),
+        'elements' => get_field('expect_elements', $product_id),
+      ),
+
+      'for' => array(
+        'display' => get_field('for_display', $product_id),
+        'title'   => get_field('for_title', $product_id),
+        'text'    => get_field('for_text', $product_id),
+      ),
+
+      'show_blocks' => array(
+        'show_customize_and_create' => get_field('show_customize_and_create', $product_id),
+        'show_good_2_know' => get_field('show_good_2_know', $product_id),
+        'show_bespoke' => get_field('show_bespoke', $product_id),
+      ),
+
+      'pgb' => get_option('product_global_blocks'),
+
+    );
+
+    wp_localize_script($theme_init->main_script_slug, 'gallery_items', $gallery);
+
+    if(wp_is_mobile()):
+      print_theme_template_part('product-mobile', 'woocommerce', $args);
+    else:
+      print_theme_template_part('product-desktop', 'woocommerce', $args);
+    endif;
+  }
+
+  public static function print_product_contructor(){
+    global $theme_init;
+    $product_id = (int)$_GET['product_id'];
+    wp_localize_script($theme_init->main_script_slug, 'product_id', array($product_id));
+
+    $product = wc_get_product($product_id);
+
+    $fattrack = wc_get_product(get_option('wfp_priority_delivery_product_id'));
+    $handle   = wc_get_product(get_option('wfp_return_product_id'));
+
+    $options = get_option('theme_settings');
+
+    $options['image'] = $options['single_product_price'] ;
+    $options['fasttrack'] = $fattrack->get_price() ;
+    $options['handle']    = $handle->get_price()  ;
+
+    $prices = array_map(function($el){return (int)$el;}, $options);
+
+    wp_localize_script($theme_init->main_script_slug, 'theme_prices', $prices);
+
+    if(isset($options['product_types'])){
+      $product_types_published = isset($options['product_types']['published'])?  explode(PHP_EOL, $options['product_types']['published']): array();
+
+      $product_types_published = array_map(function($el){return array('name'=>$el, 'published' => 1);}, $product_types_published);
+
+      $product_types_soon = isset($options['product_types']['soon'])?  explode(PHP_EOL, $options['product_types']['soon']): array();
+      $product_types_soon = array_map(function($el){return array('name'=>$el, 'published' => 0);}, $product_types_soon);
+
+      $product_types = array_merge( $product_types_published, $product_types_soon);
+
+
+      wp_localize_script($theme_init->main_script_slug, 'product_types', $product_types);
+    }else{
+      wp_localize_script($theme_init->main_script_slug, 'product_types', array());
+    }
+
+
+    $colors = get_field('constructor_color',  $product_id)? : array();
+
+    $colors = array_map(function($el){
+      $el['bg'] = $el['bg_img']?'url('.$el['bg_img'].')': $el['bg'];
+      return $el;
+    }, $colors);
+
+    wp_localize_script($theme_init->main_script_slug, 'theme_colors', $colors);
+
+    $countries = new WC_Countries();
+
+    $col = array_map(function($el){
+      $country_name = '';
+      $regexp = '/\([\s\S]*\)/';
+
+      $country_name = $el;
+
+      $country_name = preg_replace($regexp, '', $country_name);
+
+      $country_flag_url = str_replace(' ', '_', trim($country_name)).'.png';
+
+       return array(
+        'name' => trim($el),
+        'published' =>  $el =="United Kingdom (UK)"? 1 : 0,
+        'flag' => THEME_URL.'/images/flags/'.$country_flag_url,
+      ); }, $countries->get_countries());
+
+    wp_localize_script($theme_init->main_script_slug, 'all_countries_flags', $col);
+    wp_localize_script($theme_init->main_script_slug, 'all_countries', $countries->get_countries());
+
+    $args = array(
+      'product_guid_url' =>get_option('theme_page_product_guid')? get_permalink( get_option('theme_page_product_guid')) : false,
+      'redo_policy_url' => get_option('theme_page_redo_policy')? get_permalink( get_option('theme_page_redo_policy')) : '',
+      'terms_page_url' => get_option('woocommerce_terms_page_id')? get_permalink( get_option('woocommerce_terms_page_id')) : '',
+      'img_url' => wp_get_attachment_image_url($product->get_image_id(), wp_is_mobile()? 'full' : 'full'),
+      'gateways' => WC()->payment_gateways->get_available_payment_gateways(),
+      'title'    => $product->get_title(),
+      'bg_color'  => get_post_meta( $product_id, 'bg_color', true)? : '#000',
+    );
+
+
+    if(wp_is_mobile()):
+      print_theme_template_part('mobile', 'constructor', $args);
+    else:
+      print_theme_template_part('desktop', 'constructor', $args);
+    endif;
+  }
+
+  public static function print_popup_address(){
+    $args = array();
+    print_theme_template_part('popup-address', 'constructor', $args);
+  }
+
+  public static function print_footer_new(){
+    $main_menu = wp_nav_menu( array(
+      'theme_location'  => 'main_menu',
+      'menu'            => '',
+      'container'       => 'nav',
+      'container_class' => 'footer-nav',
+      'container_id'    => '',
+      'menu_class'      => 'menu',
+      'menu_id'         => '',
+      'echo'            => false,
+      // 'fallback_cb'     => '',
+      'before'          => '',
+      'after'           => '',
+      'link_before'     => '',
+      'link_after'      => '',
+      'items_wrap'      => '<ul id="%1$s" class="%2$s">%3$s</ul>',
+      'depth'           => 2,
+      'walker'          => new main_menu_walker(),
+    ) );
+
+    $args = array(
+      'main_menu' => $main_menu,
+    );
+    if(wp_is_mobile()):
+      // print_theme_template_part('mobile', 'constructor', $args);
+    else:
+      print_theme_template_part('footer-desktop-new', 'globals', $args);
+    endif;
+  }
+
+  public static function print_gallery(){
+
   }
 }
 

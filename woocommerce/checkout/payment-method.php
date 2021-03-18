@@ -20,21 +20,22 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 $options = get_theme_checkout_content();
 $class = ('regular' === $options['type'])? 'checkout__aside-block no-margin' : '';
+
 ?>
-<div class="<?php echo $class ?> checkout-block wc_payment_method payment_method_<?php echo esc_attr( $gateway->id ); ?>">
+<li class="<?php echo $class ?> checkout-block wc_payment_method payment_method_<?php echo esc_attr( $gateway->id ); ?>">
   <?php $title_class = ('regular' === $options['type'])?  'checkout__aside-subtitle' : 'checkout-block__title'; ?>
 	<div class="<?php echo $title_class ?>">
 
-	<input id="payment_method_<?php echo esc_attr( $gateway->id ); ?>" type="radio" class="input-radio" name="payment_method" value="<?php echo esc_attr( $gateway->id ); ?>" <?php checked( $gateway->chosen, true ); ?> data-order_button_text="<?php echo esc_attr( $gateway->order_button_text ); ?>" />
-
+	<input <?php echo isset($count) && $count==1? 'style="display:none" checked="checked"' :''; ?> id="payment_method_<?php echo esc_attr( $gateway->id ); ?>" type="radio" class="input-radio" name="payment_method" value="<?php echo esc_attr( $gateway->id ); ?>" <?php checked( $gateway->chosen, true ); ?> data-order_button_text="<?php echo esc_attr( $gateway->order_button_text ); ?>" />
+<?php /*
 	<label for="payment_method_<?php echo esc_attr( $gateway->id ); ?>" >
-		<?php echo $gateway->get_title(); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?>
-		<?php echo $gateway->get_icon(); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?>
-	</label>
+		<?php echo $gateway->get_title();  ?>
+		<?php echo $gateway->get_icon(); ?>
+	</label> */?>
 	</div>
 	<?php if ( $gateway->has_fields() || $gateway->get_description() ) : ?>
-		<div class="payment_box checkout-block__comment payment_method_<?php echo esc_attr( $gateway->id ); ?>" <?php if ( ! $gateway->chosen ) : /* phpcs:ignore Squiz.ControlStructures.ControlSignature.NewlineAfterOpenBrace */ ?>style="display:none;"<?php endif; /* phpcs:ignore Squiz.ControlStructures.ControlSignature.NewlineAfterOpenBrace */ ?>>
+		<div class="payment_box checkout-block__comment payment_method_<?php echo esc_attr( $gateway->id ); ?>" <?php if ( ! $gateway->chosen ) : /* phpcs:ignore Squiz.ControlStructures.ControlSignature.NewlineAfterOpenBrace */ ?><?php endif; /* phpcs:ignore Squiz.ControlStructures.ControlSignature.NewlineAfterOpenBrace */ ?>>
 			<?php $gateway->payment_fields(); ?>
 	<?php endif; ?>
 	</div>
-</div>
+</li>
