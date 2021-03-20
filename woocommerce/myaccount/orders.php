@@ -70,7 +70,7 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
         $color = adjustBrightness($hex_color, -100);
       }
 
-      $date = $order->get_date_created();
+        $date = $order->get_date_created();
       ?>
 
       <div class="col-12 col-md-6 col-lg-4 order-previews col-xl-3 <?php echo in_array($order->get_status(), array('completed', 'failed'))? 'completed hidden' : 'processing';?>" data-time="<?php echo $date->date_i18n('Y-m-d').'T'.$date->date_i18n('H:i:s'); ?>">

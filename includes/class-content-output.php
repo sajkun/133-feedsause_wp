@@ -174,6 +174,7 @@ class theme_content_output{
   }
 
   public static function print_new_header(){
+    global $wp;
     $page = get_queried_object();
 
     $header_class = is_checkout() && !empty( is_wc_endpoint_url('order-received') ) ? 'contrast' : '';
@@ -186,7 +187,7 @@ class theme_content_output{
               sprintf('<a href="%s"  class="logo"><img src="%s/images/logo.svg" alt=""></a>',get_home_url(), THEME_URL):
               sprintf('<a  href="%s" class="logo"><img src="%s" alt=""></a>',get_home_url(),  esc_url( $custom_logo_url ));
 
-    $logo =  $header_class == 'contrast' ? sprintf('<a href="%s"  class="logo"><img src="%s/images/logo_contrast.png" alt=""></a>', get_home_url(), THEME_URL): $logo;
+    $logo =  $header_class == 'contrast'  || isset($wp->query_vars['my-gallery'])? sprintf('<a href="%s"  class="logo"><img src="%s/images/logo_contrast.png" alt=""></a>', get_home_url(), THEME_URL): $logo;
 
     $user_id = get_current_user_id();
 
@@ -310,7 +311,7 @@ class theme_content_output{
         'user_id'        => $user_id,
         'user_name'      => $user_name,
         'avatar_url'     => $user_id >0 ? get_avatar_url($user_id) : '',
-        'account_url'      => $my_account_id? get_permalink( $my_account_id) : false,
+        'account_url'      => $my_account_id? wc_get_account_endpoint_url('orders') : false,
       );
 
       print_theme_template_part('header-desktop-new', 'globals', $args);
@@ -636,7 +637,7 @@ class theme_content_output{
                   'facebook'  => 'fb',
                   'twitter'   => 'twitter'
                 ); ?>
-        </div>
+              </div>
                   <?php foreach ($socials as $channel => $icon):
                     $name = 'theme_footer_'.$channel;
                      if((get_option($name))):
@@ -2344,7 +2345,7 @@ class theme_content_output{
                 <svg class="icon svg-icon-arrows"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-arrows"></use> </svg>
               </div>
 
-              <a href="" class="my-order__button-add">+ New Shoot</a>
+              <a href="<?php echo esc_url(get_permalink(wc_get_page_id( 'shop' ) )); ?>" class="my-order__button-add">+ New Shoot</a>
               <?php endif ?>
             </div>
           </div>
@@ -3782,7 +3783,8 @@ class theme_content_output{
         'name' => trim($el),
         'published' =>  $el =="United Kingdom (UK)"? 1 : 0,
         'flag' => THEME_URL.'/images/flags/'.$country_flag_url,
-      ); }, $countries->get_countries());
+
+    ); }, $countries->get_countries());
 
     wp_localize_script($theme_init->main_script_slug, 'all_countries_flags', $col);
     wp_localize_script($theme_init->main_script_slug, 'all_countries', $countries->get_countries());
@@ -3820,7 +3822,6 @@ class theme_content_output{
       'menu_class'      => 'menu',
       'menu_id'         => '',
       'echo'            => false,
-      // 'fallback_cb'     => '',
       'before'          => '',
       'after'           => '',
       'link_before'     => '',
@@ -3841,7 +3842,146 @@ class theme_content_output{
   }
 
   public static function print_gallery(){
+    global $theme_init;
 
+    $user_id = get_current_user_id();
+
+    $customer_orders = get_posts( array(
+        'numberposts' => -1,
+        'meta_key'    => '_customer_user',
+        'meta_value'  => get_current_user_id(),
+        'post_type'   => wc_get_order_types(),
+        'post_status' => array_keys( wc_get_order_statuses() ),
+    ) );
+
+    $shoots = array_filter( $customer_orders, function($order_item){
+      $images          = get_post_meta($order_item->ID , '_wfp_image', true);
+      return !!$images;
+    } );
+
+
+    $shoots = array_map(function($order_item){
+      $handle_id       = (int)get_option('wfp_return_product_id');
+      $product_fast_id = (int)get_option('wfp_priority_delivery_product_id');
+      $images          = get_post_meta($order_item->ID , '_wfp_image', true);
+      $order = wc_get_order($order_item->ID);
+
+      $items = array();
+
+      $has_fasttrack = 0;
+      $has_handle    = 0;
+
+      $fasttrack_price = 0;
+      $handle_price = 0;
+
+      foreach ($order->get_items() as $key => $item) {
+
+        if($item->get_product_id() == $handle_id ){
+          $has_handle  = 1;
+          $p = $item->get_product();
+          $handle_price = $p->get_price();
+        }
+
+        if($item->get_product_id() == $product_fast_id ){
+          $has_fasttrack = 1;
+          $p = $item->get_product();
+          $fasttrack_price = $p->get_price();
+        }
+
+        if($item->get_product_id() == $handle_id   || $item->get_product_id() == $product_fast_id ){
+          continue;
+        }
+
+        $meta = $extra_data = $item->get_meta('extra_data');
+        $product_name = isset($meta['name']['value'])? explode(PHP_EOL, $meta['name']['value']) : '';
+        $product_count = isset($meta['name']['value'])? count($product_name) : '';
+        $product = $item->get_product();
+
+
+        $items[] = array(
+          'order_item_id'   => $item->get_id(),
+          'extra_data'   => $extra_data,
+          'prices'       => $item->get_meta('theme_prices') && !is_null($item->get_meta('theme_prices'))?$item->get_meta('theme_prices'): get_option('theme_settings'),
+          'product_name' => $product->get_title(),
+          'item_name'    => $product_name,
+          'item_count'   => $product_count,
+        );
+      }
+
+      $current_status = new WC_Order_Status_Manager_Order_Status($order->get_status());
+
+      $current_status_meta = get_post_meta($current_status->get_id(), 'custom_order_data', true);
+
+      $current_status_order = isset(  $current_status_meta['order'] ) ? (int)$current_status_meta['order']   :0;
+
+      $images =  get_post_meta($order->ID , '_wfp_image', true)?
+              array_filter(get_post_meta($order->ID , '_wfp_image', true),function($el){
+                return isset($el['files_uploaded']);
+              }) :
+              array();
+
+      $today = new DateTime();
+      $order_date = new DateTime($order_item->post_date);
+
+      $diff = date_diff($today ,  $order_date );
+
+      return array(
+        'order'  => (array)$order,
+        'date'   => str_replace(' ','T', $order_item->post_date),
+        'order_id' => $order->get_id(),
+        'coupons' => $order->get_used_coupons(),
+        'current_status' =>  isset($current_status_meta['title'])? $current_status_meta['title']: wc_get_order_status_name($order->get_status()),
+        'current_status_meta' => get_post_meta($current_status->get_id(), 'custom_order_data', true),
+        'current_status_order' => isset(  $current_status_meta['order'] ) ? (int)$current_status_meta['order']   : -1,
+        'item'  =>  $items[0],
+        'has_fasttrack'    =>  $has_fasttrack,
+        'has_handle'       =>  $has_handle,
+        'fasttrack_price'  =>  $fasttrack_price,
+        'handle_price'     =>  $handle_price,
+        'images'     => $images,
+        'thumbnails' => get_post_meta($order_item->ID, '_wfp_thumbnails', true),
+        'total'    =>html_entity_decode( strip_tags(wc_price($order->get_total()))),
+        'discount' =>html_entity_decode( strip_tags( wc_price($order->get_total_discount()))),
+        'photo_limit' => get_post_meta($order->ID , '_wfp_image_limit', true),
+
+        'diff' => $diff->format('%d') < 3 && $diff->format('%m') < 1 && $diff->format('%y') < 1 ?  3 - $diff->format('%d') : 0,
+      );
+    },$shoots);
+
+    $shoots = array_values($shoots);
+
+    $args = array(
+      'shoot_url' =>  esc_url(get_permalink(wc_get_page_id( 'shop' ) )),
+    );
+
+    $orders = [];
+    $number_of_active = 0;
+
+    foreach (wc_get_order_statuses() as $key => $status):
+      $st = new WC_Order_Status_Manager_Order_Status($key);
+      $meta = get_post_meta($st->get_id(), 'custom_order_data', true);
+
+      if(isset($meta['use']) && $meta['use'] == 'yes'){
+        $num = (int)$meta['order'];
+        $orders[$num]['name'] = $status;
+        $orders[$num]['obj']  = $st;
+        $orders[$num]['meta'] = $meta;
+      }
+    endforeach;
+
+    $duh_tracker_options = get_option('duh_tracker_options');
+
+
+    wp_localize_script($theme_init->main_script_slug, '_dropbox', $duh_tracker_options['dropbox']);
+    wp_localize_script($theme_init->main_script_slug, 'order_statuses', $orders);
+    wp_localize_script($theme_init->main_script_slug, 'theme_prices', $theme_prices);
+    wp_localize_script($theme_init->main_script_slug, 'my_shoots', $shoots);
+    wp_localize_script($theme_init->main_script_slug, 'DUMMY_S', DUMMY_S);
+    wp_localize_script($theme_init->main_script_slug, 'currency_symbol', html_entity_decode(get_woocommerce_currency_symbol()));
+
+    print_theme_template_part('gallery', 'woocommerce', $args);
+    print_theme_template_part('order-details', 'woocommerce', $args);
+    print_theme_template_part('order-popup', 'woocommerce', $args);
   }
 }
 

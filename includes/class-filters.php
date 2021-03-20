@@ -522,8 +522,8 @@ class theme_filter_class{
      $classes .= " contrast ";
     }
 
-    if(  is_account_page() && is_wc_endpoint_url('orders') ){
-     $classes .= " white ";
+    if(  is_account_page()   ){
+     $classes .= " white discard-column-inner ";
     }
 
     return $classes;
@@ -1096,6 +1096,7 @@ add_action('woocommerce_checkout_create_order_line_item', 'theme_save_additional
 
 function theme_save_additional_item_data($item, $cart_item_key, $values, $order ){
 
+  $order_id = $order->get_id();
 
   if(isset($values['custom_price'])){
     $item->set_subtotal((int)$values['custom_price']);
@@ -1122,15 +1123,28 @@ function theme_save_additional_item_data($item, $cart_item_key, $values, $order 
   if(isset($_POST['fast_order_id'])){
     $item['fast_order_id'] = array( $_POST['fast_order_id'] );
 
-    $order_id = $order->get_id();
-
-
-
     if(!update_post_meta((int)$_POST['fast_order_id'], 'is_fasttracked', 'yes' )){
-
       add_post_meta((int)$_POST['fast_order_id'], 'is_fasttracked', 'yes', true );
     }
   }
+
+  // $handle_id       = (int)get_option('wfp_return_product_id');
+  // $product_fast_id = (int)get_option('wfp_priority_delivery_product_id');
+
+  // if($product_fast_id == $item->get_product_id()){
+  //   $product = $item->get_product();
+
+  //   if(!update_post_meta( $order_id , '_fasttrack', array($product->get_price()) )){
+  //     add_post_meta( $order_id, '_fasttrack', array($product->get_price()), true );
+  //   }
+  // }
+
+  // if($handle_id == $item->get_product_id()){
+  //   $product = $item->get_product();
+  //   if( !update_post_meta($order->get_id() , '_handle_return', array( $product->get_price() ) ) ){
+  //     add_post_meta($order->get_id() , '_handle_return', array($product->get_price()) , true );
+  //   }
+  // }
 }
 
 add_action('woocommerce_order_item_line_item_html', 'print_additional_data_line', 10, 3);

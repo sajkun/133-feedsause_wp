@@ -32,7 +32,65 @@
     add_action('wp_ajax_nopriv_apply_may_be_coupon', array($this, 'apply_may_be_coupon_cb'));
 
     add_action('wp_ajax_finish_shooting', array($this, 'finish_shooting_cb'));
+
+    add_action('wp_ajax_exec_download_request_theme', array($this, 'exec_download_request_cb'));
   }
+
+  public static function exec_download_request_cb(){
+
+     $order_id  = (int)$_POST['order_id'];
+
+     $images = get_post_meta($order_id, '_wfp_image', true);
+
+     $order = wc_get_order($order_id);
+
+     $items = $order->get_items();
+
+     $current_item = $items[(int)$_POST['order_item_id']];
+
+     $meta = $current_item->get_meta('extra_data');
+
+     $limit = isset($meta['image_count']['value'])? $meta['image_count']['value'] : get_post_meta($order_id, '_wfp_image_limit' , 'true');
+
+      $downloaded_images = array_values(array_filter($images, function($el){
+            return $el['was_downloaded'] && (!isset($el['is_free']) || $el['is_free'] == 0);
+      }));
+
+      $limit -= count($downloaded_images );
+
+     foreach ($images as $key => $img):
+       if($img['id'] == $_POST['image_id']){
+
+         if($img['is_active'] == 0){
+           wp_send_json_error(array(
+            'message'=> 'image is not available for download'
+          ),418);
+         }
+
+         if($limit <= 0 && (!isset($img['is_free']) || $img['is_free'] != 1)){
+           wp_send_json_error(array(
+            'message'=> 'out of image limit'
+          ),418);
+         }
+
+         $images[$key]['was_downloaded'] = 1;
+
+       }
+     endforeach;
+
+
+     if(!update_post_meta($order_id, '_wfp_image', $images)){
+       add_post_meta($order_id, '_wfp_image', $images);
+     }
+
+     wp_send_json(array(
+      'post'   => $_POST,
+      'images' => $images,
+      'limit'  => $limit,
+      'exec_upload' => 1,
+    ));
+  }
+
 
   public static function finish_shooting_cb(){
 

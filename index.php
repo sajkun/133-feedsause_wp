@@ -9,7 +9,9 @@
 
 get_header();
 $data = get_queried_object();
-
+if(isset($wp->query_vars[ 'my-gallery'])){
+  add_filter('theme_site_container_styles', function(){return 'dark-mode';});
+}
 ?>
 
 <div class="site-container <?php echo apply_filters('theme_site_container_styles', $data); ?>" id="site-body">

@@ -114,6 +114,7 @@ class velesh_init_theme{
     add_image_size('gallery_1', 518, 688, true);
     add_image_size('gallery_2', 518, 357, true);
     add_image_size('gallery_3', 518, 518, true);
+    add_image_size('wfp_image_thumbnail_xl', 800, 800, true);
   }
 
 
@@ -128,6 +129,8 @@ class velesh_init_theme{
       wp_enqueue_style('datepicker', THEME_URL.'/assets/datepicker/daterangepicker.css' );
 
       wp_enqueue_script('moment', THEME_URL.'/assets/datepicker/moment.min.js', array('jquery'), THEME_VERSION, true);
+
+      wp_enqueue_script('datetimepicker-jquery', THEME_URL.'/assets/datetimepicker/build/jquery.datetimepicker.full.min.js', array('jquery'), THEME_VERSION, true);
 
       wp_enqueue_script('datepicker', THEME_URL.'/assets/datepicker/daterangepicker.js', array('jquery'), THEME_VERSION, true);
 
@@ -149,7 +152,7 @@ class velesh_init_theme{
       if(wp_is_mobile()){
         wp_enqueue_style('theme-style-desktop', THEME_URL.'/css/mobile.main4.min.css' );
       }else{
-        wp_enqueue_style('theme-style-desktop', THEME_URL.'/css/desktop.main4.min.css' );
+        wp_enqueue_style('theme-style-desktop', THEME_URL.'/css/desktop.main5.min.css' );
       }
 
       wp_enqueue_script('velocity-min', THEME_URL.'/assets/velocity/velocity.min.js', array('jquery'), THEME_VERSION, true);
@@ -160,7 +163,7 @@ class velesh_init_theme{
       if(wp_is_mobile()){
         wp_enqueue_script($this->main_script_slug, THEME_URL.'/script/new/mobile.main4.min.js', array('jquery'), THEME_VERSION, true);
       }else{
-        wp_enqueue_script($this->main_script_slug, THEME_URL.'/script/new/desktop.main5.min.js', array('jquery'), THEME_VERSION, true);
+        wp_enqueue_script($this->main_script_slug, THEME_URL.'/script/new/desktop.main6.min.js', array('jquery'), THEME_VERSION, true);
       }
     }else{
 
@@ -349,6 +352,8 @@ class velesh_init_theme{
       add_action('admin_footer', 'exec_clog', PHP_INT_MAX);
       add_action('end_page', 'exec_clog', PHP_INT_MAX);
     }
+
+    remove_action( 'woocommerce_view_order', 'woocommerce_order_details_table', 10 );
   }
 
 

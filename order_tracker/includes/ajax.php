@@ -379,9 +379,10 @@ if(!class_exists('tracker_ajax')){
         if(!is_a($attachment_id, 'WP_error')){
           $key_pierces  = explode('_', $key);
           $meta[(int)$key_pierces[1]] = array(
-            'attachment_id'    => $attachment_id,
-            'item_id'          => (int)$key_pierces[1],
-            'attachment_url'   => wp_get_attachment_image_url($attachment_id, 'wfp_image_thumbnail'),
+            'attachment_id'     => $attachment_id,
+            'item_id'           => (int)$key_pierces[1],
+            'attachment_url'    => wp_get_attachment_image_url($attachment_id, 'wfp_image_thumbnail'),
+            'attachment_url_lg' => wp_get_attachment_image_url($attachment_id, 'wfp_image_thumbnail_xl'),
           );
         }
       }

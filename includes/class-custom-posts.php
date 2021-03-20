@@ -38,6 +38,8 @@ class velesh_theme_posts {
     add_action( 'admin_menu', array( __CLASS__, 'add_metaboxes' ) );
 
     add_action( 'save_post',array( __CLASS__, 'save_meta' ) );
+
+    add_action( 'wc_order_status_manager_process_wc_order_status_meta', array( __CLASS__, 'save_meta' ), 10, 2 );
   }
 
   public static function register_taxonomies(){
@@ -330,6 +332,73 @@ class velesh_theme_posts {
      add_meta_box( 'color_settings', __( 'Color settings for page', 'theme-translations' ),  array(__CLASS__, 'color_settings_cb'),  self::$showcase_name, 'side', 'low' );
 
      add_meta_box( 'author_name', __( 'Author name', 'theme-translations' ),  array(__CLASS__, 'author_name_cb'),  self::$customer_name, 'side', 'low' );
+
+    add_meta_box(
+      'woocommerce-order-status-actions-custom',
+      __( 'Feedsauce Order Details'),
+      array( __CLASS__, 'order_status_actions_meta_box' ),
+      'wc_order_status',
+      'normal',
+      'low'
+    );
+  }
+
+  public static function order_status_actions_meta_box($post){
+    $meta = get_post_meta($post->ID, 'custom_order_data', true);
+    ?>
+    <div class="panel woocommerce_options_panel">
+      <div class="options_group">
+        <p class="form-field use_in_order_field ">
+          <label for="use_in_order">Use in order progress</label>
+          <input type="hidden" value="no"  name="custom_order_data[use]">
+          <input type="checkbox" class="checkbox" <?php echo isset($meta['use']) && $meta['use'] =='yes'? 'checked="checked"': ''?>  name="custom_order_data[use]" id="use_in_order" value="yes">
+          <span class="description">Use this order status in single order details. This will be visible only for customer</span>
+        </p>
+
+        <p class="form-field custom_order_data_order_field ">
+          <label for="custom_order_data_order">Position</label>
+          <input type="number" min="1" max="99" <?php echo 'style="width: 50px"'?> value="<?php echo isset($meta['order']) ? $meta['order'] : ''?>" name="custom_order_data[order]" id="custom_order_data_order" >
+          <span class="description">Order of statuses on order detailes page</span>
+        </p>
+      </div>
+
+      <div class="options_group">
+        <p class="form-field custom_order_data_title_field">
+          <label for="custom_order_data_title">Title</label>
+          <textarea name="custom_order_data[title]" id="custom_order_data_title rows="5"><?php echo isset($meta['title']) ? $meta['title'] : ''?></textarea>
+        </p>
+        <p class="form-field custom_order_data_descr_field">
+          <label for="custom_order_data_descr">Description</label>
+          <textarea name="custom_order_data[descr]" id="custom_order_data_descr rows="8"><?php echo isset($meta['descr']) ? $meta['descr'] : ''?></textarea>
+          <div></div>
+          <span class="description">Use [on_date] in text to display date of collection. <br>Use [guid_package] to insert link to Packaging Guidlines</span>
+        </p>
+        <p class="form-field custom_order_data_what_next_field">
+          <label for="custom_order_data_what_next">What Happens Next?</label>
+          <textarea name="custom_order_data[what_next]" id="custom_order_data_what_next" rows="8"><?php echo isset($meta['what_next']) ? $meta['what_next'] : ''?></textarea>
+        </p>
+        <p class="form-field custom_order_data_custom_action_field">
+          <label for="custom_order_data_custom_action">Custom Actions</label>
+          <?php
+           $options = array(
+            'download' => 'Donwload Postage Label',
+           );
+          ?>
+          <select name="custom_order_data[custom_action]" id="custom_order_data_custom_action">
+            <option value="none">--select--</option>
+
+            <?php foreach ($options as $key => $o): ?>
+            <option value="<?php echo $key; ?>"  <?php echo isset($meta['custom_action']) && $meta['custom_action'] ==$key? 'selected="selected"': ''?> ><?php echo $o; ?></option>
+            <?php endforeach ?>
+          </select>
+          <span class="description">A custom action that can be take on this step</span>
+        </p>
+      </div>
+    </div>
+
+    <input type="hidden" name="save_theme_meta" value="yes">
+    <?php
+
   }
 
   /**
@@ -637,7 +706,7 @@ class velesh_theme_posts {
       <?php if (self::$customer_name !== $post->post_type): ?>
         <table class="settings-table">
           <tr>
-            <td style="width: 200px">
+            <td <?php echo 'style="width: 200px"'; ?>>
               <h4>Subcategory's icon</h4>
 
                <div class="image-download">
@@ -745,6 +814,9 @@ class velesh_theme_posts {
 
     $data     = array(
       ['name' =>'_question', 'unique' => true, 'type' =>'text', 'meta_type'=>self::$faq_name],
+
+      ['name' =>'custom_order_data', 'unique' => true, 'type' =>'regular', 'meta_type'=>'wc_order_status'],
+
       ['name' =>'_author_name', 'unique' => true, 'type' =>'text', 'meta_type'=>self::$faq_name],
       ['name' =>'_answer', 'unique' => true, 'type' =>'text', 'meta_type'=>self::$faq_name],
       ['name' =>'_gallery', 'unique' => true, 'type' =>'array', 'meta_type'=>self::$showcase_name],
