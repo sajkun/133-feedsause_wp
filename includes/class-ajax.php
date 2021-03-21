@@ -34,6 +34,122 @@
     add_action('wp_ajax_finish_shooting', array($this, 'finish_shooting_cb'));
 
     add_action('wp_ajax_exec_download_request_theme', array($this, 'exec_download_request_cb'));
+
+    add_action('wp_ajax_add_correction', array($this, 'add_correction_cb'));
+    add_action('wp_ajax_add_correction_attachment', array($this, 'add_correction_attachment_cb'));
+
+    add_action('wp_ajax_proceed_stripe_payment', array($this, 'proceed_stripe_payment_cb'));
+  }
+
+  public static function proceed_stripe_payment_cb(){
+
+    global $woocommerce;
+    $id = get_option('wfp_single_product_id');
+
+    $extra_data = array(
+      'name' => array(
+          'value' => "Reshoot Item. Order #"  . $_POST['order_id'] . ' image #'.  $_POST['image_id'] ,
+          'label' => 'Product',
+          'name'  => 'printed_name',
+        ),
+
+      'recipe_name' =>array(
+         'value' => $_POST['recipe_name'],
+         'label' => 'Recipe',
+         'name'  => 'recipe_name'
+      ),
+
+      'sizes' =>array(
+         'value' => $_POST['extra_data']['sizes'],
+         'label' => 'Sizes',
+         'name'  => 'sizes'
+      ),
+
+      'colors' =>array(
+         'value' => $_POST['extra_data']['colors'],
+         'label' => 'Colors',
+         'name'  => 'colors'
+      ),
+
+      'position' =>array(
+         'value' => $_POST['extra_data']['position'],
+         'label' => 'Position',
+         'name'  => 'position'
+      ),
+
+      'order_id'=> array(
+         'value' =>  $_POST['order_id'],
+         'label' => 'Order ',
+         'name'  => 'order_id'
+      ),
+
+      'image_count' => array(
+         'value' => 1,
+         'label' => 'Number of Images',
+         'name'  => 'image_count'
+      ),
+    );
+
+
+    $order = wc_create_order();
+    $order->set_customer_id( get_current_user_id());
+
+
+    $order->add_product( get_product( $id ), 1, array('total' => $_POST['product_price'], 'subtotal' => $_POST['product_price'] ) );
+
+    $items = $order->get_items();
+
+    foreach ($items as $key => $i) {
+      wc_add_order_item_meta($key, 'extra_data',$extra_data);
+      wc_add_order_item_meta($key, 'is_reshoot','1');
+    }
+
+    $order->calculate_totals();
+    $order->update_status("wc-in-production", 'Reshoot Ordered', TRUE);
+
+     wp_send_json(array(
+      'post'       => $_POST,
+      'order_id'   => $order->get_id(),
+    ));
+  }
+
+
+  public static function add_correction_cb(){
+    $order_id = (int)$_POST['order_id'];
+    $meta = get_post_meta( $order_id , '_wfp_image' , true);
+
+    foreach ($meta as $key => $f) {
+      if($f['id'] == $_POST['image_id']){
+
+        $meta[$key]['is_active'] = 0;
+
+        if($_POST['attachment_url']){
+          $meta[$key]['attachment_url'] = $_POST['attachment_url'];
+        }
+
+        $meta[$key]['request'][0] = array(
+          'date' => $_POST['date'],
+          'text' => $_POST['request_text'],
+        );
+      }
+    }
+
+    if(!update_post_meta($order_id, '_wfp_image', $meta)){
+      add_post_meta($order_id, '_wfp_image', $meta);
+    }
+
+    $meta_new = get_post_meta( $order_id , '_wfp_image' , true);
+
+     wp_send_json(array(
+      'post'   => $_POST,
+      'meta'   => $meta,
+      'meta_new'   => $meta_new,
+    ));
+  }
+
+  public static function add_correction_attachment_cb(){
+    $f = exec_upload_file('attachment');
+    wp_send_json($f['file_loaded']['url']);
   }
 
   public static function exec_download_request_cb(){

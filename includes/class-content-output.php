@@ -3841,7 +3841,10 @@ class theme_content_output{
     endif;
   }
 
+
+
   public static function print_gallery(){
+
     global $theme_init;
 
     $user_id = get_current_user_id();
@@ -3858,7 +3861,6 @@ class theme_content_output{
       $images          = get_post_meta($order_item->ID , '_wfp_image', true);
       return !!$images;
     } );
-
 
     $shoots = array_map(function($order_item){
       $handle_id       = (int)get_option('wfp_return_product_id');
@@ -3952,6 +3954,7 @@ class theme_content_output{
 
     $args = array(
       'shoot_url' =>  esc_url(get_permalink(wc_get_page_id( 'shop' ) )),
+      'gateways' => WC()->payment_gateways->get_available_payment_gateways(),
     );
 
     $orders = [];
@@ -3971,6 +3974,7 @@ class theme_content_output{
 
     $duh_tracker_options = get_option('duh_tracker_options');
 
+    $theme_prices = get_option('theme_settings');
 
     wp_localize_script($theme_init->main_script_slug, '_dropbox', $duh_tracker_options['dropbox']);
     wp_localize_script($theme_init->main_script_slug, 'order_statuses', $orders);

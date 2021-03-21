@@ -1153,6 +1153,8 @@ function print_additional_data_line( $item_id, $item, $order ){
   $meta = $item->get_meta('extra_data');
   $meta2 = $item->get_meta('fast_order_id');
 
+  clog($meta);
+
   if($meta2){
     ?>
   <tr>
@@ -1197,13 +1199,17 @@ function print_additional_data_line( $item_id, $item, $order ){
           ?>
           <tr>
             <th><?php echo $_m['label'] ?>: &nbsp;&nbsp;&nbsp;&nbsp;</th>
-            <td> <p> <?php
+            <td> <?php if ($key == 'order_id' ) : ?>
+                <a href="<?php echo admin_url(sprintf('post.php?post=%s&action=edit', trim($_m['value'] ))); ?>"><?php echo trim($_m['value']);?></a>
+              <?php else: ?>
+              <p> <?php
                 if(is_array($_m['value'] )){
                   echo(implode(',', $_m['value']));
                 }else{
                  echo trim($_m['value']);
                 }
-                ?> </p> </td>
+                ?> </p>
+              <?php endif; ?> </td>
           </tr>
         <?php
          endforeach;

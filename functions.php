@@ -125,10 +125,14 @@ class velesh_init_theme{
    * @hookedto - wp_enqueue_scripts 999
    */
   public function enqueue_scripts_styles_front(){
+      global $wp;
 
       wp_enqueue_style('datepicker', THEME_URL.'/assets/datepicker/daterangepicker.css' );
 
       wp_enqueue_script('moment', THEME_URL.'/assets/datepicker/moment.min.js', array('jquery'), THEME_VERSION, true);
+
+      wp_enqueue_style('stripe-card', THEME_URL.'/stripe-card/without-webhooks/client/web/css/global.css' );
+
 
       wp_enqueue_script('datetimepicker-jquery', THEME_URL.'/assets/datetimepicker/build/jquery.datetimepicker.full.min.js', array('jquery'), THEME_VERSION, true);
 
@@ -152,7 +156,7 @@ class velesh_init_theme{
       if(wp_is_mobile()){
         wp_enqueue_style('theme-style-desktop', THEME_URL.'/css/mobile.main4.min.css' );
       }else{
-        wp_enqueue_style('theme-style-desktop', THEME_URL.'/css/desktop.main5.min.css' );
+        wp_enqueue_style('theme-style-desktop', THEME_URL.'/css/desktop.main6.min.css' );
       }
 
       wp_enqueue_script('velocity-min', THEME_URL.'/assets/velocity/velocity.min.js', array('jquery'), THEME_VERSION, true);
@@ -163,7 +167,7 @@ class velesh_init_theme{
       if(wp_is_mobile()){
         wp_enqueue_script($this->main_script_slug, THEME_URL.'/script/new/mobile.main4.min.js', array('jquery'), THEME_VERSION, true);
       }else{
-        wp_enqueue_script($this->main_script_slug, THEME_URL.'/script/new/desktop.main6.min.js', array('jquery'), THEME_VERSION, true);
+        wp_enqueue_script($this->main_script_slug, THEME_URL.'/script/new/desktop.main7.min.js', array('jquery'), THEME_VERSION, true);
       }
     }else{
 
@@ -656,8 +660,8 @@ class velesh_init_theme{
 
     if(isset($_GET['action'])) return $tag;
 
-    if('jquery' === $handle || 'jquery-core' === $handle){
-      return $tag;
+    if('jquery' === $handle || 'jquery-core' === $handle || 'stripe-card'  === $handle || 'stripe-main'  === $handle){
+      return str_replace('?ver=2.0', '',$tag);
     }
 
     if(function_exists('wc') && (is_woocommerce())){return $tag;}

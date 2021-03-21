@@ -2918,6 +2918,7 @@ Vue.component('single-studio-content', {
         if (this.readyState === 4) {
 
           clog('file was loaded', 'green');
+
           var data = JSON.parse(this.responseText);
 
           parent[0].files_uploaded.push({

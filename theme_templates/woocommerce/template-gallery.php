@@ -68,5 +68,9 @@
   <my-order-details
     ref="order_details"
     v-on:images_update = "images_update_cb"
+    v-on:review_submited = "review_submited_cb"
   ></my-order-details>
 </div>
+
+<script src="https://js.stripe.com/v3/"></script>
+

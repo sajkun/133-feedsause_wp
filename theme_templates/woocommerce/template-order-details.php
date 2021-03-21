@@ -1,6 +1,6 @@
 <?php echo '<script type="text/x-template" id="my-order-details">'; ?>
   <div class="row no-gutters my-order" v-if="show">
-      <div class="col-md-5 col-lg-5 clearfix">
+      <div class="col-md-5 col-lg-5 clearfix padding-right-20">
       <div class="shoot-steps">
         <div class="shoot-steps__header">
           <a class="comment" v-on:click = 'go_back'>← BACK</a>
@@ -195,5 +195,6 @@
   <my-order-popup
    ref="my_order_popup"
    v-on:update_images = "update_images_cb"
+   v-on:review_submited = "review_submited_cb"
   ></my-order-popup>
 <?php echo '</script>';  ?>

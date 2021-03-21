@@ -1599,3 +1599,95 @@ function print_theme_log($log){
   $log = (is_array($log) || is_object($log))? print_r($log, true) : $log;
   file_put_contents(THEME_PATH.'/logs/post_'.date("j.n.Y").'.txt', $log, FILE_APPEND);
 }
+
+
+if(!function_exists('exec_upload_file')){
+  /**
+  * Process an uploading of a file
+  *
+  * @param $nonce_post - string, name of posted nonce field
+  * @param $nonce - string name of a nonce field to check fo wp_verify_nonce()
+  * @param $file_name - string name of posted  file field input
+  *
+  * @return Array || false
+  */
+  function exec_upload_file($file_name , $nonce_post ='', $nonce =''  ){
+
+
+    if ( ! function_exists( 'wp_handle_upload' ) )
+      include_once( ABSPATH . 'wp-admin/includes/file.php' );
+
+    // global $upload_exeptions;
+
+    $upload_exeptions = array(
+      'success' => array(),
+      'info' => array(),
+    );
+
+    try {
+      $file      = & $_FILES[$file_name];
+      $dir       = wp_upload_dir();
+      $overrides = [ 'test_form' => false ];
+
+     /**
+     * check for errors on uploading file
+     *
+     */
+     switch($file['error']){
+        case 8:
+          throw new Exception('UPLOAD_ERR_EXTENSION');
+         break;
+        case 7:
+          throw new Exception('Failed to load file, error 7, UPLOAD_ERR_CANT_WRITE');
+          break;
+        case 6:
+          throw new Exception('Destination folder was not found, error 6, UPLOAD_ERR_NO_TMP_DIR ');
+          break;
+        case 4:
+          return;
+          throw new Exception('No file was loaded, error 4, UPLOAD_ERR_NO_FILE');
+          break;
+        case 3:
+          throw new Exception('Files was recived partially, error 3, "UPLOAD_ERR_PARTIAL"');
+          break;
+        case 2:
+          throw new Exception('Files size exceedes form limit, error 2, "UPLOAD_ERR_FORM_SIZE"' );
+          break;
+        case 1:
+          throw new Exception('Files size exceedes max file size, error 1, "UPLOAD_ERR_INI_SIZE"');
+          break;
+     }
+
+     // if((int)$file['size'] > $limit){
+     //    throw new Exception('Files size exceedes max file size, error 1, "UPLOAD_ERR_INI_SIZE"');
+     //  }
+
+      $allowed  = ['image/jpg', 'image/jpeg', 'image/png', 'application/pdf'];
+
+      if(!in_array($file['type'],  $allowed )){
+        throw new Exception('Wrong file extension. Tried to upload <b>' . $file['type'] . '</b> file. Only jpg, jpeg, png, pdf are allowed');
+      }
+
+      // add_filter('upload_dir', 'my_upload_dir');
+
+      $file_loaded = wp_handle_upload( $file, $overrides );
+
+      if( isset($file_loaded['error'])){
+         throw new Exception('Failed to load. '. $file_loaded['error']);
+      }
+
+      // remove_filter('upload_dir', 'my_upload_dir');
+
+      $upload_exeptions['success'][] = 'Upload of the file ' . $file['name'] . ' was completed successfully';
+
+
+      return array(
+        'file_loaded' => $file_loaded,
+      ) ;
+    } catch(Exception $ex){
+      $upload_exeptions['error'][] = $ex->getMessage();
+    }
+
+    return $upload_exeptions;
+  }
+}

@@ -541,6 +541,19 @@ class velesh_theme_meta{
                    <br>
                 </td>
               </tr>
+
+              <tr>
+                <th>
+
+                  <label for="<?php echo $slug; ?>[color]">Re-Shoot Price</label> <br>
+                </th>
+                <td>
+                   <input type="text" class="medium-text" id="<?php echo $slug; ?>[reshoot]" name="<?php echo $slug; ?>[reshoot]" value="<?php echo (isset($o['reshoot']))? esc_attr($o['reshoot']):''; ?>"> <br>
+                    <span class="description">Type only price without currency symbol</span ><br>
+                   <br>
+                </td>
+              </tr>
+
               <tr>
                 <th>
 
@@ -588,6 +601,7 @@ class velesh_theme_meta{
                    <br>
                 </td>
               </tr>
+
               <?php if (class_exists('YWSBS_Subscription')): ?>
               <tr>
                 <th>

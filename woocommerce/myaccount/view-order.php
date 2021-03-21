@@ -62,7 +62,7 @@ foreach ($order->get_items() as $key => $item) {
 	$current_status_meta = get_post_meta($current_status->get_id(), 'custom_order_data', true);
 	$current_status_order = isset(	$current_status_meta['order'] ) ? (int)$current_status_meta['order']   :0;
 ?>
-
+<div class="container-lg fixed">
   <?php if (wp_is_mobile()): ?>
     <div class="summary">
       <div class="summary__header">
@@ -579,5 +579,5 @@ foreach ($order->get_items() as $key => $item) {
 </div><!-- row -->
 
 <div class="spacer-h-50"></div>
-
+</div>
 <?php do_action( 'woocommerce_view_order', $order_id ); ?>
