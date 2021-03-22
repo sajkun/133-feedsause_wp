@@ -39,6 +39,19 @@
     add_action('wp_ajax_add_correction_attachment', array($this, 'add_correction_attachment_cb'));
 
     add_action('wp_ajax_proceed_stripe_payment', array($this, 'proceed_stripe_payment_cb'));
+
+    add_action('wp_ajax_get_stripe_keys', array($this, 'get_stripe_keys_cb'));
+
+  }
+
+  public static function get_stripe_keys_cb(){
+    $helper = new WC_Gateway_Stripe();
+
+    $key_publish = ($helper->get_option('testmode') == 'yes')? $helper->get_option('test_publishable_key') : $helper->get_option('publishable_key');
+
+    $key_publish = 'pk_test_epxLdX0oCEqtGEBIzs7MFtC4003SgnBL0z';
+
+    wp_send_json($key_publish);
   }
 
   public static function proceed_stripe_payment_cb(){

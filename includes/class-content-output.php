@@ -3976,6 +3976,7 @@ class theme_content_output{
 
     $theme_prices = get_option('theme_settings');
 
+
     wp_localize_script($theme_init->main_script_slug, '_dropbox', $duh_tracker_options['dropbox']);
     wp_localize_script($theme_init->main_script_slug, 'order_statuses', $orders);
     wp_localize_script($theme_init->main_script_slug, 'theme_prices', $theme_prices);

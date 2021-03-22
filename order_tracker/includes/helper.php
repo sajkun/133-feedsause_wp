@@ -345,9 +345,14 @@ if(!class_exists('map_orders_cb')){
                         /**
                         * get items image count
                         */
-                        $_items_count = get_post_meta($variation_id, '_items_count', true);
-                        $items_count = ($_items_count)? (int)$_items_count[$variation_id] : get_count_from_name($item->get_name());
 
+                        if(isset($meta['image_count'])){
+                          $items_count = (int)$meta['image_count']['value'];
+                        }else{
+                          $_items_count = get_post_meta($variation_id, '_items_count', true);
+                          $items_count = ($_items_count)? (int)$_items_count[$variation_id] : get_count_from_name($item->get_name());
+
+                        }
                         if(in_array($product_id, $skip_ids)){
                           return false;
                         }
