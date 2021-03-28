@@ -67,6 +67,7 @@ class velesh_init_theme{
     define('HOME_URL', get_home_url());
     define('THEME_VERSION', '2.0');
     define('DUMMY_ADMIN', THEME_URL.'/images/admin/blank.png');
+    define('DUMMY_DARK', THEME_URL.'/images/blank_image_dark.png');
     define('PROGRESS', THEME_URL.'/images/admin/progress.gif');
     define('DUMMY', THEME_URL.'/images/admin/blank.png');
     define('DUMMY_S', THEME_URL.'/images/admin/blank_s.png');

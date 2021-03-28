@@ -6258,6 +6258,194 @@ table .single-product__table-text {
   background-color: #0e9f68;
 }
 
+.images-row {
+  display: flex;
+  flex-flow: row wrap;
+  margin: 0 -5px;
+  justify-content: space-between;
+}
+
+.images-row .spacer {
+  flex-basis: 210px;
+}
+
+.images-item {
+  cursor: pointer;
+  flex-basis: 212px;
+  height: 212px;
+  border-radius: 9px;
+  overflow: hidden;
+  margin-bottom: 12px;
+  background-color: #17181d;
+}
+
+.images-item img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/******************************************/
+.my-order-data {
+  width: 100%;
+  border-radius: 9px;
+  border: 1px solid #2e303c;
+  overflow: hidden;
+}
+
+.my-order-data__header {
+  width: 100%;
+  display: flex;
+  background-image: url(../images/bg/data_order.jpg);
+  background-size: cover;
+  background-repeat: no-repeat;
+  border-bottom: 1px solid #2e303c;
+}
+
+.my-order-data__header .cell {
+  text-align: center;
+  flex-basis: 33.333%;
+  min-width: 33.333%;
+  max-width: 33.333%;
+  padding: 20px 15px;
+  text-align: center;
+}
+
+.my-order-data__header .cell:not(:last-child) {
+  border-right: 1px solid #2e303c;
+}
+
+.my-order-data__header .value {
+  color: #ffffff;
+  font-family: "HelveticaFont_", sans-serif;
+  font-size: 39px;
+  font-weight: 700;
+  display: block;
+  margin: 0 0 10px;
+}
+
+.my-order-data__header .label {
+  color: #8f9eb7;
+  font-family: "HelveticaFont_", sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.91px;
+  text-transform: uppercase;
+  display: block;
+}
+
+.my-order-data__row {
+  padding: 20px 30px;
+  display: flex;
+}
+
+.my-order-data__row .image-holder {
+  margin-right: 20px;
+}
+
+.my-order-data__row .text {
+  margin: 0;
+  color: #b6bedb;
+  font-family: "HelveticaFont_", sans-serif;
+  font-size: 11px;
+  font-style: normal;
+  letter-spacing: normal;
+  line-height: 17.4px;
+  text-align: left;
+}
+
+.my-order-data__footer {
+  border-top: 1px solid #2e303c;
+}
+
+.my-order-data__footer .warning {
+  color: #ffffff;
+  padding-left: 40px;
+  font-weight: 500;
+}
+
+.yellow {
+  color: #ffbb36;
+}
+
+.my-shoots {
+  display: flex;
+  margin: 0 -5px;
+  flex-flow: row wrap;
+}
+
+.my-shoots__item {
+  background-color: #17181d;
+  max-width: 20px;
+  flex-basis: 205px;
+  min-width: 205px;
+  margin: 0 5px 10px;
+  height: 210px;
+  border-radius: 9px;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.my-shoots__item img {
+  width: 100%;
+  height: 100%;
+  -o-object-fit: cover;
+     object-fit: cover;
+}
+
+.dark-mode ~ .daterangepicker,
+.dark-mode + .daterangepicker {
+  background-color: #17181d;
+  border: 1px solid #2e303c;
+}
+
+.dark-mode ~ .daterangepicker .ranges li:hover,
+.dark-mode + .daterangepicker .ranges li:hover {
+  background-color: #2e3039;
+}
+
+.dark-mode ~ .daterangepicker:after,
+.dark-mode + .daterangepicker:after {
+  border-bottom: 6px solid #17181d;
+}
+
+.dark-mode ~ .daterangepicker.show-ranges.ltr .drp-calendar.left,
+.dark-mode + .daterangepicker.show-ranges.ltr .drp-calendar.left {
+  border: 1px solid #2e303c;
+}
+
+.dark-mode ~ .daterangepicker .calendar-table,
+.dark-mode + .daterangepicker .calendar-table {
+  border: 1px solid #17181d;
+  border-radius: 4px;
+  background-color: #17181d;
+}
+
+.dark-mode ~ .daterangepicker .calendar-table .next span,
+.dark-mode ~ .daterangepicker .calendar-table .prev span,
+.dark-mode + .daterangepicker .calendar-table .next span,
+.dark-mode + .daterangepicker .calendar-table .prev span {
+  border-color: #fff;
+}
+
+.dark-mode ~ .daterangepicker .calendar-table th, .dark-mode ~ .daterangepicker .calendar-table td,
+.dark-mode + .daterangepicker .calendar-table th,
+.dark-mode + .daterangepicker .calendar-table td {
+  color: #fff;
+  background-color: #17181d;
+}
+
+.dark-mode ~ .daterangepicker .calendar-table th.in-range, .dark-mode ~ .daterangepicker .calendar-table td.in-range,
+.dark-mode + .daterangepicker .calendar-table th.in-range,
+.dark-mode + .daterangepicker .calendar-table td.in-range {
+  background-color: #2e3039;
+}
+
+.dark-mode ~ .daterangepicker .ranges li,
+.dark-mode + .daterangepicker .ranges li {
+  color: #fff;
+}
+
 .dark-mode {
   background-color: #121212;
 }

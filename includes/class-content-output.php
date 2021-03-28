@@ -3981,7 +3981,7 @@ class theme_content_output{
     wp_localize_script($theme_init->main_script_slug, 'order_statuses', $orders);
     wp_localize_script($theme_init->main_script_slug, 'theme_prices', $theme_prices);
     wp_localize_script($theme_init->main_script_slug, 'my_shoots', $shoots);
-    wp_localize_script($theme_init->main_script_slug, 'DUMMY_S', DUMMY_S);
+    wp_localize_script($theme_init->main_script_slug, 'DUMMY_S', DUMMY_DARK);
     wp_localize_script($theme_init->main_script_slug, 'currency_symbol', html_entity_decode(get_woocommerce_currency_symbol()));
 
     print_theme_template_part('gallery', 'woocommerce', $args);
