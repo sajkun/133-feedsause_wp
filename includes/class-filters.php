@@ -518,7 +518,7 @@ class theme_filter_class{
       $classes .= ' lines';
     }
 
-    if(is_checkout() && empty( is_wc_endpoint_url('order-received') )) {
+    if((is_checkout() && !isset($_GET['no_reload'])) && empty( is_wc_endpoint_url('order-received') )) {
      $classes .= " contrast ";
     }
 

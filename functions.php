@@ -154,9 +154,9 @@ class velesh_init_theme{
       wp_enqueue_script('theme-fancybox-thumbs', THEME_URL.'/assets/fancybox2/helpers/jquery.fancybox-thumbs.js', array('jquery'), THEME_VERSION, true);
 
       if(wp_is_mobile()){
-        wp_enqueue_style('theme-style-desktop', THEME_URL.'/css/mobile.main4.min.css' );
+        wp_enqueue_style('theme-style-desktop', THEME_URL.'/css/mobile.main6.min.css' );
       }else{
-        wp_enqueue_style('theme-style-desktop', THEME_URL.'/css/desktop.main6.min.css' );
+        wp_enqueue_style('theme-style-desktop', THEME_URL.'/css/desktop.main7.min.css' );
       }
 
       wp_enqueue_script('velocity-min', THEME_URL.'/assets/velocity/velocity.min.js', array('jquery'), THEME_VERSION, true);
@@ -165,9 +165,9 @@ class velesh_init_theme{
       wp_enqueue_script('vuejs', THEME_URL.'/assets/vuejs/prod.js', array(), THEME_VERSION, true);
 
       if(wp_is_mobile()){
-        wp_enqueue_script($this->main_script_slug, THEME_URL.'/script/new/mobile.main4.min.js', array('jquery'), THEME_VERSION, true);
+        wp_enqueue_script($this->main_script_slug, THEME_URL.'/script/new/mobile.main5.min.js', array('jquery'), THEME_VERSION, true);
       }else{
-        wp_enqueue_script($this->main_script_slug, THEME_URL.'/script/new/desktop.main7.min.js', array('jquery'), THEME_VERSION, true);
+        wp_enqueue_script($this->main_script_slug, THEME_URL.'/script/new/desktop.main8.min.js', array('jquery'), THEME_VERSION, true);
       }
     }else{
 
@@ -470,9 +470,9 @@ class velesh_init_theme{
    */
   public function print_inline_data_body(){
     if(theme_construct_page::is_page_type( 'new-styles' )){
-      add_svg_sprite('theme_sprite_svg_133_8_new',THEME_URL.'/svg_sprite/new/symbol_sprite_2.html');
+      add_svg_sprite('theme_sprite_svg_133_9_new',THEME_URL.'/svg_sprite/new/symbol_sprite_2.html');
     }else{
-      add_svg_sprite('theme_sprite_svg_133_2',THEME_URL.'/svg_sprite/symbol_sprite.html');
+      add_svg_sprite('theme_sprite_svg_133_3',THEME_URL.'/svg_sprite/symbol_sprite.html');
     }
   }
 

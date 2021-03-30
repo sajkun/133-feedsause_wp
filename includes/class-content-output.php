@@ -219,7 +219,7 @@ class theme_content_output{
           $url_gallery = wc_get_account_endpoint_url('my-gallery');
           $url_gallery_active = isset($wp->query_vars['my-gallery']) ? 'active' : '';
 
-          $main_menu = sprintf('<nav class="main-menu"><ul class="mobile-menu__list"> <li class="%s"><a href="%s"><svg class=" svg-icon-dots-2"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-dots-2"></use> </svg> Shoots</a></li> <li class="%s"><a href="%s"><svg class=" svg-icon-gallery"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-gallery"></use> </svg> Gallery</a></li> </ul></nav>',
+          $main_menu = sprintf('<nav class="main-menu centered"><ul class="mobile-menu__list"> <li class="%s"><a href="%s"><svg class=" svg-icon-dots-2"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-dots-2"></use> </svg> Shoots</a></li> <li class="%s"><a href="%s"><svg class=" svg-icon-gallery"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-gallery"></use> </svg> Gallery</a></li> </ul></nav>',
             $url_shoots_active,
             $url_shoots,
             $url_gallery_active,
@@ -256,6 +256,8 @@ class theme_content_output{
         'logo'   => $logo,
         'hide_menu'   => $hide_menu,
         'main_menu'   => $main_menu,
+        'avatar_url'     => $user_id >0 ? get_avatar_url($user_id) : '',
+        'is_account_page' => is_account_page() && is_wc_endpoint_url('orders') ||  is_wc_endpoint_url('view-order') ||  isset($wp->query_vars['my-gallery']) ,
       );
 
       print_theme_template_part('header-mobile-new', 'globals', $args);
@@ -302,7 +304,6 @@ class theme_content_output{
       $header_class = is_checkout() && !empty( is_wc_endpoint_url('order-received') ) ? ' contrast ' : '';
 
       $header_class .=  is_account_page()?  ' underline ' : '';
-
 
       $args = array(
         'logo'           => $logo,
@@ -3927,10 +3928,13 @@ class theme_content_output{
 
       $diff = date_diff($today ,  $order_date );
 
+      $actions   = wc_get_account_orders_actions( $order );
+
       return array(
         'order'  => (array)$order,
         'date'   => str_replace(' ','T', $order_item->post_date),
         'order_id' => $order->get_id(),
+        'status'   => wc_get_order_status_name($order->get_status()),
         'coupons' => $order->get_used_coupons(),
         'current_status' =>  isset($current_status_meta['title'])? $current_status_meta['title']: wc_get_order_status_name($order->get_status()),
         'current_status_meta' => get_post_meta($current_status->get_id(), 'custom_order_data', true),
@@ -3947,6 +3951,8 @@ class theme_content_output{
         'photo_limit' => get_post_meta($order->ID , '_wfp_image_limit', true),
 
         'diff' => $diff->format('%d') < 3 && $diff->format('%m') < 1 && $diff->format('%y') < 1 ?  3 - $diff->format('%d') : 0,
+
+        'download_pdf' =>  isset($actions['print-invoice']['url'])? $actions['print-invoice']['url'] : false,
       );
     },$shoots);
 
@@ -3984,9 +3990,18 @@ class theme_content_output{
     wp_localize_script($theme_init->main_script_slug, 'DUMMY_S', DUMMY_S);
     wp_localize_script($theme_init->main_script_slug, 'currency_symbol', html_entity_decode(get_woocommerce_currency_symbol()));
 
-    print_theme_template_part('gallery', 'woocommerce', $args);
-    print_theme_template_part('order-details', 'woocommerce', $args);
-    print_theme_template_part('order-popup', 'woocommerce', $args);
+    if (wp_is_mobile()) {
+      # code...
+      print_theme_template_part('gallery-mobile', 'woocommerce', $args);
+      print_theme_template_part('order-details-mobile', 'woocommerce', $args);
+      print_theme_template_part('order-popup-mobile', 'woocommerce', $args);
+    }else{
+      print_theme_template_part('gallery', 'woocommerce', $args);
+      print_theme_template_part('order-details', 'woocommerce', $args);
+      print_theme_template_part('order-popup', 'woocommerce', $args);
+    }
+
+
   }
 }
 

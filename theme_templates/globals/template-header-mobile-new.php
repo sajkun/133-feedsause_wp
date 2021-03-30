@@ -13,9 +13,15 @@
 
   <?php echo $logo; ?>
 
+  <?php if ($is_account_page): ?>
+  <div class="gravatar">
+    <img src="<?php echo $avatar_url; ?>" alt="">
+  </div>
+  <?php else: ?>
   <i class="chat-icon online" onclick="Intercom('show')">
     <svg class="icon svg-icon-safe"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-safe"></use> </svg>
   </i>
+  <?php endif ?>
 </header>
 <?php if (!$hide_menu): ?>
 <nav class="mobile-menu">

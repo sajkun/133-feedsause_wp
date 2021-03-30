@@ -75,10 +75,9 @@ function check_element(ele)
 
     jQuery("#bar1").animate({width:prog_width+"%"},1,function(){
       document.getElementById("load-statuses").classList.add('width-'+parseInt(prog_width.toFixed(0)))
-      if(document.getElementById("bar1").style.width=="100%")
+      if(parseInt(document.getElementById("bar1").style.width) >= 100)
       {
         //trigger action
-
         jQuery('.load-page').addClass('hidden');
         jQuery('.site-header').removeClass('visuallyhidden');
         jQuery('.site-container').removeClass('contrast');
