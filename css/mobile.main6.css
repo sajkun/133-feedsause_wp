@@ -5225,6 +5225,10 @@ fieldset {
   float: right;
 }
 
+a.comment {
+  text-decoration: none !important;
+}
+
 .thank-you {
   min-height: calc(100vh - 72px);
   background: #0d0f14;
@@ -5298,6 +5302,8 @@ fieldset {
   background-image: url(../images/bg_order.jpg);
   background-size: cover;
   border-radius: 8px 8px 0 0;
+  min-height: 144px;
+  box-sizing: border-box;
 }
 
 .thank-you__order-header .deco {
@@ -6267,6 +6273,7 @@ table .single-product__table-text {
   left: 0;
   height: 2px;
   display: block;
+  z-index: 20;
   background-color: transparent;
 }
 
@@ -6294,7 +6301,7 @@ table .single-product__table-text {
   font-family: "PoppinsFont", sans-serif;
   font-size: 40px;
   font-weight: 600;
-  padding: 0 15px;
+  padding: 0;
 }
 
 .dark-mode .my-order__title {
@@ -6643,6 +6650,7 @@ table .single-product__table-text {
   border-right: 1px solid #2e303c;
 }
 
+#my_order .my-order-data__header .cell:not(:last-child),
 #my_gallery .my-order-data__header .cell:not(:last-child) {
   border-right: 0;
 }
@@ -6670,6 +6678,7 @@ table .single-product__table-text {
   display: flex;
 }
 
+#my_order .my-order-data__row,
 #my_gallery .my-order-data__row {
   padding: 7px 0;
 }
@@ -6891,6 +6900,19 @@ table .single-product__table-text {
 
 .my-cta__button:active {
   background-color: #8a97ff;
+}
+
+.my-order .order-previews {
+  flex-basis: 267px;
+  max-width: 267px;
+  width: 267px;
+  padding: 0 10px 0 0 !important;
+  display: flex;
+}
+
+.order-scroll {
+  max-width: 100%;
+  overflow: auto;
 }
 
 .dark-mode {

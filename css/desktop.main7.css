@@ -11295,6 +11295,15 @@ fieldset {
   color: #5769ff;
 }
 
+a.comment {
+  text-decoration: none !important;
+  transition: all .1s;
+}
+
+a.comment:hover {
+  color: #5769ff;
+}
+
 .thank-you {
   min-height: calc(100vh - 72px);
   background: #0d0f14;

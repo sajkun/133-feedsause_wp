@@ -72,23 +72,11 @@
          'name'  => 'recipe_name'
       ),
 
-      'sizes' =>array(
-         'value' => $_POST['extra_data']['sizes'],
-         'label' => 'Sizes',
-         'name'  => 'sizes'
-      ),
+      'sizes' => $_POST['extra_data']['sizes'],
 
-      'colors' =>array(
-         'value' => $_POST['extra_data']['colors'],
-         'label' => 'Colors',
-         'name'  => 'colors'
-      ),
+      'colors' =>$_POST['extra_data']['colors'],
 
-      'position' =>array(
-         'value' => $_POST['extra_data']['position'],
-         'label' => 'Position',
-         'name'  => 'position'
-      ),
+      'position' => $_POST['extra_data']['position'],
 
       'order_id'=> array(
          'value' =>  $_POST['order_id'],

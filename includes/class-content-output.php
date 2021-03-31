@@ -2308,9 +2308,6 @@ class theme_content_output{
       }
 
       $today = new DateTime();
-
-
-
       ?>
       <div class="my-order__header my-order__header-transparent ">
         <div class="container container_sm">
@@ -2323,19 +2320,16 @@ class theme_content_output{
           <?php endif ?>
           <div class="spacer-h-25"></div>
 
-          <div class="row">
+          <div class="row no-gutters">
             <div class="col-12 col-md-4">
               <h2 class="my-order__title">
                 <span class="my-order__title-text">Shoots
                 </span>
               </h2>
+              <div class="spacer-h-10"></div>
             </div>
 
             <div class="col-12 col-md-8 text-right-md">
-
-              <?php if (!wp_is_mobile()): ?>
-
-
               <div class="my-order__date-range-picker">
                 <svg class="icon svg-icon-calendar"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-calendar"></use> </svg>
 
@@ -2346,9 +2340,13 @@ class theme_content_output{
                 <svg class="icon svg-icon-arrows"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-arrows"></use> </svg>
               </div>
 
+              <?php if (!wp_is_mobile()): ?>
               <a href="<?php echo esc_url(get_permalink(wc_get_page_id( 'shop' ) )); ?>" class="my-order__button-add">+ New Shoot</a>
+              <?php else: ?>
+              <a href="<?php echo esc_url(get_permalink(wc_get_page_id( 'shop' ) )); ?>" class="my-order__button-add">+</a>
               <?php endif ?>
             </div>
+            <div class="spacer-h-10"></div>
           </div>
 
           <div class="spacer-h-20"></div>

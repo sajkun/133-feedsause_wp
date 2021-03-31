@@ -65,166 +65,165 @@
       </div><!-- summary__header -->
 
       <div class="summary__body">
-      <div class="shoot-steps">
-        <div class="shoot-steps__header">
-          <h2 class="title">
-             <?php echo $title; ?>
-            <i class="icon-star"></i>
-            <span class="rating"> <span class="value">4.5</span> Excellent</span>
+        <div class="shoot-steps">
+          <div class="shoot-steps__header">
+            <h2 class="title">
+               <?php echo $title; ?>
+              <i class="icon-star"></i>
+              <span class="rating"> <span class="value">4.5</span> Excellent</span>
 
-          </h2>
-          <span class="regular-text">Select an element below to make changes</span>
-        </div><!-- shoot-steps__header -->
+            </h2>
+            <span class="regular-text">Select an element below to make changes</span>
+          </div><!-- shoot-steps__header -->
           <table class="summary__content">
-          <tbody>
-            <tr :class="{active: (max_step => 1)}" v-on:click="change_step(1)">
-              <td>
-                <div class="step-label"  :class="{active: (step == 1)}" >
-                  <svg class="icon svg-icon-product">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-product"></use>
-                  </svg>
-                  <span class="step-label__text">Products</span>
-                </div>
-              </td>
-              <td>
-                <p class="summary__content-text">{{names_str.name}} <span v-if="names_str.addon" class="addon">+{{names_str.addon}}</span></p>
-              </td>
-              <td>
-              </td>
-              <td>
-                 <p class="summary__content-price">{{order_total.product_names}}</p>
-              </td>
-            </tr>
+            <tbody>
+              <tr :class="{active: (max_step => 1)}" v-on:click="change_step(1)">
+                <td>
+                  <div class="step-label"  :class="{active: (step == 1)}" >
+                    <svg class="icon svg-icon-product">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-product"></use>
+                    </svg>
+                    <span class="step-label__text">Products</span>
+                  </div>
+                </td>
+                <td>
+                  <p class="summary__content-text">{{names_str.name}} <span v-if="names_str.addon" class="addon">+{{names_str.addon}}</span></p>
+                </td>
+                <td>
+                </td>
+                <td>
+                   <p class="summary__content-price">{{order_total.product_names}}</p>
+                </td>
+              </tr>
 
-            <tr  :class="{active: (max_step >= 2)}"  v-on:click="change_step(2)">
-              <td>
-                <div class="step-label"   :class="{active: (step == 2)}">
-                  <svg class="icon svg-icon-number" v-if="step!=2">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href=" #svg-icon-number"></use>
-                  </svg>
-                  <svg class="icon svg-icon-images-white"  v-if="step==2">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href=" #svg-icon-images-white"></use>
-                  </svg>
-                  <span class="step-label__text">Photos</span>
-                </div>
-              <td>
-                <p class="summary__content-text">{{total_images}}</p>
-              </td>
-              <td>
-              </td>
-              <td>
-                 <p class="summary__content-price">{{order_total.image_count}}</p>
-              </td>
-            </tr>
+              <tr  :class="{active: (max_step >= 2)}"  v-on:click="change_step(2)">
+                <td>
+                  <div class="step-label"   :class="{active: (step == 2)}">
+                    <svg class="icon svg-icon-number" v-if="step!=2">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href=" #svg-icon-number"></use>
+                    </svg>
+                    <svg class="icon svg-icon-images-white"  v-if="step==2">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href=" #svg-icon-images-white"></use>
+                    </svg>
+                    <span class="step-label__text">Photos</span>
+                  </div>
+                <td>
+                  <p class="summary__content-text">{{total_images}}</p>
+                </td>
+                <td>
+                </td>
+                <td>
+                   <p class="summary__content-price">{{order_total.image_count}}</p>
+                </td>
+              </tr>
 
-            <tr  :class="{active: (max_step >= 3)}"  v-on:click="change_step(3)">
-              <td>
-                <div class="step-label"   :class="{active: (step == 3)}">
-                  <svg class="icon svg-icon-custom">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-custom"></use>
-                  </svg>
-                  <span class="step-label__text">Customise</span>
-                </div>
-              </td>
-              <td>
-                <p class="summary__content-text">{{customize_text}}</p>
-              </td>
-              <td>
-              </td>
-              <td>
-                 <p class="summary__content-price">{{order_total.customize}}</p>
-              </td>
-            </tr>
-            <tr  :class="{active: (max_step >= 4  )}"   v-on:click="change_step(4)">
-              <td>
-                <div class="step-label"   :class="{active: (step == 4|| step == 5)}">
-                  <svg class="icon svg-icon-notes">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-notes"></use>
-                  </svg>
-                  <span class="step-label__text">Studio Notes</span>
-                </div>
-              </td>
-              <td>
-                <p class="summary__content-text">{{this.notes.title || '-'}}</p>
-              </td>
-              <td>
-              </td>
-              <td>
-                 <p class="summary__content-price">{{order_total.shoots}}</p>
-              </td>
-            </tr>
-            <tr  :class="{active: (max_step >= 6)}"   v-on:click="change_step(6)">
-              <td>
-                <div class="step-label"   :class="{active: (step == 6)}">
-                  <svg class="icon svg-icon-flash">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-flash"></use>
-                  </svg>
-                  <span class="step-label__text">Turnaround</span>
-                </div>
-              </td>
-              <td>
-                <p class="summary__content-text">{{turnaround_text}}</p>
-              </td>
-              <td>
-              </td>
-              <td>
-                 <p class="summary__content-price">{{order_total.turnaround}}</p>
-              </td>
-            </tr>
-            <tr  :class="{active: (max_step >= 7)}"   v-on:click="change_step(7)">
-              <td>
-                <div class="step-label"   :class="{active: (step == 7)}">
-                  <svg class="icon svg-icon-handling">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-handling"></use>
-                  </svg>
-                  <span class="step-label__text">Handling</span>
-                </div>
-              </td>
-              <td>
-                <p class="summary__content-text">{{handling_text}}</p>
-              </td>
-              <td>
-              </td>
-              <td>
-                 <p class="summary__content-price">{{order_total.handling}}</p>
-              </td>
-            </tr>
-          </tbody>
-          <tfoot>
-            <tr>
-              <td colspan="4"><span class="summary__label">Total Cost</span> <div class="spacer-h-10"></div></td>
-            </tr>
-            <tr>
-              <td colspan="2">Subtotal</td>
-              <td colspan="2">£{{order_total.subtotal}}</td>
-            </tr>
-            <tr>
-              <td colspan="2">Add-Ons</td>
-              <td colspan="2">£{{order_total.addons}}</td>
-            </tr>
-            <tr>
-              <td colspan="2">Discount <span class="coupon_code" v-show="applied_coupon">{{applied_coupon}}</span></td>
-              <td colspan="2">£{{order_total_discount}}</td>
-            </tr>
-            <tr>
-              <td colspan="2"></td>
-              <td colspan="2"><span class="summary__total">£{{order_total.total}}</span></td>
-            </tr>
+              <tr  :class="{active: (max_step >= 3)}"  v-on:click="change_step(3)">
+                <td>
+                  <div class="step-label"   :class="{active: (step == 3)}">
+                    <svg class="icon svg-icon-custom">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-custom"></use>
+                    </svg>
+                    <span class="step-label__text">Customise</span>
+                  </div>
+                </td>
+                <td>
+                  <p class="summary__content-text">{{customize_text}}</p>
+                </td>
+                <td>
+                </td>
+                <td>
+                   <p class="summary__content-price">{{order_total.customize}}</p>
+                </td>
+              </tr>
+              <tr  :class="{active: (max_step >= 4  )}"   v-on:click="change_step(4)">
+                <td>
+                  <div class="step-label"   :class="{active: (step == 4|| step == 5)}">
+                    <svg class="icon svg-icon-notes">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-notes"></use>
+                    </svg>
+                    <span class="step-label__text">Studio Notes</span>
+                  </div>
+                </td>
+                <td>
+                  <p class="summary__content-text">{{this.notes.title || '-'}}</p>
+                </td>
+                <td>
+                </td>
+                <td>
+                   <p class="summary__content-price">{{order_total.shoots}}</p>
+                </td>
+              </tr>
+              <tr  :class="{active: (max_step >= 6)}"   v-on:click="change_step(6)">
+                <td>
+                  <div class="step-label"   :class="{active: (step == 6)}">
+                    <svg class="icon svg-icon-flash">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-flash"></use>
+                    </svg>
+                    <span class="step-label__text">Turnaround</span>
+                  </div>
+                </td>
+                <td>
+                  <p class="summary__content-text">{{turnaround_text}}</p>
+                </td>
+                <td>
+                </td>
+                <td>
+                   <p class="summary__content-price">{{order_total.turnaround}}</p>
+                </td>
+              </tr>
+              <tr  :class="{active: (max_step >= 7)}"   v-on:click="change_step(7)">
+                <td>
+                  <div class="step-label"   :class="{active: (step == 7)}">
+                    <svg class="icon svg-icon-handling">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-handling"></use>
+                    </svg>
+                    <span class="step-label__text">Handling</span>
+                  </div>
+                </td>
+                <td>
+                  <p class="summary__content-text">{{handling_text}}</p>
+                </td>
+                <td>
+                </td>
+                <td>
+                   <p class="summary__content-price">{{order_total.handling}}</p>
+                </td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="4"><span class="summary__label">Total Cost</span> <div class="spacer-h-10"></div></td>
+              </tr>
+              <tr>
+                <td colspan="2">Subtotal</td>
+                <td colspan="2">£{{order_total.subtotal}}</td>
+              </tr>
+              <tr>
+                <td colspan="2">Add-Ons</td>
+                <td colspan="2">£{{order_total.addons}}</td>
+              </tr>
+              <tr>
+                <td colspan="2">Discount <span class="coupon_code" v-show="applied_coupon">{{applied_coupon}}</span></td>
+                <td colspan="2">£{{order_total_discount}}</td>
+              </tr>
+              <tr>
+                <td colspan="2"></td>
+                <td colspan="2"><span class="summary__total">£{{order_total.total}}</span></td>
+              </tr>
 
-          </tfoot>
-        </table>
-              <p class="terms">By placing an order with Feedsauce, you agree to the website <a href="<?php echo $terms_page_url ?>">Terms & Conditions</a>
+            </tfoot>
+          </table>
+          <p class="terms">By placing an order with Feedsauce, you agree to the website <a href="<?php echo $terms_page_url ?>">Terms & Conditions</a>
 
-                <?php if ($redo_policy_url): ?>
-                  , our <a  href="<?php echo $redo_policy_url ?>"> Redo Policy</a>
-                <?php endif ?>
-                <?php if ($product_guid_url): ?>
-                 and verify that your product meets <a href="<?php echo $product_guid_url ?>">Feedsauce’s Product Guidelines</a>
-                <?php endif ?>
-              </p>
-
-              <div class="spacer-h-30"></div>
-            </div>
+            <?php if ($redo_policy_url): ?>
+              , our <a  href="<?php echo $redo_policy_url ?>"> Redo Policy</a>
+            <?php endif ?>
+            <?php if ($product_guid_url): ?>
+             and verify that your product meets <a href="<?php echo $product_guid_url ?>">Feedsauce’s Product Guidelines</a>
+            <?php endif ?>
+          </p>
+          <div class="spacer-h-100"></div>
+        </div>
       </div>
     </div><!-- summary -->
     <div class="summary-place"></div>
