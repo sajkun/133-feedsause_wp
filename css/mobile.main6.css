@@ -5227,6 +5227,7 @@ fieldset {
 
 a.comment {
   text-decoration: none !important;
+  cursor: pointer;
 }
 
 .thank-you {

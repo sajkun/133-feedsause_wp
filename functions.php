@@ -432,6 +432,8 @@ class velesh_init_theme{
 
     wp_localize_script($this->main_script_slug,'WP_URLS', $wc_urls);
 
+    clog($wc_urls);
+
     $user_data = array(
       'user_id' => (get_current_user_id() > 0)? get_current_user_id() : 'visitor',
     );
