@@ -80,8 +80,12 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 
         <div class="col-md-6 col-lg-4 order-previews col-xl-3 <?php echo in_array($order->get_status(), array('completed', 'failed'))? 'completed hidden' : 'processing';?>" data-time="<?php echo $date->date_i18n('Y-m-d').'T'.$date->date_i18n('H:i:s'); ?>">
 
+
+        <?php
+          $actions = wc_get_account_orders_actions( $order );
+        ?>
         <div class="thank-you__order">
-          <div class="thank-you__order-header">
+          <a href="<?php echo $actions['view']['url'] ?>" class="thank-you__order-header">
             <span class="thank-you__order-number">#FS-<?php echo $order->get_order_number();?></span>
             <span class="thank-you__order-number text-right"> <?php echo $date->date_i18n('d M y'); ?> </span>
             <div class="clearfix"></div>
@@ -90,7 +94,7 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
             <span class="thank-you__order-name"><?php echo is_array( $product_name)? $product_name[0] : 'No name'  ?>  <?php if ($product_name  && count($product_name) - 1  > 0): ?> <span class="count">
             + <?php echo count($product_name) - 1; ?></span>
             <?php endif ?></span>
-          </div><!-- thank-you__order-header -->
+          </a><!-- thank-you__order-header -->
 
           <div class="thank-you__order-line clearfix">
             <div class="thank-you__order-status" <?php printf('style="background-color:%s"', $hex_color); ?>></div><?php echo $order_statuses['wc-'.$order->get_status()];?>
@@ -129,10 +133,6 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
               <span class="thank-you__order-price"><?php echo wc_price($order->get_total());?></span>
             </div>
             <div class="spacer-h-25"></div>
-
-            <?php
-              $actions = wc_get_account_orders_actions( $order );
-            ?>
 
             <a href="<?php echo $actions['view']['url'] ?>" class="thank-you__order-track">Track</a>
           </div><!-- thank-you__order-body -->

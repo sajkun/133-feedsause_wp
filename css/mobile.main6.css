@@ -5305,6 +5305,14 @@ a.comment {
   border-radius: 8px 8px 0 0;
   min-height: 144px;
   box-sizing: border-box;
+  display: block;
+  text-decoration: none;
+  outline: 0;
+}
+
+.thank-you__order-header * {
+  outline: 0;
+  text-decoration: none;
 }
 
 .thank-you__order-header .deco {

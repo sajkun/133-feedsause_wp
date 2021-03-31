@@ -11374,7 +11374,15 @@ a.comment:hover {
   padding: 11px 25px 25px;
   background-image: url(../images/bg_order.jpg);
   background-size: cover;
+  display: block;
+  text-decoration: none;
+  outline: 0;
   border-radius: 8px 8px 0 0;
+}
+
+.thank-you__order-header * {
+  outline: 0;
+  text-decoration: none;
 }
 
 .thank-you__order-header .deco {

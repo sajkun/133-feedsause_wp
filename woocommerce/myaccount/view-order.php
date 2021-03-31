@@ -772,7 +772,9 @@ foreach ($order->get_items() as $key => $item) {
      <?php endif ?>
 
 			<?php if ( isset($current_status_meta['what_next']) &&  !empty($current_status_meta['what_next'])): ?>
-	 	  	<div class="spacer-h-50"></div>
+	 	  	<div class="spacer-h-40 spacer-h-lg-50"></div>
+        <div class="my-hr-grey mobile-show"></div>
+        <div class="spacer-h-30 spacer-h-lg-0"></div>
 	   	  <div class="text-center">
 			 	  <a href="javascript:void(0)" class="what-next">What happens next?</a>
 		 	  </div>
