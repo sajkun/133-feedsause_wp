@@ -7,118 +7,226 @@
           <div class="spacer-h-20"></div>
           <h2 class="title">
              {{product_name}}
-             <svg class="icon svg-icon-dots"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-dots"></use> </svg>
           </h2>
-        <span class="comment">#FS-{{meta.order_id}}</span>
+          <span class="comment">#FS-{{meta.order_id}}</span>
+          <div class="spacer-h-30"></div>
+
+          <div class="my-order__filter">
+            <a href="#photos" class="my-order__filter-item-2" v-on:click.prevent = "mode='photos'"  :class="{active: (mode == 'photos')}">Your Photos</a>
+            <a href="#details" class="my-order__filter-item-2" v-on:click.prevent = "mode='details'" :class="{active: (mode == 'details')}">Order Details</a>
+          </div>
 
         </div><!-- shoot-steps__header -->
-        <div class="summary">
-          <div class="summary__body">
-            <h3 class="summary__title">Shoot Summary</h3>
-            <p class="summary__text">Order placed on {{order_date}}</p>
-            <div class="spacer-h-10"></div>
-            <table class="summary__content">
-              <tbody>
-                <tr>
-                  <td> <div class="step-label">
-                      <svg class="icon svg-icon-product">
-                        <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-product"></use>
-                      </svg>
-                      <span class="step-label__text">Products</span>
-                    </div> </td>
+
+        <transition
+          class="studio-content"
+          name="studio-content"
+          tag="div"
+          v-bind:css="false"
+          v-on:before-enter="beforeEnter"
+          v-on:enter="enter"
+          v-on:leave="leave"
+          v-on:after-enter="enterAfter"
+          v-on:after-leave="leaveAfter"
+        >
+          <div class="my-order-data order-details" v-if="mode == 'details'">
+            <div class="my-summary">
+              <div class="my-summary__body">
+                <div class="spacer-h-10"></div>
+                <table class="my-summary__content">
+                  <tbody>
+                    <tr>
+                      <td> <div class="step-label">
+                          <svg class="icon svg-icon-product">
+                            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-product"></use>
+                          </svg>
+                          <span class="step-label__text">Products</span>
+                        </div> </td>
 
 
-                  <td> <p class="summary__content-text">{{item.name}} <span v-if="item.count" class="addon"> + {{item.count}}</span> </p> </td>
+                      <td> <p class="my-summary__content-text">{{item.name}} <span v-if="item.count" class="addon"> + {{item.count}}</span> </p> </td>
 
-                  <td class="active"> <p class="summary__content-price">{{item.price}}</p> </td>
-                </tr>
+                      <td class="active"> <p class="my-summary__content-price">{{item.price}}</p> </td>
+                    </tr>
 
-                <tr>
-                  <td> <div class="step-label">
-                      <svg class="icon svg-icon-images-3">
-                        <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href=" #svg-icon-images-3"></use>
-                      </svg>
-                      <span class="step-label__text">Photos</span>
-                    </div> </td>
+                    <tr>
+                      <td> <div class="step-label">
+                          <svg class="icon svg-icon-images-3">
+                            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href=" #svg-icon-images-3"></use>
+                          </svg>
+                          <span class="step-label__text">Photos</span>
+                        </div> </td>
 
-                  <td class="active"> <p class="summary__content-text">{{photos.count}}</p> </td>
-                  <td class="active"> <p class="summary__content-price">{{photos.price}}</p> </td>
-                </tr>
+                      <td class="active"> <p class="my-summary__content-text">{{photos.count}}</p> </td>
+                      <td class="active"> <p class="my-summary__content-price">{{photos.price}}</p> </td>
+                    </tr>
 
-                <tr>
-                  <td> <div class="step-label"> <svg class="icon svg-icon-custom">
-                        <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-custom"></use>
-                      </svg>
-                      <span class="step-label__text">Customise</span>
-                    </div> </td>
-                  <td class="active"> <p class="summary__content-text">{{customisations.count}} Customisations </p> </td>
-                  <td class="active"> <p class="summary__content-price">{{customisations.price}}</p> </td>
-                </tr>
-                <tr>
-                  <td> <div class="step-label">
-                      <svg class="icon svg-icon-notes">
-                        <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-notes"></use>
-                      </svg>
-                      <span class="step-label__text">Studio Notes</span>
-                    </div> </td>
+                    <tr>
+                      <td> <div class="step-label"> <svg class="icon svg-icon-custom">
+                            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-custom"></use>
+                          </svg>
+                          <span class="step-label__text">Customise</span>
+                        </div> </td>
+                      <td class="active"> <p class="my-summary__content-text">{{customisations.count}} Customisations </p> </td>
+                      <td class="active"> <p class="my-summary__content-price">{{customisations.price}}</p> </td>
+                    </tr>
+                    <tr>
+                      <td> <div class="step-label">
+                          <svg class="icon svg-icon-notes">
+                            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-notes"></use>
+                          </svg>
+                          <span class="step-label__text">Studio Notes</span>
+                        </div> </td>
 
-                  <td class="active"> <p class="summary__content-text">{{notes.text}} </p> </td>
+                      <td class="active"> <p class="my-summary__content-text">{{notes.text}} </p> </td>
 
-                  <td class="active"> <p class="summary__content-price">{{notes.price}}</p> </td>
-                </tr>
+                      <td class="active"> <p class="my-summary__content-price">{{notes.price}}</p> </td>
+                    </tr>
 
-                <tr>
-                  <td> <div class="step-label">
-                      <svg class="icon svg-icon-flash">
-                        <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-flash"></use>
-                      </svg>
-                      <span class="step-label__text">Turnaround</span>
-                    </div> </td>
+                    <tr>
+                      <td> <div class="step-label">
+                          <svg class="icon svg-icon-flash">
+                            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-flash"></use>
+                          </svg>
+                          <span class="step-label__text">Turnaround</span>
+                        </div> </td>
 
-                  <td class="active"> <p class="summary__content-text">{{fasttrack.text}}</p> </td>
+                      <td class="active"> <p class="my-summary__content-text">{{fasttrack.text}}</p> </td>
 
-                  <td class="active"> <p class="summary__content-price">{{fasttrack.price}}</p> </td>
-                </tr>
+                      <td class="active"> <p class="my-summary__content-price">{{fasttrack.price}}</p> </td>
+                    </tr>
 
-                <tr>
-                  <td> <div class="step-label">
-                      <svg class="icon svg-icon-handling">
-                        <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-handling"></use>
-                      </svg>
-                      <span class="step-label__text">Handling</span>
-                    </div> </td>
+                    <tr>
+                      <td> <div class="step-label">
+                          <svg class="icon svg-icon-handling">
+                            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-handling"></use>
+                          </svg>
+                          <span class="step-label__text">Handling</span>
+                        </div> </td>
 
-                  <td class="active"> <p class="summary__content-text">{{handle.text}}</p> </td>
+                      <td class="active"> <p class="my-summary__content-text">{{handle.text}}</p> </td>
 
-                  <td class="active"> <p class="summary__content-price">{{handle.price}}</p> </td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <td colspan="3"><span class="summary__label">Total Cost</span> <div class="spacer-h-10"></div></td>
-                </tr>
-                <tr>
-                  <td colspan="2">Subtotal</td>
-                  <td colspan="1">{{total.images}}</td>
-                </tr>
-                <tr>
-                  <td colspan="2">Add-Ons</td>
-                  <td colspan="1">{{total.addons}}</td>
-                </tr>
-                <tr>
-                  <td colspan="2">Discount  <span v-if="meta.coupons.length>0" class="coupon_code">{{meta.coupons.join(',')}}</span></td>
-                  <td colspan="1">{{meta.discount}}</td>
-                </tr>
-                <tr>
-                  <td colspan="2"></td>
-                  <td colspan="1"><span class="summary__total">{{meta.total}}</td>
-                </tr>
+                      <td class="active"> <p class="my-summary__content-price">{{handle.price}}</p> </td>
+                    </tr>
+                  </tbody>
+                </table>
 
-              </tfoot>
-            </table>
+                <div class="spacer-h-20"></div>
+                <div class="my-hr-grey"></div>
+                <div class="spacer-h-10"></div>
+
+                <table class="my-summary__content">
+                  <tfoot>
+                    <tr>
+                      <td colspan="3"><span class="my-summary__label">Total Cost</span> <div class="spacer-h-10"></div></td>
+                    </tr>
+                    <tr>
+                      <td colspan="2">Subtotal</td>
+                      <td colspan="1" class="text-right text-white">{{total.images}}</td>
+                    </tr>
+                    <tr>
+                      <td colspan="2">Add-Ons</td>
+                      <td colspan="1" class="text-right text-white">{{total.addons}}</td>
+                    </tr>
+                    <tr>
+                      <td colspan="2">Discount  <span v-if="meta.coupons.length>0" class="coupon_code">{{meta.coupons.join(',')}}</span></td>
+                      <td colspan="1" class="text-right text-white">{{meta.discount}}</td>
+                    </tr>
+                    <tr>
+                      <td colspan="2"></td>
+                      <td colspan="1" class="text-right"><span class="my-summary__total">{{meta.total}}</td>
+                    </tr>
+
+                  </tfoot>
+                </table>
+                <div class="spacer-h-15"></div>
+
+                <div class="text-center" :class="{visuallyhidden: (!meta.download_pdf)}"><a :href="meta.download_pdf" download class="invoice-link"><svg class="icon svg-icon-download"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-download"></use></svg>Download Invoice </a></div>
+                <div class="spacer-h-20"></div>
+              </div>
+            </div><!-- my-summary -->
+            <div class="spacer-h-25"></div>
+          </div><!-- my-order-data -->
+        </transition>
+
+        <transition
+          class="studio-content"
+          name="studio-content"
+          tag="div"
+          v-bind:css="false"
+          v-on:before-enter="beforeEnter"
+          v-on:enter="enter"
+          v-on:leave="leave"
+          v-on:after-enter="enterAfter"
+          v-on:after-leave="leaveAfter"
+        >
+          <div class="my-order-data my-order-shoots"  v-if="mode == 'photos'">
+            <div class="my-order-data__header">
+              <div class="cell">
+                <span class="label">Photos ordered</span>
+                <span class="value">{{photos.count}}</span>
+              </div>
+              <div class="cell">
+                <span class="label">Photos created</span>
+                <span class="value">{{photo_limits.total}}</span>
+              </div>
+              <div class="cell">
+                <span class="label">Downloads remaining</span>
+                <span class="value">{{photo_limits.limit}}</span>
+              </div>
+            </div>
+
+            <div class="spacer-h-10" v-if="photo_limits.total > photos.count"></div>
+            <div class="my-hr-grey" v-if="photo_limits.total > photos.count"></div>
+            <div class="spacer-h-25" v-if="photo_limits.total > photos.count"></div>
+
+            <div class="my-order-data__row" v-if="photo_limits.total > photos.count">
+              <div class="valign-top image-holder">
+                <img src="assets/images/cherry.png" alt="" class="image-holder__image-cherry">
+              </div>
+              <div class="clearfix">
+                <h2 class="my-order-data__row-title">Why are there extra photos? <span class="trigger"></span></h2>
+                 <p class="text hidden">
+                   We shot a few extra photos so that you can pick your favourite ones. But hey, if you like all the photos below, you can instantly buy and download those shots too. How about that for a cherry on the cake?
+                </p>
+              </div>
+            </div><!-- my-order-data__row -->
+
+            <div class="spacer-h-15" v-if="meta.diff > 0"></div>
+            <div class="my-hr-grey" v-if="meta.diff > 0"></div>
+            <div class="spacer-h-25" v-if="meta.diff > 0"></div>
+
+            <div class="my-order-data__row" v-if="meta.diff > 0">
+              <div class="valign-top image-holder">
+                <img src="assets/images/warn.png" alt="" class="image-holder__image-warning">
+              </div>
+              <div class="warning">
+               You have <span class="yellow">3 <span v-if="meta.diff != 1">days</span> left </span>to review your photos. After 3 days, your order will be marked as complete.
+                <div class="spacer-h-5"></div>
+              </div>
+              <div class="spacer-h-5"></div>
+            </div><!-- my-order-data__footer -->
+
+            <div class="spacer-h-15"></div>
+            <div class="my-hr-grey"></div>
+            <div class="spacer-h-25"></div>
+
+            <div class="my-cta">
+              <span class="my-cta__tag">
+                <span class="my-cta__tag-inner">NEW</span>
+              </span>
+               <div class="spacer-h-10"></div>
+
+               <h4 class="my-cta__title">More photos, faster.</h4>
+               <p class="my-cta__text">Did you know that since we already have your products <br> you can get new photos faster. </p>
+               <div class="spacer-h-0"></div>
+               <div class="text-center">
+                <a href="<?php echo $shoot_url; ?>" class="my-cta__button">Explore Recipes</a>
+                <div class="spacer-h-30"></div>
+              </div>
+            </div><!-- my-cta -->
           </div>
-        </div><!-- summary -->
-        <div class="spacer-h-25"></div>
+        </transition>
       </div><!-- shoot-steps -->
   </div>
 
@@ -139,42 +247,19 @@
     </div><!-- progress-wrapper -->
 
     <div class="spacer-h-45"></div>
+    <h2 class="my-shoots__title">Gallery</h2>
 
-    <div class="my-order-data">
-     <div class="my-order-data__header">
-        <div class="cell">
-          <span class="value">{{photos.count}}</span>
-          <span class="label">PHOTOS ORDERED</span>
-        </div>
-        <div class="cell">
-          <span class="value">{{photo_limits.total}}</span>
-          <span class="label">PHOTOS CREATED</span>
-        </div>
-        <div class="cell">
-          <span class="value">{{photo_limits.limit}}</span>
-          <span class="label">DOWNLOADS REMAINING</span>
-        </div>
-     </div>
+    <p class="my-shoots__text">
+      <svg class="icon svg-icon-notes"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-notes"></use> </svg>
+      Click on any photo to enlarge and manage your photo
+    </p>
 
-     <div class="my-order-data__row" v-if="photo_limits.total > photos.count">
-      <div class="valign-center image-holder">
-        <img src="assets/images/cherry.png" alt="">
-      </div>
-       <p class="text">
-         We shot a few extra photos so that you can pick your favourite ones. But hey, if you like all the photos below, you can instantly buy and download those shots too. How about that for a cherry on the cake?
-       </p>
-     </div>
-
-     <div class="my-order-data__footer" v-if="meta.diff > 0">
-      <div class="warning">
-        <div class="spacer-h-10"></div>
-         You have <span class="yellow">{{meta.diff}} <span v-if="meta.diff == 1">day</span>  <span  v-if="meta.diff != 1">days</span> left </span>to review your photos. After 3 days, your order will be marked as complete.
-        <div class="spacer-h-5"></div>
-       </div>
-       <div class="spacer-h-5"></div>
-     </div>
-    </div><!-- my-order-data -->
-
+    <div class="my-order__filter modify">
+      <a href="#processing" class="my-order__filter-item-2" v-on:click="filter='all'" :class="{active: (filter=='all')}">All Photos <span class="count">{{images_count.all}}</span></a>
+      <a href="#completed" class="my-order__filter-item-2"  v-on:click="filter='downloaded'" :class="{active: (filter=='downloaded')}">Downloaded <span class="count">{{images_count.downloaded}}</span></a>
+      <a href="#completed" class="my-order__filter-item-2"  v-on:click="filter='available'" :class="{active: (filter=='available')}">Not Downloaded <span class="count">{{images_count.available}}</span></a>
+      <a href="#completed" class="my-order__filter-item-2"  v-on:click="filter='inreview'" :class="{active: (filter=='inreview')}">In Review <span class="count">{{images_count.inreview}}</span></a>
+    </div>
     <div class="spacer-h-25"></div>
 
     <div class="my-shoots">

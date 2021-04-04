@@ -5,15 +5,22 @@
 
 <?php echo $header_class; ?>
 " >
-  <div class="container-lg">
-    <div class="row">
-      <div class="col-md-9 valign-center">
+  <div class="container-fluid">
+    <div class="row justify-content-between">
+      <div class="col-6 col-md-2 valign-center">
           <?php echo $logo ?>
-          <?php echo $main_menu; ?>
       </div><!-- col-md-7 -->
 
-      <div class="col-md-3 text-right valign-center">
+      <div class="col text-center order-1 order-md-0">
+        <div class="spacer-h-15 spacer-h-md-0"></div>
+          <?php echo $main_menu; ?>
+      </div>
+
+      <div class="col-6 col-md-2 order-0 order-md-1 text-right valign-center">
         <ul class="login-menu">
+          <li>
+            <svg class="icon svg-icon-dots-in-row"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-dots-in-row"></use> </svg>
+          </li>
           <?php if ($account_url): ?>
           <li><a href="<?php echo $account_url; ?>">
 
@@ -21,7 +28,7 @@
               <div class="gravatar">
                 <img src="<?php echo $avatar_url; ?>" alt="">
               </div>
-              <span> Hi, <?php echo $user_name; ?></span>
+              <span> Me <?php // echo $user_name; ?></span>
             <?php else: ?>
               <svg class="icon svg-icon-login"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-login"></use> </svg>
              <span> Log In</span>

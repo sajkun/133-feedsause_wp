@@ -27,6 +27,12 @@ class velesh_init_theme{
 
   public $main_script_slug = 'theme-main-script-dev11';
 
+  public $dt_ver_css = 9;
+  public $dt_ver_js = 10;
+
+  public $mob_ver_js = 5;
+  public $mob_ver_css = 6;
+
 
   /**
    * theme init defauls action
@@ -155,9 +161,9 @@ class velesh_init_theme{
       wp_enqueue_script('theme-fancybox-thumbs', THEME_URL.'/assets/fancybox2/helpers/jquery.fancybox-thumbs.js', array('jquery'), THEME_VERSION, true);
 
       if(wp_is_mobile()){
-        wp_enqueue_style('theme-style-desktop', THEME_URL.'/css/mobile.main6.min.css' );
+        wp_enqueue_style('theme-style-mobile', THEME_URL.'/css/mobile.main'.$this->mob_ver_css.'.min.css' );
       }else{
-        wp_enqueue_style('theme-style-desktop', THEME_URL.'/css/desktop.main7.min.css' );
+        wp_enqueue_style('theme-style-desktop', THEME_URL.'/css/desktop.main'.$this->dt_ver_css.'.min.css' );
       }
 
       wp_enqueue_script('velocity-min', THEME_URL.'/assets/velocity/velocity.min.js', array('jquery'), THEME_VERSION, true);
@@ -166,9 +172,9 @@ class velesh_init_theme{
       wp_enqueue_script('vuejs', THEME_URL.'/assets/vuejs/prod.js', array(), THEME_VERSION, true);
 
       if(wp_is_mobile()){
-        wp_enqueue_script($this->main_script_slug, THEME_URL.'/script/new/mobile.main5.min.js', array('jquery'), THEME_VERSION, true);
+        wp_enqueue_script($this->main_script_slug, THEME_URL.'/script/new/mobile.main'.$this->mob_ver_js.'.min.js', array('jquery'), THEME_VERSION, true);
       }else{
-        wp_enqueue_script($this->main_script_slug, THEME_URL.'/script/new/desktop.main8.min.js', array('jquery'), THEME_VERSION, true);
+        wp_enqueue_script($this->main_script_slug, THEME_URL.'/script/new/desktop.main'.$this->dt_ver_js.'.min.js', array('jquery'), THEME_VERSION, true);
       }
     }else{
 

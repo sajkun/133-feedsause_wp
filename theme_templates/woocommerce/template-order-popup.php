@@ -23,7 +23,7 @@
             <span class="download-popup__text" v-if="image.meta.is_active == 1">Your photo is ready to be downloaded.</span>
             <span class="download-popup__text" v-if="image.meta.is_active != 1">Your photo is not ready or under review</span>
 
-            <div class="spacer-h-20"></div>
+            <div class="spacer-h-25"></div>
           </div><!-- download-popup__row -->
 
           <div class="download-popup__row divider  fl">
@@ -90,11 +90,11 @@
           </div><!-- download-popup__row -->
 
           <div class="download-popup__row divider" v-if="image.meta.was_downloaded == 0 && image.meta.is_active !=0">
-            <div class="spacer-h-20"></div>
+            <div class="spacer-h-25"></div>
             <div class="clearfix">
               <span class="download-popup__label">Something not right?</span>
+              <div class="spacer-h-10"></div>
               <div class="clearfix"></div>
-              <div class="spacer-h-5"></div>
               <span class="download-popup__text" v-on:click="position='step_2'">
                 <i class="icon-right text-right"><svg class="icon svg-icon-next-bracket"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-next-bracket"></use> </svg></i>
                 Request a free edit if we’ve missed something from your notes or you can pay for a re-shoot

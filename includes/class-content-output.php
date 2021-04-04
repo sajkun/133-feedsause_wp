@@ -272,7 +272,7 @@ class theme_content_output{
       $url_gallery = wc_get_account_endpoint_url('my-gallery');
       $url_gallery_active = isset($wp->query_vars['my-gallery']) ? 'active' : '';
 
-      $main_menu = sprintf('<nav class="main-menu"><ul class="menu"> <li class="%s"><a href="%s"><svg class="icon svg-icon-dots-2"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-dots-2"></use> </svg> Shoots</a></li> <li class="%s"><svg class="icon svg-icon-gallery"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-gallery"></use> </svg><a href="%s">Gallery</a></li> </ul></nav>',
+      $main_menu = sprintf('<nav class="main-menu"><ul class="menu"> <li class="%s"><a href="%s"><svg class="icon svg-icon-dots-2"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-dots-2"></use> </svg> Shoots</a></li> <li class="%s"><a href="%s"><svg class="icon svg-icon-gallery"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-gallery"></use> </svg>Gallery</a></li> </ul></nav>',
         $url_shoots_active,
         $url_shoots,
         $url_gallery_active,
@@ -3947,10 +3947,8 @@ class theme_content_output{
         'total'    =>html_entity_decode( strip_tags(wc_price($order->get_total()))),
         'discount' =>html_entity_decode( strip_tags( wc_price($order->get_total_discount()))),
         'photo_limit' => get_post_meta($order->ID , '_wfp_image_limit', true),
-
         'diff' => $diff->format('%d') < 3 && $diff->format('%m') < 1 && $diff->format('%y') < 1 ?  3 - $diff->format('%d') : 0,
-
-        'download_pdf' =>  isset($actions['print-invoice']['url'])? $actions['print-invoice']['url'] : false,
+        'download_pdf' =>  isset($actions['print-invoice']['url'])? html_entity_decode($actions['print-invoice']['url']) : false,
       );
     },$shoots);
 
@@ -3998,8 +3996,8 @@ class theme_content_output{
       print_theme_template_part('order-details', 'woocommerce', $args);
       print_theme_template_part('order-popup', 'woocommerce', $args);
     }
-
-
   }
 }
+
+
 
