@@ -5141,7 +5141,8 @@ html {
 }
 
 .my-summary__content tbody td:nth-child(2) {
-  padding: 0;
+  padding-left: 0;
+  padding-right: 0;
   padding-left: 10px;
 }
 
@@ -5168,7 +5169,7 @@ html {
   border-bottom: 0;
 }
 
-.my-hr-grey {
+.site-container:not(.white) .my-hr-grey {
   height: 1px;
   display: block;
   background-color: #303645;
@@ -13950,6 +13951,10 @@ table .single-product__table-text {
   background-color: transparent;
 }
 
+#my_gallery .my-order__filter-item-2:after, #my_gallery .my-order__filter-item:after {
+  height: 3px;
+}
+
 .my-order__filter-item-2 .count, .my-order__filter-item .count {
   margin-left: 2px;
   display: inline-block;
@@ -14783,6 +14788,11 @@ table .single-product__table-text {
 }
 
 #my_gallery .invoice-link {
+  color: #a9b1c7;
+  transition: all .1s;
+}
+
+#my_gallery .invoice-link:hover {
   color: #fff;
 }
 

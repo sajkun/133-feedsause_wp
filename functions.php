@@ -479,9 +479,9 @@ class velesh_init_theme{
    */
   public function print_inline_data_body(){
     if(theme_construct_page::is_page_type( 'new-styles' )){
-      add_svg_sprite('theme_sprite_svg_133_9_new',THEME_URL.'/svg_sprite/new/symbol_sprite_2.html');
+      add_svg_sprite('theme_sprite_svg_133_10_new',THEME_URL.'/svg_sprite/new/symbol_sprite_3.html');
     }else{
-      add_svg_sprite('theme_sprite_svg_133_3',THEME_URL.'/svg_sprite/symbol_sprite.html');
+      add_svg_sprite('theme_sprite_svg_133_4',THEME_URL.'/svg_sprite/symbol_sprite.html');
     }
   }
 

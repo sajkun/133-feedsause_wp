@@ -13,8 +13,11 @@ do_action('start_page');
   <?php   wp_head(); ?>
   <title><?php wp_title(' | ', 'echo', 'right'); ?></title>
   <meta charset="<?php bloginfo( 'charset' ); ?>">
+  <?php if (!wp_is_mobile()): ?>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes">
-
+  <?php else: ?>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <?php endif ?>
   <?php if (function_exists('get_google_client_id')): ?>
   <meta name="google-signin-client_id" content="<?php echo get_google_client_id(); ?>">
   <?php endif ?>
