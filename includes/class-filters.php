@@ -523,7 +523,7 @@ class theme_filter_class{
     }
 
     if(  is_account_page()   ){
-     $classes .= " white discard-column-inner ";
+     $classes .= " discard-column-inner ";
     }
 
     return $classes;

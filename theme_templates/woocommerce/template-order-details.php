@@ -1,9 +1,17 @@
 <?php echo '<script type="text/x-template" id="my-order-details">'; ?>
+<transition
+  v-bind:css="false"
+  v-on:before-enter="beforeEnter"
+  v-on:enter="enter_width"
+  v-on:leave="leave_width"
+  v-on:after-enter="enterAfter_width"
+  v-on:after-leave="leaveAfter"
+>
   <div class="row no-gutters my-order" v-if="show">
-      <div class="col-md-5 col-lg-5 clearfix padding-right-20">
-      <div class="shoot-steps">
+    <div class="col-md-5 col-lg-5 clearfix padding-right-20">
+      <div class="shoot-steps dark-bg">
         <div class="shoot-steps__header">
-          <a class="comment" v-on:click = 'go_back'>← BACK</a>
+          <a class="comment back" v-on:click = 'go_back'><svg class="icon svg-icon-bracket"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-bracket"></use> </svg> Back</a>
           <div class="spacer-h-20"></div>
           <h2 class="title">
              {{product_name}}
@@ -11,11 +19,22 @@
           <span class="comment">#FS-{{meta.order_id}}</span>
           <div class="spacer-h-30"></div>
 
-          <div class="my-order__filter">
-            <a href="#photos" class="my-order__filter-item-2" v-on:click.prevent = "mode='photos'"  :class="{active: (mode == 'photos')}">Your Photos</a>
-            <a href="#details" class="my-order__filter-item-2" v-on:click.prevent = "mode='details'" :class="{active: (mode == 'details')}">Order Details</a>
-          </div>
+          <div class="my-order__filter" ref="filter_side">
+            <div class="decoration"></div>
+            <div class="decoration pre"></div>
+            <a href="#photos" class="my-order__filter-item-2"
+              v-on:click.prevent = "mode='photos'"
+              v-on:mouseover="move_deco('#photos')"
+              v-on:mouseout="move_deco('filter_side')"
+              :class="{active: (mode == 'photos')}">Your Photos</a>
 
+            <a href="#details" class="my-order__filter-item-2"
+            v-on:click.prevent = "mode='details'"
+            :class="{active: (mode == 'details')}"
+            v-on:mouseover="move_deco('#details')"
+            v-on:mouseout="move_deco('filter_side')"
+            >Order Details</a>
+          </div>
         </div><!-- shoot-steps__header -->
 
         <transition
@@ -134,7 +153,7 @@
                     </tr>
                     <tr>
                       <td colspan="2"></td>
-                      <td colspan="1" class="text-right"><span class="my-summary__total">{{meta.total}}</td>
+                      <td colspan="1" class="text-right"><span class="my-summary__total">{{meta.total}}</span></td>
                     </tr>
 
                   </tfoot>
@@ -182,13 +201,23 @@
 
             <div class="my-order-data__row" v-if="photo_limits.total > photos.count">
               <div class="valign-top image-holder">
-                <img src="assets/images/cherry.png" alt="" class="image-holder__image-cherry">
+                <img src="<?php echo THEME_URL?>/images/cherry.png" alt="" class="image-holder__image-cherry">
               </div>
               <div class="clearfix">
-                <h2 class="my-order-data__row-title">Why are there extra photos? <span class="trigger"></span></h2>
-                 <p class="text hidden">
+                <h2 class="my-order-data__row-title" v-on:click="show_explain = !show_explain">Why are there extra photos? <span class="trigger" :class="{active: show_explain}"></span></h2>
+
+                <transition
+                  v-bind:css="false"
+                  v-on:before-enter="beforeEnter"
+                  v-on:enter="enter"
+                  v-on:leave="leave"
+                  v-on:after-enter="enterAfter"
+                  v-on:after-leave="leaveAfter"
+                >
+                 <p class="text" v-if="show_explain">
                    We shot a few extra photos so that you can pick your favourite ones. But hey, if you like all the photos below, you can instantly buy and download those shots too. How about that for a cherry on the cake?
                 </p>
+              </transition>
               </div>
             </div><!-- my-order-data__row -->
 
@@ -198,7 +227,7 @@
 
             <div class="my-order-data__row" v-if="meta.diff > 0">
               <div class="valign-top image-holder">
-                <img src="assets/images/warn.png" alt="" class="image-holder__image-warning">
+                <img src="<?php echo THEME_URL?>/images/warn.png" alt="" class="image-holder__image-warning">
               </div>
               <div class="warning">
                You have <span class="yellow">3 <span v-if="meta.diff != 1">days</span> left </span>to review your photos. After 3 days, your order will be marked as complete.
@@ -228,58 +257,95 @@
           </div>
         </transition>
       </div><!-- shoot-steps -->
-  </div>
 
-  <div class="col-12 col-md-7">
-    <div class="progress-wrapper">
-     <ul class="progress-order progress">
-
-      <li class="progress__item"
-        v-for="st, key in order_statuses"
-        :key="'status_+'+key"
-        :class="{active: (meta.current_status_order > 0  && parseInt(st.meta.order) <= meta.current_status_order )}"
-        >
-       <span class="progress__item-dots"></span>
-       <span class="progress__item-name">{{st.name}}</span>
-      </li>
-
-     </ul>
-    </div><!-- progress-wrapper -->
-
-    <div class="spacer-h-45"></div>
-    <h2 class="my-shoots__title">Gallery</h2>
-
-    <p class="my-shoots__text">
-      <svg class="icon svg-icon-notes"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-notes"></use> </svg>
-      Click on any photo to enlarge and manage your photo
-    </p>
-
-    <div class="my-order__filter modify">
-      <a href="#processing" class="my-order__filter-item-2" v-on:click="filter='all'" :class="{active: (filter=='all')}">All Photos <span class="count">{{images_count.all}}</span></a>
-      <a href="#completed" class="my-order__filter-item-2"  v-on:click="filter='downloaded'" :class="{active: (filter=='downloaded')}">Downloaded <span class="count">{{images_count.downloaded}}</span></a>
-      <a href="#completed" class="my-order__filter-item-2"  v-on:click="filter='available'" :class="{active: (filter=='available')}">Not Downloaded <span class="count">{{images_count.available}}</span></a>
-      <a href="#completed" class="my-order__filter-item-2"  v-on:click="filter='inreview'" :class="{active: (filter=='inreview')}">In Review <span class="count">{{images_count.inreview}}</span></a>
+      <div class="spacer-h-40 spacer-h-md-0"></div>
     </div>
-    <div class="spacer-h-25"></div>
 
-    <div class="my-shoots">
-      <div class="my-shoots__item"
-        v-for="thumb, key in gallery_thumbs"
-        :key = "'inner_thumb_'+ key"
-        v-on:click="show_popup(thumb)"
-      >
-        <img :src="thumb.url" alt="">
+    <div class="col-12 col-md-7">
+      <div class="progress-wrapper">
+        <ul class="progress-order progress">
+
+          <li class="progress__item"
+            v-for="st, key in order_statuses"
+            :key="'status_+'+key"
+            :class="{active: (meta.current_status_order > 0  && parseInt(st.meta.order) <= meta.current_status_order )}"
+            >
+           <span class="progress__item-dots"></span>
+           <span class="progress__item-name">{{st.name}}</span>
+          </li>
+
+        </ul>
+      </div><!-- progress-wrapper -->
+
+      <div class="spacer-h-45"></div>
+      <h2 class="my-shoots__title">Gallery</h2>
+
+      <p class="my-shoots__text">
+        <svg class="icon svg-icon-notes"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-notes"></use> </svg>
+        Click on any photo to enlarge and manage your photo
+      </p>
+
+      <div class="my-order__filter modify" ref="gallery">
+        <div class="decoration"></div>
+        <div class="decoration pre"></div>
+
+        <a href="#processing" class="my-order__filter-item-2"
+        v-on:click="filter='all'"
+        v-on:mouseover="move_deco('#processing')"
+        v-on:mouseout="move_deco('gallery')"
+        :class="{active: (filter=='all')}">All Photos <span class="count">{{images_count.all}}</span></a>
+
+        <a href="#downloaded" class="my-order__filter-item-2"
+        v-on:click="filter='downloaded'"
+        v-on:mouseover="move_deco('#downloaded')"
+        v-on:mouseout="move_deco('gallery')"
+        :class="{active: (filter=='downloaded')}">Downloaded <span class="count">{{images_count.downloaded}}</span></a>
+
+        <a href="#available" class="my-order__filter-item-2"
+        v-on:click="filter='available'"
+        v-on:mouseover="move_deco('#available')"
+        v-on:mouseout="move_deco('gallery')"
+        :class="{active: (filter=='available')}">Not Downloaded <span class="count">{{images_count.available}}</span></a>
+
+        <a href="#completed" class="my-order__filter-item-2"
+        v-on:click="filter='inreview'"
+        v-on:mouseover="move_deco('#completed')"
+        v-on:mouseout="move_deco('gallery')"
+        :class="{active: (filter=='inreview')}">In Review <span class="count">{{images_count.inreview}}</span></a>
       </div>
 
-      <div class="my-shoots__item-blank"></div>
-      <div class="my-shoots__item-blank"></div>
-    </div>
-    <div class="spacer-h-25"></div>
-  </div>
+      <div class="spacer-h-25"></div>
 
-  <my-order-popup
-   ref="my_order_popup"
-   v-on:update_images = "update_images_cb"
-   v-on:review_submited = "review_submited_cb"
-  ></my-order-popup>
+        <transition-group
+          class="my-shoots"
+          name="my-shoots"
+          tag="div"
+          v-bind:css="false"
+          v-on:before-enter="beforeEnter"
+          v-on:enter="enter_width"
+          v-on:leave="leave_width"
+          v-on:after-enter="enterAfter_width"
+          v-on:after-leave="leaveAfter"
+        >
+        <div class="my-shoots__item"
+          v-for="thumb, key in gallery_thumbs"
+          :key = "'inner_thumb_'+ key"
+          v-on:click="show_popup(thumb)"
+        >
+          <img :src="thumb.url" alt="">
+        </div>
+
+        <div class="my-shoots__item-blank"></div>
+        <div class="my-shoots__item-blank"></div>
+      </transition-group>
+      <div class="spacer-h-25"></div>
+    </div>
+    <my-order-popup
+     ref="my_order_popup"
+     v-on:update_images = "update_images_cb"
+     v-on:review_submited = "review_submited_cb"
+    ></my-order-popup>
+  </div>
+</transition>
+
 <?php echo '</script>';  ?>

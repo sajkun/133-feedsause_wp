@@ -27,11 +27,11 @@ class velesh_init_theme{
 
   public $main_script_slug = 'theme-main-script-dev11';
 
-  public $dt_ver_css = 9;
-  public $dt_ver_js = 10;
+  public $dt_ver_css = 11;
+  public $dt_ver_js = 12;
 
-  public $mob_ver_js = 5;
-  public $mob_ver_css = 6;
+  public $mob_ver_js = 6;
+  public $mob_ver_css = 7;
 
 
   /**

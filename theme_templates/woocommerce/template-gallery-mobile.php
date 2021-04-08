@@ -27,6 +27,8 @@
 
     <div class="my-order__filter">
       <div class="my-order__filter-scroll">
+        <div class="decoration"></div>
+        <div class="decoration pre"></div>
         <a href="#processing" class="my-order__filter-item-2"
         :class="{active: (filter=='all')}"
         v-on:click="filter='all'"

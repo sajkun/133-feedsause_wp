@@ -160,10 +160,11 @@ do_action( 'woocommerce_before_customer_login_form' ); ?>
 			<?php if ( 'no' === get_option( 'woocommerce_registration_generate_password' ) ) : ?>
 			<div class="clearfix">
 				<div class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide ">
-					<p class="input-with-icon">
+					<p class="input-with-icon password-input">
 
 					<svg class="icon svg-icon-key"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-key"></use> </svg>
 					<input type="password" class="woocommerce-Input woocommerce-Input--text input-text" name="password" id="reg_password" autocomplete="new-password" placeholder="<?php esc_html_e( 'Password', 'woocommerce' ); ?>"/>
+            <span class="show-password-input"></span>
 					</p>
 				</div>
 			</div>

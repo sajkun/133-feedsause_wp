@@ -184,7 +184,7 @@ class theme_content_output{
     $custom_logo_url =  wp_get_attachment_image_url( $custom_logo_id , 'full' );
 
     $logo = (empty(get_theme_mod( 'custom_logo' ))) ?
-              sprintf('<a href="%s"  class="logo"><img src="%s/images/logo.svg" alt=""></a>',get_home_url(), THEME_URL):
+              sprintf('<a href="%s"  class="logo"><img src="%s/images/logo-new.svg" alt=""></a>',get_home_url(), THEME_URL):
               sprintf('<a  href="%s" class="logo"><img src="%s" alt=""></a>',get_home_url(),  esc_url( $custom_logo_url ));
 
     $logo =  $header_class == 'contrast'  || isset($wp->query_vars['my-gallery'])? sprintf('<a href="%s"  class="logo"><img src="%s/images/logo_contrast.png" alt=""></a>', get_home_url(), THEME_URL): $logo;
@@ -225,8 +225,6 @@ class theme_content_output{
             $url_gallery_active,
             $url_gallery
          );
-
-
         }else{
           $main_menu = wp_nav_menu( array(
             'theme_location'  => 'main_menu',
@@ -2372,7 +2370,10 @@ class theme_content_output{
           <div class="clearfix"></div>
 
             <div class="my-order__filter">
+              <div class="decoration"></div>
+              <div class="decoration pre"></div>
               <a href="#processing" class="my-order__filter-item active"><?php _e('Active','theme-translations');?> <span class="count"><?php echo count($customer_orders_active);?></span></a>
+
               <a href="#completed" class="my-order__filter-item"><?php _e('Completed','theme-translations');?> <span class="count"><?php echo count($customer_orders_completed);?></span></a>
             </div>
           <div class="clearfix"></div>
@@ -3900,7 +3901,7 @@ class theme_content_output{
 
 
         $items[] = array(
-          'order_item_id'   => $item->get_id(),
+          'order_item_id'=> $item->get_id(),
           'extra_data'   => $extra_data,
           'prices'       => $item->get_meta('theme_prices') && !is_null($item->get_meta('theme_prices'))?$item->get_meta('theme_prices'): get_option('theme_settings'),
           'product_name' => $product->get_title(),
@@ -3957,6 +3958,9 @@ class theme_content_output{
     $args = array(
       'shoot_url' =>  esc_url(get_permalink(wc_get_page_id( 'shop' ) )),
       'gateways' => WC()->payment_gateways->get_available_payment_gateways(),
+      'product_guid_url' =>get_option('theme_page_product_guid')? get_permalink( get_option('theme_page_product_guid')) : false,
+      'redo_policy_url' => get_option('theme_page_redo_policy')? get_permalink( get_option('theme_page_redo_policy')) : '',
+      'terms_page_url' => get_option('woocommerce_terms_page_id')? get_permalink( get_option('woocommerce_terms_page_id')) : '',
     );
 
     $orders = [];

@@ -61,59 +61,171 @@
     global $woocommerce;
     $id = get_option('wfp_single_product_id');
 
-    $extra_data = array(
-      'name' => array(
-          'value' => "Reshoot Item. Order #"  . $_POST['order_id'] . ' image #'.  $_POST['image_id'] ,
-          'label' => 'Product',
-          'name'  => 'printed_name',
-        ),
+    switch ($_POST['type']) {
+      case 'buy_single':
 
-      'recipe_name' =>array(
-         'value' => $_POST['recipe_name'],
-         'label' => 'Recipe',
-         'name'  => 'recipe_name'
-      ),
+        $extra_data = array(
+          'name' => array(
+              'value' => "Single Image Bought",
+              'label' => 'Product',
+              'name'  => 'printed_name',
+            ),
 
-      'sizes' => $_POST['extra_data']['sizes'],
+          'buy_single_order_id' => array(
+              'value' => $_POST['order_id'],
+              'label' => 'Order id' ,
+              'name'  => 'buy_single_order_id',
+          ),
 
-      'colors' =>$_POST['extra_data']['colors'],
+          'buy_single_image_id' => array(
+              'value' =>  $_POST['image_id'],
+              'label' => 'Single Image Bought' ,
+              'name'  => 'buy_single_image_id',
+          ),
 
-      'position' => $_POST['extra_data']['position'],
+          'recipe_name' =>array(
+             'value' => $_POST['recipe_name'],
+             'label' => 'Recipe',
+             'name'  => 'recipe_name'
+          ),
 
-      'order_id'=> array(
-         'value' =>  $_POST['order_id'],
-         'label' => 'Order ',
-         'name'  => 'order_id'
-      ),
+          'sizes' => $_POST['extra_data']['sizes'],
 
-      'image_count' => array(
-         'value' => 1,
-         'label' => 'Number of Images',
-         'name'  => 'image_count'
-      ),
-    );
+          'colors' =>$_POST['extra_data']['colors'],
+
+          'position' => $_POST['extra_data']['position'],
+
+          'image_count' => array(
+             'value' => 1,
+             'label' => 'Number of Images',
+             'name'  => 'image_count'
+          ),
+        );
+
+        $order = wc_create_order();
+        $order->set_customer_id( get_current_user_id());
+
+        $order->add_product( get_product( $id ), 1, array('total' => $_POST['product_price'], 'subtotal' => $_POST['product_price'] ) );
+
+        $items = $order->get_items();
+
+        foreach ($items as $key => $i) {
+          wc_add_order_item_meta($key, 'extra_data',$extra_data);
+          wc_add_order_item_meta($key, 'buy_single','1');
+        }
 
 
-    $order = wc_create_order();
-    $order->set_customer_id( get_current_user_id());
+        $order_source = wc_get_order((int)$_POST['order_id']);
+
+        $image_meta = $images = $order_source->get_meta('_wfp_image');
+
+        foreach ($image_meta as $key => $_meta) {
+          if($_meta['id'] == $_POST['image_id']){
+            $image_meta[$key]['was_downloaded'] = 1;
+            $image_meta[$key]['was_bought'] = 1;
+          }
+        }
 
 
-    $order->add_product( get_product( $id ), 1, array('total' => $_POST['product_price'], 'subtotal' => $_POST['product_price'] ) );
+        $order_source->update_meta_data('_wfp_image', $image_meta);
+        $order_source->save_meta_data();
+        $order_source->save();
 
-    $items = $order->get_items();
+        $image_meta = array_values(
+            array_filter($image_meta, function($el){
+               return $el['id'] == $_POST['image_id'];
+            }));
 
-    foreach ($items as $key => $i) {
-      wc_add_order_item_meta($key, 'extra_data',$extra_data);
-      wc_add_order_item_meta($key, 'is_reshoot','1');
+        $meta = array(
+          array(
+          'files_uploaded' => $image_meta[0],
+          'id' => "0",
+          'is_active' => "1",
+          'is_free' => "0",
+          'was_downloaded' => "1",
+          ),
+        );
+
+        $order->add_meta_data('_wfp_image', $meta);
+        $order->add_meta_data('_wfp_image_limit', 1);
+        $order->save_meta_data();
+        $order->save();
+
+        $order->calculate_totals();
+        $order->update_status("wc-completed", 'Reshoot Ordered', TRUE);
+
+         wp_send_json(array(
+          'type'        => $_POST['type'],
+          'image_meta'  => $images,
+          'post'        => $_POST,
+          'order'       => $order->get_id(),
+        ));
+        break;
+
+      default:
+
+        $extra_data = array(
+          'name' => array(
+              'value' => "Reshoot",
+              'label' => 'Product',
+              'name'  => 'printed_name',
+            ),
+
+          'reshoot' => array(
+              'value' => "FS-".  $_POST['order_id'] . '/'.  $_POST['image_id'],
+              'label' => 'Reshoot of ' ,
+              'name'  => 'reshoot',
+          ),
+
+          'recipe_name' =>array(
+             'value' => $_POST['recipe_name'],
+             'label' => 'Recipe',
+             'name'  => 'recipe_name'
+          ),
+
+          'sizes' => $_POST['extra_data']['sizes'],
+
+          'colors' =>$_POST['extra_data']['colors'],
+
+          'position' => $_POST['extra_data']['position'],
+
+          'order_id'=> array(
+             'value' =>  $_POST['order_id'],
+             'label' => 'Order ',
+             'name'  => 'order_id'
+          ),
+
+          'image_count' => array(
+             'value' => 1,
+             'label' => 'Number of Images',
+             'name'  => 'image_count'
+          ),
+        );
+
+
+        $order = wc_create_order();
+        $order->set_customer_id( get_current_user_id());
+
+
+        $order->add_product( get_product( $id ), 1, array('total' => $_POST['product_price'], 'subtotal' => $_POST['product_price'] ) );
+
+        $items = $order->get_items();
+
+        foreach ($items as $key => $i) {
+          wc_add_order_item_meta($key, 'extra_data',$extra_data);
+          wc_add_order_item_meta($key, 'is_reshoot','1');
+        }
+
+        $order->calculate_totals();
+        $order->update_status("wc-in-production", 'Reshoot Ordered', TRUE);
+
+         wp_send_json(array(
+          'type'       => $_POST['type'],
+          'post'       => $_POST,
+          'order_id'   => $order->get_id(),
+        ));
+        break;
     }
-
-    $order->calculate_totals();
-    $order->update_status("wc-in-production", 'Reshoot Ordered', TRUE);
-
-     wp_send_json(array(
-      'post'       => $_POST,
-      'order_id'   => $order->get_id(),
-    ));
   }
 
 
@@ -174,6 +286,20 @@
       $downloaded_images = array_values(array_filter($images, function($el){
             return $el['was_downloaded'] && (!isset($el['is_free']) || $el['is_free'] == 0);
       }));
+
+      foreach ($downloaded_images as $key => $image) {
+        if($image['id'] == $_POST['image_id']){
+           wp_send_json(array(
+            'post'   => $_POST,
+            'images' => $images,
+            'limit'  => $limit,
+            'exec_upload' => 1,
+          ));
+
+           exit();
+        }
+      }
+
 
       $limit -= count($downloaded_images );
 

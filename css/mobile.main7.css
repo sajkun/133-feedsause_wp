@@ -504,6 +504,10 @@ html {
   background-color: #fff;
 }
 
+.site-container.dark-mode {
+  background-color: #212732 !important;
+}
+
 .site-content {
   padding: 0 10px;
   position: relative;
@@ -553,7 +557,7 @@ html {
 }
 
 .dark-mode .site-header {
-  background-color: #121212;
+  background-color: #212732;
 }
 
 .dark-mode .site-header .svg-icon-safe {
@@ -6385,7 +6389,7 @@ table .single-product__table-text {
 
 .dark-mode .my-order__date-range-picker-2, .dark-mode .my-order__date-range-picker {
   margin-right: 5px;
-  background-color: #17181d;
+  background-color: #212732;
   border: 1px solid #484b5b;
 }
 

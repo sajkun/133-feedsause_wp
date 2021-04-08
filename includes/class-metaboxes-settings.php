@@ -541,6 +541,18 @@ class velesh_theme_meta{
                    <br>
                 </td>
               </tr>
+              <tr>
+                <th>
+
+                  <label for="<?php echo $slug; ?>[buy_single]">Buy already shoot single Image Price</label> <br>
+                </th>
+                <td>
+                   <input type="text" class="medium-text" id="<?php echo $slug; ?>[buy_single]" name="<?php echo $slug; ?>[buy_single]" value="<?php echo (isset($o['buy_single']))? esc_attr($o['buy_single']):''; ?>"> <br>
+
+                    <span class="description">Type only price without currency symbol</span ><br>
+                   <br>
+                </td>
+              </tr>
 
               <tr>
                 <th>
