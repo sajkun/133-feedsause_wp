@@ -38,6 +38,16 @@ if ( ! defined( 'ABSPATH' ) ) {
       </select>
 
       <h3> Studio page: </h3>
+      <select name="<?php echo $slug ?>[review_page]">
+        <?php foreach ($pages as $key => $p): ?>
+          <option
+            value="<?php echo $p->ID ?>"
+            <?php echo isset($options['review_page']) && $p->ID == (int)$options['review_page']? 'selected="selected"': ''; ?>
+            ><?php echo $p->post_title ?></option>
+        <?php endforeach ?>
+      </select>
+
+      <h3> Review page: </h3>
       <select name="<?php echo $slug ?>[studio_page]">
         <?php foreach ($pages as $key => $p): ?>
           <option
@@ -105,6 +115,17 @@ if ( ! defined( 'ABSPATH' ) ) {
             printf('<option value="%s" %s >%s</option>', $order['slug'], $selected, is_array($order)? $order['name'] : $order );
           ?>
 
+        <?php endforeach ?>
+      </select>
+
+
+      <h4>Order Status when need to start photo delivery countdown</h4>
+
+      <select name="<?php echo $slug ?>[orders_misc][countdown]">
+        <?php  foreach ($order_statuses as $order_id => $order):
+            $selected  = $order['slug'] == $options['orders_misc']['countdown']? 'selected ="selected"': '';
+            printf('<option value="%s" %s >%s</option>', $order['slug'], $selected, is_array($order)? $order['name'] : $order );
+          ?>
         <?php endforeach ?>
       </select>
 

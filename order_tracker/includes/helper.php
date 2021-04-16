@@ -150,6 +150,33 @@ if(!function_exists('get_item_for_tracker')){
 }
 
 
+function update_order_statuses_history($order, $data = null){
+  if(!$data){
+    return false;
+  }
+
+  $history = map_orders_cb::get_order_notes_changed($order);
+
+  $status = str_replace('wc-', '', $data['status']);
+
+  if(!isset( $history[$status] )){
+    return false;
+  }
+
+  $date = new DateTime();
+  $history[$status][] =   $date->format('Y-m-d H:i:s');
+  $order_id = $order->get_id();
+
+  if(!update_post_meta( $order_id , '_statuses_history',  $history)){
+    $test = add_post_meta( $order_id , '_statuses_history',  $history);
+  }
+
+  return array(
+    'history' => $history,
+    'status'  => $data['status'],
+  );
+}
+
 if(!class_exists('map_orders_cb')){
   class map_orders_cb{
 
@@ -215,12 +242,67 @@ if(!class_exists('map_orders_cb')){
                 }));
       }
 
-    $order_status = $order->get_status();
-    $order_status = strpos('wc-', $order_status ) === 0? $order_status: 'wc-'. $order_status;
+      $order_status = $order->get_status();
+
+      $order_status = strpos('wc-', $order_status ) === 0? $order_status: 'wc-'. $order_status;
+
+      /***************************/
+      /***************************/
+      /***************************/
+      /***************************/
+      /***************************/
+      $order_items = array();
+      $handle_id       = (int)get_option('wfp_return_product_id');
+      $product_fast_id = (int)get_option('wfp_priority_delivery_product_id');
+
+      foreach ($order->get_items() as $key => $item) {
+
+        if($item->get_product_id() == $handle_id ){
+          $has_handle  = 1;
+          $p = $item->get_product();
+          $handle_price = $p->get_price();
+        }
+
+        if($item->get_product_id() == $product_fast_id ){
+          $has_fasttrack = 1;
+          $p = $item->get_product();
+          $fasttrack_price = $p->get_price();
+        }
+
+        if($item->get_product_id() == $handle_id   || $item->get_product_id() == $product_fast_id ){
+          continue;
+        }
+
+        $meta = $extra_data = $item->get_meta('extra_data');
+        $product_name = isset($meta['name']['value'])? explode(PHP_EOL, $meta['name']['value']) : '';
+        $product_count = isset($meta['name']['value'])? count($product_name) : '';
+        $product = $item->get_product();
+
+
+        $order_items[] = array(
+          'order_item_id'=> $item->get_id(),
+          'extra_data'   => $extra_data,
+          'prices'       => $item->get_meta('theme_prices') && !is_null($item->get_meta('theme_prices'))?$item->get_meta('theme_prices'): get_option('theme_settings'),
+          'product_name' =>$product ? $product->get_title() : '',
+          'item_name'    => $product_name,
+          'item_count'   => $product_count,
+        );
+      }
+      /***************************/
+      /***************************/
+      /***************************/
+      /***************************/
+      /***************************/
+
+      clog( $order_items );
 
       return array(
-        'order_id' =>  $this->order_id,
+        'order_id'         => $this->order_id,
+        'date_completed'   => $order->get_date_completed(),
         'data'     => array(
+          'order_items_data' => $order_items[0],
+          'extra_data' => $order->get_meta('_extra_data'),
+          'statuses_history' => $this->get_order_notes_changed($order),
           'order_id'      => $this->order_id,
           'name'          => $this->user->get_display_name(),
           'created_order' => $order->get_meta('_is_created_order'),
@@ -293,6 +375,68 @@ if(!class_exists('map_orders_cb')){
           ),
         ),
       );
+    }
+
+    public static function get_order_notes_changed($order){
+
+      $order_id = $order->get_id();
+
+      if(get_post_meta($order_id, '_statuses_history', true)){
+        return(get_post_meta($order_id, '_statuses_history', true));
+      }
+
+      $notes = get_private_order_notes( $order_id );
+
+      if(is_array( $notes )){
+        $notes = array_filter( $notes, function($el){
+          return strpos($el['note_content'], 'Order status changed from') !== FALSE;
+        });
+
+        $notes = array_values($notes);
+
+        $notes_val = array_map(function($el){
+          return $el['note_date'];
+        }, $notes);
+
+        $notes_indexes = array_map(function($el){
+          $single_note = explode(' to ', $el['note_content']);
+          $single_note = str_replace('.', '', $single_note[1]);
+          return trim($single_note);
+        }, $notes);
+
+
+        $return = array();
+
+        foreach ($notes_indexes as $id => $key) {
+          if(!isset($return[$key])){
+            $return[$key] = array();
+          }
+
+          $return[$key][] =  $notes_val[$id];
+        }
+      }else{
+        $return = array();
+      }
+
+      $order_statuses = wc_get_order_statuses();
+      $data = array();
+
+      foreach ($order_statuses as $key => $status) {
+        $key = str_replace('wc-', '', $key);
+        if(isset($return[$status])){
+          $data[$key] = array(
+            'status' => $status,
+            'dates'  => $return[$status],
+          );
+        }else{
+          $data[$key] = array(
+            'status' => $status,
+            'dates'  => array(),
+          );
+        }
+      }
+
+      return $data;
     }
 
     protected function prepare_data($order){
@@ -756,4 +900,46 @@ if(!function_exists('my_upload_dir')){
 
     return $upload;
   }
+}
+
+
+function days_diff($x) {
+    if (get_class($x) != 'DateTime') {
+        return false;
+    }
+
+    $y = $x->format('Y') - 1;
+    $days = $y * 365;
+    $z = (int)($y / 4);
+    $days += $z;
+    $z = (int)($y / 100);
+    $days -= $z;
+    $z = (int)($y / 400);
+    $days += $z;
+    $days += $x->format('z');
+
+    return $days;
+}
+
+
+function get_private_order_notes( $order_id){
+    global $wpdb;
+
+    $table_perfixed = $wpdb->prefix . 'comments';
+    $results = $wpdb->get_results("
+        SELECT *
+        FROM $table_perfixed
+        WHERE  `comment_post_ID` = $order_id
+        AND  `comment_type` LIKE  'order_note'
+    ");
+
+    foreach($results as $note){
+        $order_note[]  = array(
+            'note_id'      => $note->comment_ID,
+            'note_date'    => $note->comment_date,
+            'note_author'  => $note->comment_author,
+            'note_content' => $note->comment_content,
+        );
+    }
+    return $order_note;
 }

@@ -3,49 +3,9 @@ if ( ! defined( 'ABSPATH' ) ) {
   exit; // Exit if accessed directly
 }
 ?>
-      <div class="container-lg single-order" id="single-frontdesk-order" v-if="visible">
+      <div class="container-fluid single-order" id="single-frontdesk-order" v-if="visible">
         <div class="spacer-h-40"></div>
 
-        <!-- ********************************
-        ******** START HEADER BUTTONS *******
-        **********************************-->
-        <div class="single-order__top row">
-          <div class="col-6">
-            <a href="#" class="go-back" v-on:click.preventdefault="return_to_list">
-               <svg class="icon svg-icon-arrow-left"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-arrow-left"></use> </svg>
-              <span>Back to Hub</span>
-            </a>
-              <reminder
-              v-on:input_value_changed="update_reminder($event)"
-              v-bind:placeholder="'MM dd YYYY hh:mm'"
-              v-model="order_data.reminder.date"
-              _name="reminder"
-              v-bind:_value="order_data.reminder.date"
-              v-bind:_value_formatted="order_data.reminder.date_formatted"
-              v-bind:_overdue="order_data.reminder.is_overdue"></reminder>
-          </div>
-
-          <div class="col-6 text-right">
-            <order-status-select ref="order_status"
-               _select_name="order_status"
-               v-bind:_options='order_statuses'
-               v-bind:_current_status='order_data.order_status'
-               v-bind:class="'text-left'"
-               v-on:update_list="update_order_status"></order-status-select>
-
-            <a href="#"  v-on:click.prevent="exec_save" class="button-save-order" v-bind:class="{gray: !_order_was_changed}">
-               <svg  v-if="!is_run_saving" class="icon svg-icon-ok-marker"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-ok-marker"></use> </svg>
-
-              <span v-if="!is_run_saving">Save Changes</span>
-
-              <img v-if="is_run_saving" src="<?php  echo THEME_URL; ?>/order_tracker/assets/images/spinner_white.gif" alt="" class="spinner-white">
-              <span v-if="is_run_saving">Saving... </span>
-            </a>
-          </div>
-        </div><!-- single-order__top -->
-        <!-- ********************************
-        ******** END HEADER BUTTONS *******
-        **********************************-->
 
         <div class="spacer-h-40"></div>
 
@@ -54,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
         **********************************-->
 
         <div class="single-order__columns row">
-          <div class="col-12 col-lg-4">
+          <div class="col-12 col-lg-4 col-xl-3">
             <!-- ********************************
             ******** START CUSTOMER DATA  **** -->
               <div class="leads-block">
@@ -62,9 +22,8 @@ if ( ! defined( 'ABSPATH' ) ) {
                   <!-- block title
                   ************************* -->
                   <h2 class="leads-block__title">
-                    <svg class="icon svg-icon-customer"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-customer"></use> </svg>
-                    Customer
-                    <span class="icons">
+                    Customer Details
+                    <span class="icons hidden">
                       <span class="phones">
                         <i class="phone-ok icon" v-on:click="change_order_data_value ('phone_count', order_data.phone_count-1)" v-for="n in order_data.phone_count"></i><i class="phone-na icon" v-for="n in phone_left" v-on:click="change_order_data_value ('phone_count', order_data.phone_count+1)"></i>
                       </span>
@@ -74,15 +33,14 @@ if ( ! defined( 'ABSPATH' ) ) {
                     </span>
                   </h2>
 
-                  <div class="hr"></div>
+                  <div class="spacer-h-15"></div>
 
                    <!-- ASSIGNED SPECIALIST
                     ************************* -->
                     <div class="row no-gutters">
                       <div class="col-5 valign-center">
-                        <span class="leads-block__title">
-                           <svg class="icon  svg-icon-human grey"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-human"></use> </svg>
-                           Assigned<span class="mark">*</span>
+                        <span class="leads-block__sub-title">
+                           Frontdesk
                         </span>
                       </div>
                       <div class="col-6">
@@ -92,9 +50,8 @@ if ( ! defined( 'ABSPATH' ) ) {
                         v-on:user_select_change="update_order($event, 'customer')"></user-select>
                       </div>
                     </div>
-
-                  <div class="hr"></div>
-
+                  <div class="spacer-h-10"></div>
+                  <div class="hr no-margin"></div>
                   <div class="spacer-h-10"></div>
 
                   <!-- CUSTOMER DATA
@@ -106,7 +63,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                       <span class="leads-block__comment">Added {{order_data.customer.date_added}}</span>
                     </div>
 
-                    <div class="spacer-h-10"></div>
+                    <div class="spacer-h-5"></div>
 
                     <table class="leads-block__data">
                       <tr>
@@ -114,7 +71,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                           <svg class="icon svg-icon-phone"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-phone"></use> </svg>
                         </td>
                         <td><p class="leads-block__label">Phone</p></td>
-                        <td>
+                        <td class="text-right">
                           <input-field _name="phone" v-bind:_value="order_data.customer.phone" v-on:input_value_changed="update_order($event, 'customer')"></input-field>
                         </td>
                       </tr>
@@ -123,7 +80,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                           <svg class="icon svg-icon-email"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-email"></use> </svg>
                         </td>
                         <td><p class="leads-block__label">E-mail</p></td>
-                        <td>
+                        <td class="text-right">
                             <span class="leads-block__text no-margin" v-bind:title="order_data.customer.email">{{order_data.customer.email}}</span>
                         </td>
                       </tr>
@@ -132,7 +89,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                           <svg class="icon svg-icon-sourses"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-sourses"></use> </svg>
                         </td>
                         <td><p class="leads-block__label">Source</p></td>
-                        <td>
+                        <td class="text-right">
                           <select-imitation
                            v-bind:class="'fullwidth style-less'"
                             _select_name="source"
@@ -147,7 +104,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                           <svg class="icon svg-icon-diamond"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-diamond"></use> </svg>
                         </td>
                         <td><p class="leads-block__label">Brand</p></td>
-                        <td>
+                        <td class="text-right">
                           <input-field
                             _name="brand"
                             v-model="order_data.customer.brand"
@@ -171,7 +128,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                  <div class="spacer-h-20"></div>
 
                   <div class="leads-block__row">
-                    <p class="no-notes" v-if="computed_enquery_notes.length === 0">No notes there yet</p>
+                    <p class="no-notes leads-block__comment" v-if="computed_enquery_notes.length === 0">No notes there yet</p>
                     <div v-for="note, key in computed_enquery_notes" class="note-block">
                       <div class="note-block__header clearfix">
                         <span class="name">{{note.user_name}}</span>
@@ -190,7 +147,8 @@ if ( ! defined( 'ABSPATH' ) ) {
                       </div>
                     </div>
 
-                    <span class="note-block__show-more" v-on:click="enquery_notes_count = order_data.messages.enquery.length + 999" v-if="enquery_notes_count < computed_enquery_notes_count"> <i class="icon"></i> Show {{computed_enquery_notes_count - 1}} more</span>
+                    <span class="note-block__show-more" v-on:click="enquery_notes_count = order_data.messages.enquery.length + 999" v-if="enquery_notes_count < computed_enquery_notes_count"> <i class="icon">
+                      <svg  width="25" height="23" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:avocode="https://avocode.com/" viewBox="0 0 25 23"><defs></defs><desc>Generated with Avocode.</desc><g><g clip-path="url(#clip-DE13DCBF-88C9-45C8-BBB9-358E473B1E2D)"><title>Path Copy</title><path d="M14.94831,10.53082l-2.33405,2.33389c-0.03335,0.03338 -0.07171,0.0501 -0.11511,0.0501c-0.0434,0 -0.08183,-0.01672 -0.1152,-0.0501l-2.33385,-2.33389c-0.03344,-0.03343 -0.0501,-0.0718 -0.0501,-0.11521c0,-0.0434 0.01672,-0.08182 0.0501,-0.11519l0.25036,-0.25034c0.03338,-0.03338 0.0718,-0.05006 0.1152,-0.05006c0.0434,0 0.08182,0.01668 0.1152,0.05006l1.96829,1.96826v0l1.96836,-1.96838c0.03337,-0.03338 0.0718,-0.04996 0.11513,-0.04996c0.04347,0 0.08189,0.01668 0.11525,0.04996l0.2504,0.25045c0.03336,0.03336 0.04994,0.0718 0.04994,0.11518c0.00002,0.04343 -0.01656,0.08185 -0.04992,0.11523z" fill="#ffffff" fill-opacity="1"></path><path d="M14.94831,10.53082l-2.33405,2.33389c-0.03335,0.03338 -0.07171,0.0501 -0.11511,0.0501c-0.0434,0 -0.08183,-0.01672 -0.1152,-0.0501l-2.33385,-2.33389c-0.03344,-0.03343 -0.0501,-0.0718 -0.0501,-0.11521c0,-0.0434 0.01672,-0.08182 0.0501,-0.11519l0.25036,-0.25034c0.03338,-0.03338 0.0718,-0.05006 0.1152,-0.05006c0.0434,0 0.08182,0.01668 0.1152,0.05006l1.96829,1.96826v0l1.96836,-1.96838c0.03337,-0.03338 0.0718,-0.04996 0.11513,-0.04996c0.04347,0 0.08189,0.01668 0.11525,0.04996l0.2504,0.25045c0.03336,0.03336 0.04994,0.0718 0.04994,0.11518c0.00002,0.04343 -0.01656,0.08185 -0.04992,0.11523z" fill-opacity="0" fill="#ffffff" stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1" stroke="#ffffff" stroke-miterlimit="20" stroke-width="1"></path></g></g></svg></i> Show {{computed_enquery_notes_count - 1}} more</span>
                     <div class="spacer-h-20"></div>
                   </div>
 
@@ -206,11 +164,247 @@ if ( ! defined( 'ABSPATH' ) ) {
                     </div>
                   </form>
               </div><!-- leads-block -->
+
+              <div class="leads-block">
+                <div class="shoot-steps">
+                  <div class="spacer-h-10"></div>
+                  <h2 class="leads-block__title"> Order Details</h2>
+                  <div class="shoot-steps__header">
+                    <h2 class="title">
+                        {{order_data.order_items_data.product_name}}
+                    </h2>
+                  <span class="comment">#FS-{{order_data.order_id}} on  {{order_data.order.date}}</span>
+                  </div><!-- shoot-steps__header -->
+                  <div class="summary">
+                    <div class="summary__body">
+                      <table class="summary__content">
+                        <tbody>
+                          <tr>
+                            <td> <div class="step-label  trigger-expand" data-target="products">
+                                <svg class="icon svg-icon-product">
+                                  <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-product"></use>
+                                </svg>
+                                <span class="step-label__text">Products</span>
+                              </div> </td>
+
+                            <td> <p class="summary__content-text"> saddsafds  <span class="addon"> + 1</span> </p> </td>
+
+                            <td class="active"> <p class="summary__content-price"><span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">£</span>7</bdi></span></p>
+                              <i class="trigger-expand">
+                                <svg  width="46" height="46" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:avocode="https://avocode.com/" viewBox="0 0 46 46"><defs></defs><desc>Generated with Avocode.</desc><g><g clip-path="url(#clip-F41AE82F-F655-4B7A-8911-124D6B464325)"><title>Path</title><path d="M28.88972,20.11213c-0.14705,-0.14951 -0.38562,-0.14951 -0.53267,0l-3.85685,4.28085v0l-3.85724,-4.28085c-0.14705,-0.14951 -0.38563,-0.14951 -0.53268,0c-0.14704,0.1495 -0.14704,0.39197 0,0.54145l4.10445,4.55554c0.0784,0.07969 0.18268,0.11383 0.28509,0.10853c0.10277,0.0053 0.20669,-0.02884 0.28509,-0.10853l4.10482,-4.55594c0.14703,-0.14947 0.14703,-0.39155 -0.00001,-0.54105z" fill="#6f7894" fill-opacity="1"></path><path d="M28.88972,20.11213c-0.14705,-0.14951 -0.38562,-0.14951 -0.53267,0l-3.85685,4.28085v0l-3.85724,-4.28085c-0.14705,-0.14951 -0.38563,-0.14951 -0.53268,0c-0.14704,0.1495 -0.14704,0.39197 0,0.54145l4.10445,4.55554c0.0784,0.07969 0.18268,0.11383 0.28509,0.10853c0.10277,0.0053 0.20669,-0.02884 0.28509,-0.10853l4.10482,-4.55594c0.14703,-0.14947 0.14703,-0.39155 -0.00001,-0.54105z" fill-opacity="0" fill="#ffffff" stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1" stroke="#6d7797" stroke-miterlimit="20" stroke-width="2"></path></g></g></svg>
+                              </i>
+                            </td>
+                          </tr>
+                          <tr class="resert-cells">
+                            <td colspan="3" class="text-left">
+                              <div class="details" data-parent="products">
+                                <table>
+                                  <tbody><tr>
+                                    <td class="limit-width"><svg class="icon svg-icon-product">
+                                        <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-product"></use>
+                                        </svg><span class="item-title">Blog</span></td>
+                                    <td><span class="item-details">saddsafds</span>
+
+                                    </td>
+                                  </tr>
+                                                            <tr>
+                                    <td class="limit-width"><svg class="icon svg-icon-product">
+                                        <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-product"></use>
+                                        </svg><span class="item-title">Beauty</span></td>
+                                    <td><span class="item-details">12213321213</span></td>
+                                  </tr>
+                                </tbody></table>
+                              </div>
+                            </td>
+                          </tr>
+
+                          <tr>
+                            <td> <div class="step-label no-hover">
+                                <svg class="icon svg-icon-images-3">
+                                  <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href=" #svg-icon-images-3"></use>
+                                </svg>
+                                <span class="step-label__text">Photos</span>
+                              </div> </td>
+
+                            <td class="active"> <p class="summary__content-text">9</p> </td>
+                            <td class="active"> <p class="summary__content-price"><span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">£</span>270</bdi></span></p> </td>
+                          </tr>
+
+                          <tr>
+                            <td> <div class="step-label trigger-expand" data-target="customize"> <svg class="icon svg-icon-custom">
+                                  <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-custom"></use>
+                                </svg>
+                                <span class="step-label__text">Customise</span>
+                              </div> </td>
+                            <td class="active"> <p class="summary__content-text">3 Customisations </p> </td>
+                             <td class="active"> <p class="summary__content-price"><span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">£</span>4</bdi></span></p>
+                              <i class="trigger-expand">
+                                <svg  width="46" height="46" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:avocode="https://avocode.com/" viewBox="0 0 46 46"><defs></defs><desc>Generated with Avocode.</desc><g><g clip-path="url(#clip-F41AE82F-F655-4B7A-8911-124D6B464325)"><title>Path</title><path d="M28.88972,20.11213c-0.14705,-0.14951 -0.38562,-0.14951 -0.53267,0l-3.85685,4.28085v0l-3.85724,-4.28085c-0.14705,-0.14951 -0.38563,-0.14951 -0.53268,0c-0.14704,0.1495 -0.14704,0.39197 0,0.54145l4.10445,4.55554c0.0784,0.07969 0.18268,0.11383 0.28509,0.10853c0.10277,0.0053 0.20669,-0.02884 0.28509,-0.10853l4.10482,-4.55594c0.14703,-0.14947 0.14703,-0.39155 -0.00001,-0.54105z" fill="#6f7894" fill-opacity="1"></path><path d="M28.88972,20.11213c-0.14705,-0.14951 -0.38562,-0.14951 -0.53267,0l-3.85685,4.28085v0l-3.85724,-4.28085c-0.14705,-0.14951 -0.38563,-0.14951 -0.53268,0c-0.14704,0.1495 -0.14704,0.39197 0,0.54145l4.10445,4.55554c0.0784,0.07969 0.18268,0.11383 0.28509,0.10853c0.10277,0.0053 0.20669,-0.02884 0.28509,-0.10853l4.10482,-4.55594c0.14703,-0.14947 0.14703,-0.39155 -0.00001,-0.54105z" fill-opacity="0" fill="#ffffff" stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1" stroke="#6d7797" stroke-miterlimit="20" stroke-width="2"></path></g></g></svg>
+                              </i>
+                             </td>
+
+                          </tr>
+
+                          <tr class="resert-cells">
+                            <td colspan="3" class="text-left">
+                              <div class="details" data-parent="customize">
+                                <table>
+                                  <tbody><tr>
+                                    <td class="limit-width"><svg class="icon svg-icon-custom">
+                                        <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-custom"></use>
+                                        </svg><span class="item-title">Theme</span></td>
+                                    <td>
+                                      <span class="item-details">Don't care</span>
+                                  </td>
+                                  </tr>
+                                  <tr>
+                                    <td class="limit-width"><svg class="icon svg-icon-position">
+                                        <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-position"></use>
+                                        </svg><span class="item-title">Position</span></td>
+                                    <td> <span class="item-details">Don't care</span> </td>
+                                  </tr>
+                                  <tr>
+                                    <td class="limit-width"><svg class="icon svg-icon-glasess">
+                                        <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-glasess"></use>
+                                        </svg><span class="item-title">Props</span></td>
+                                    <td>                                 <span class="item-details">custom</span>
+                                      </td>
+                                  </tr>
+                                  <tr>
+                                    <td class="limit-width"><svg class="icon svg-icon-resize">
+                                        <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-resize"></use>
+                                        </svg><span class="item-title">Sizes</span></td>
+                                    <td><span class="item-details">squre<br>wide<br>full-hd</span></td>
+                                  </tr>
+                                </tbody></table>
+                              </div>
+                            </td>
+                          </tr>
+
+                          <tr>
+                            <td> <div class="step-label trigger-expand" data-target="notes">
+                                <svg class="icon svg-icon-notes">
+                                  <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-notes"></use>
+                                </svg>
+                                <span class="step-label__text">Studio Notes</span>
+                              </div> </td>
+
+                            <td class="active"> <p class="summary__content-text"> Quick Note </p> </td>
+
+                            <td class="active"> <p class="summary__content-price">Free</p>
+                              <i class="trigger-expand">
+                                <svg  width="46" height="46" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:avocode="https://avocode.com/" viewBox="0 0 46 46"><defs></defs><desc>Generated with Avocode.</desc><g><g clip-path="url(#clip-F41AE82F-F655-4B7A-8911-124D6B464325)"><title>Path</title><path d="M28.88972,20.11213c-0.14705,-0.14951 -0.38562,-0.14951 -0.53267,0l-3.85685,4.28085v0l-3.85724,-4.28085c-0.14705,-0.14951 -0.38563,-0.14951 -0.53268,0c-0.14704,0.1495 -0.14704,0.39197 0,0.54145l4.10445,4.55554c0.0784,0.07969 0.18268,0.11383 0.28509,0.10853c0.10277,0.0053 0.20669,-0.02884 0.28509,-0.10853l4.10482,-4.55594c0.14703,-0.14947 0.14703,-0.39155 -0.00001,-0.54105z" fill="#6f7894" fill-opacity="1"></path><path d="M28.88972,20.11213c-0.14705,-0.14951 -0.38562,-0.14951 -0.53267,0l-3.85685,4.28085v0l-3.85724,-4.28085c-0.14705,-0.14951 -0.38563,-0.14951 -0.53268,0c-0.14704,0.1495 -0.14704,0.39197 0,0.54145l4.10445,4.55554c0.0784,0.07969 0.18268,0.11383 0.28509,0.10853c0.10277,0.0053 0.20669,-0.02884 0.28509,-0.10853l4.10482,-4.55594c0.14703,-0.14947 0.14703,-0.39155 -0.00001,-0.54105z" fill-opacity="0" fill="#ffffff" stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1" stroke="#6d7797" stroke-miterlimit="20" stroke-width="2"></path></g></g></svg>
+                              </i>
+                            </td>
+                          </tr>
+
+                          <tr class="resert-cells">
+                            <td colspan="3" class="text-left">
+                              <div class="details" data-parent="notes">
+                                <span class="item-details"></span>
+                              </div>
+                            </td>
+                          </tr>
+
+                          <tr>
+                            <td> <div class="step-label no-hover">
+                                <svg class="icon svg-icon-flash">
+                                  <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-flash"></use>
+                                </svg>
+                                <span class="step-label__text">Turnaround</span>
+                              </div> </td>
+                            <td class="active"> <p class="summary__content-text">10 Business Days</p> </td>
+                            <td class="active"> <p class="summary__content-price">Free</p> </td>
+                          </tr>
+
+                          <tr>
+                            <td> <div class="step-label no-hover">
+                                <svg class="icon svg-icon-handling">
+                                  <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-handling"></use>
+                                </svg>
+                                <span class="step-label__text">Handling</span>
+                              </div> </td>
+                            <td class="active"> <p class="summary__content-text">Discard Products</p> </td>
+                            <td class="active"> <p class="summary__content-price">Free</p> </td>
+                          </tr>
+                        </tbody>
+                        <tfoot>
+                          <tr>
+                            <td colspan="3"><span class="summary__label">Total Cost</span> <div class="spacer-h-10"></div></td>
+                          </tr>
+                          <tr>
+                            <td colspan="2">Subtotal</td>
+                            <td colspan="1"><span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">£</span>270</bdi></span></td>
+                          </tr>
+                          <tr>
+                            <td colspan="2">Add-Ons</td>
+                            <td colspan="1"><span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">£</span>11</bdi></span></td>
+                          </tr>
+                          <tr>
+                            <td colspan="2">Discount </td>
+                            <td colspan="1"><span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">£</span>0</bdi></span></td>
+                          </tr>
+                          <tr>
+                            <td colspan="2"></td>
+                            <td colspan="1"><span class="summary__total"><span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">£</span>281</bdi></span></span></td>
+                          </tr>
+
+                        </tfoot>
+                      </table>
+                    </div>
+                  </div><!-- summary -->
+                  <div class="spacer-h-25"></div>
+                </div>
+              </div>
             <!-- *** END CUSTOMER DATA  *******
             **********************************-->
-          </div><!-- col-12 col-lg-4 -->
+          </div><!-- col-12 col-lg-4 col-xl-3 -->
 
-          <div class="col-12 col-lg-4">
+          <div class="col">
+
+        <!-- ********************************
+        ******** START HEADER BUTTONS *******
+        **********************************-->
+        <div class="single-order__top row">
+          <div class="col-4">
+            <a href="#" class="go-back" v-on:click.preventdefault="return_to_list">
+               <svg class="icon svg-icon-arrow-left"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-arrow-left"></use> </svg>
+              <span>Back</span>
+            </a>
+              <reminder
+              v-on:input_value_changed="update_reminder($event)"
+              v-bind:placeholder="'MM dd YYYY hh:mm'"
+              v-model="order_data.reminder.date"
+              _name="reminder"
+              :class="'hidden'"
+              v-bind:_value="order_data.reminder.date"
+              v-bind:_value_formatted="order_data.reminder.date_formatted"
+              v-bind:_overdue="order_data.reminder.is_overdue"></reminder>
+              <div class="spacer-h-30"></div>
+          </div>
+
+          <div class="col text-right">
+            <order-status-select ref="order_status"
+               _select_name="order_status"
+               v-bind:_options='order_statuses'
+               v-bind:_current_status='order_data.order_status'
+               v-bind:class="'text-left'"
+               v-on:update_list="update_order_status"></order-status-select>
+
+            <a href="#"  v-on:click.prevent="exec_save" class="button-save-order" v-bind:class="{gray: !_order_was_changed}">
+               <svg  v-if="!is_run_saving" class="icon svg-icon-ok-marker"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-ok-marker"></use> </svg>
+
+              <span v-if="!is_run_saving">Save Changes</span>
+
+              <img v-if="is_run_saving" src="<?php  echo THEME_URL; ?>/order_tracker/assets/images/spinner_white.gif" alt="" class="spinner-white">
+              <span v-if="is_run_saving">Saving... </span>
+            </a>
+            <div class="spacer-h-30"></div>
+          </div>
+        </div><!-- single-order__top -->
+        <!-- ********************************
+        ******** END HEADER BUTTONS *******
+        **********************************-->
 
             <!-- ********************************
             ******** START ORDER DATA   ***** -->
@@ -441,7 +635,7 @@ if ( ! defined( 'ABSPATH' ) ) {
              ************************************ -->
           </div><!-- col-12 col-lg-4 -->
 
-          <div class="col-12 col-lg-4">
+          <div class="col-12 col-lg-4 col-xl-3">
 
             <!-- ************************************
             ******** START STUDIO DATA ***** -->
@@ -597,7 +791,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
             <!--****** GALLERY END **************
              ************************************ -->
-          </div><!-- col-12 col-lg-4 -->
+          </div><!-- col-12 col-lg-4 col-xl-3 -->
         </div>
 
         <!-- ********************************

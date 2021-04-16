@@ -337,10 +337,14 @@ if(!class_exists('theme_order_tracker')){
         'logged_in_user'          => array('name'=>$user->display_name, 'user_id'=> $user->ID),
       );
 
+      clog($options);
+
 
       foreach ($data as $name => $value) {
         print_javascript_data($name, $value);
       }
+
+      return $orders;
 
       clog('prepare javascript data: '.round(microtime(true) - $start, 4).' сек.', 'red');
     }
@@ -360,9 +364,7 @@ if(!class_exists('theme_order_tracker')){
         wp_enqueue_script( 'wp-color-picker' );
 
         wp_enqueue_style('jquery-ui', '//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css' );
-
         wp_enqueue_script('jquery-ui', 'https://code.jquery.com/ui/1.12.1/jquery-ui.js', array('jquery'), THEME_VERSION, true);
-
 
         if(isset($_POST['do_save']) && 'yes' === $_POST['do_save']){
           update_option($this->slug_options, $_POST[$this->slug_options]);
@@ -420,7 +422,13 @@ if(!class_exists('theme_order_tracker')){
       $o = get_option($this->slug_options);
       $obj = get_queried_object_id();
 
-      if ($o['tracker_page'] == get_queried_object_id() || $o['studio_page'] == get_queried_object_id() ) {
+      $pages = array(
+        $o['tracker_page'] ,
+        $o['studio_page'] ,
+        $o['review_page'] ,
+      );
+
+      if ( in_array(get_queried_object_id(), $pages) ) {
         return THEME_PATH . '/order_tracker/template.php';
       }
 

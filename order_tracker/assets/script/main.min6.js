@@ -1948,7 +1948,7 @@ Vue.component('frontdesk-item', {
   props:['_info'],
 
   mounted:function(){
-    clog(this.info);
+    // clog(this.info);
   },
 
   computed: {
@@ -1965,20 +1965,29 @@ Vue.component('frontdesk-item', {
     },
 
     _stage: function(){
-      var days = this.info.is_fasttrack ? parseInt(tracker_options.turnaround.fasttrack) : parseInt(tracker_options.turnaround.regular);
+      var start_status  = tracker_options['orders_misc']['countdown'].replace('wc-', '');
 
-      var multiplier = days / 5;
+      if(this.info.statuses_history[start_status].dates.length > 0){
+        var ind = this.info.statuses_history[start_status].dates.length - 1;
+        var _date = this.info.statuses_history[start_status].dates[ind];
 
-      var due_date    = new Date(this.info.due_date.date.replace(/\s/, 'T'));
-      var today       = new Date();
-      var diff = days - Math.floor((due_date.getTime() - today.getTime() )/ (1000*60*60*24));
+        var days = this.info.is_fasttrack ? parseInt(tracker_options.turnaround.fasttrack) : parseInt(tracker_options.turnaround.regular);
 
-      diff = diff > days ? days : diff;
-      diff = diff/multiplier;
-      diff = diff <= 0 ? 1 : diff;
-      diff = diff > 5? 5 : diff;
+        var multiplier = tracker_options.turnaround.regular / days;
 
-      return Math.floor(diff);
+        var due_date    = new Date(_date.replace(/\s/, 'T'));
+        var today       = new Date();
+        var diff = days - Math.floor((due_date.getTime() - today.getTime() )/ (1000*60*60*24));
+
+        diff = diff > days ? days : diff;
+        diff = diff*multiplier;
+        diff = diff <= 0 ? 1 : diff;
+        diff = diff > tracker_options.turnaround.regular ? tracker_options.turnaround.regular  : diff;
+
+        return Math.floor(diff);
+      }else{
+        return 0;
+      }
     },
   },
 
@@ -1993,7 +2002,6 @@ Vue.component('frontdesk-item', {
   },
 
   mounted: function(){
-    var test = this._stage;
   },
 
   methods: {
@@ -2003,7 +2011,11 @@ Vue.component('frontdesk-item', {
     }
   },
 
-  template: `<div class="order-preview" :title="info.name" v-on:click="open_order(info.order_id)">
+  template: `<div class="order-preview"
+              :title="info.name"
+               v-on:click="open_order(info.order_id)"
+               :class="{'fasttrack': (is_fasttrack)}"
+              >
   <div class="row no-gutters">
     <div class="col-6">
       <span class="order-preview__name">{{info.name}}</span>
@@ -2034,10 +2046,6 @@ Vue.component('frontdesk-item', {
     </span>
     <div class="col-6" v-bind:class="'stage'+_stage">
       <div class="order-preview__progress">
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
         <span></span>
       </div>
     </div>
@@ -4401,8 +4409,6 @@ Vue.component('input-text-search-product', {
     }
   },
 
-
-
   mixins: [get_set_props],
 
   props: ['_img_url', '_placeholder', '_name'],
@@ -4447,6 +4453,7 @@ Vue.component('input-text-search-product', {
   },
 
   computed: {
+
     found_options: function(){
       var options = [];
       var search = this.title.toLowerCase();
@@ -4945,6 +4952,8 @@ if(document.getElementById('frontdesk_list')){
         var item = this.get_item_by('order_id', data.order_id);
         const _data = JSON.parse(JSON.stringify(item.data));
 
+        clog(_data);
+
         if(typeof(filters) == 'object'){
           filters.update_prop('visible', false);
         }
@@ -4969,8 +4978,6 @@ if(document.getElementById('frontdesk_list')){
           return false;
         }
 
-        console.log(order_status)
-
         jQuery.ajax({
           url: WP_URLS.ajax,
           type: 'POST',
@@ -4980,6 +4987,10 @@ if(document.getElementById('frontdesk_list')){
             order_id     : order_id,
             order_status : order_status,
           },
+        })
+
+        .done(function(e){
+          console.log(e);
         })
       },
 
@@ -6046,6 +6057,15 @@ if(document.getElementById('search-field')){
         return all_customers;
        },
 
+      platform: function(){
+        if(navigator.platform.toUpperCase().indexOf('MAC')>=0){
+          return 'mac';
+        }
+
+        return 'notmac';
+      },
+
+
        _users_found: function(){
         var vm = this;
 
@@ -6070,9 +6090,15 @@ if(document.getElementById('search-field')){
 
      mounted: function(){
       this.$refs.dropdown.classList.remove('visuallyhidden');
+      this.$refs.button.classList.remove('visuallyhidden');
+      this.$refs.icon_close.classList.remove('visuallyhidden');
      },
 
      methods:{
+
+      test: function(event){
+        console.log(event.keyCode)
+      },
 
       // search action on form submit
       exec_search: function(){

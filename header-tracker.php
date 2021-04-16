@@ -75,9 +75,9 @@
              else document.addEventListener( 'DOMContentLoaded', insertIT );
            };
 
-         if( isLocalStorage && localStorage.getItem( 'inlineSVGrev_project_151_2' ) == revision )
+         if( isLocalStorage && localStorage.getItem( 'inlineSVGrev_project_174_10' ) == revision )
          {
-           data = localStorage.getItem( 'inlineSVGdata_project_174_3' );
+           data = localStorage.getItem( 'inlineSVGdata_project_174_10' );
            if( data )
            {
              insert();
@@ -97,8 +97,8 @@
                insert();
                if( isLocalStorage )
                {
-                 localStorage.setItem( 'inlineSVGdata_project_174_3',  data );
-                 localStorage.setItem( 'inlineSVGrev_project_174_3',   revision );
+                 localStorage.setItem( 'inlineSVGdata_project_174_10',  data );
+                 localStorage.setItem( 'inlineSVGrev_project_174_10',   revision );
                }
              }
            }

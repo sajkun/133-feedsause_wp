@@ -45,6 +45,13 @@ if(!class_exists('tracker_ajax')){
       $order = wc_get_order($order_id);
       $order_status = str_replace('wc-', '', $_POST['order_status']);
       $order->set_status($order_status);
+
+      $data = array(
+        'status' =>  $_POST['order_status'],
+      );
+
+      update_order_statuses_history($order, $data);
+
       $meta = $order->get_meta('_wfp_image');
       $meta2 = $order->get_meta('_wfp_image_limit');
       $order->save();
@@ -66,6 +73,7 @@ if(!class_exists('tracker_ajax')){
       wp_send_json(array(
         'post' => $_POST,
         'meta' => $meta,
+        'update_order_statuses_history' => update_order_statuses_history($order, $data),
       ));
     }
 
@@ -119,6 +127,14 @@ if(!class_exists('tracker_ajax')){
     public static function update_order_meta_cb(){
       $order = wc_get_order($_POST['data']['order_id']);
       $order->set_status($_POST['data']['order_status']);
+
+      $data = array(
+        'status' =>  $_POST['data']['order_status'],
+      );
+
+      update_order_statuses_history($order, $data);
+
+
       $order_id = $order->get_id();
 
       $customer_id = $order->get_customer_id();
@@ -222,6 +238,11 @@ if(!class_exists('tracker_ajax')){
 
       // set order status
       if ($_POST['data']['order_status']) {
+        $data = array(
+          'status' =>  $_POST['data']['order_status'],
+        );
+
+        update_order_statuses_history($order, $data);
         $order->set_status($_POST['data']['order_status']);
       }
 
@@ -521,8 +542,14 @@ if(!class_exists('tracker_ajax')){
 
       $order_status = str_replace('wc-', '', $options['orders_misc']['shoot']);
       $order->set_status($order_status);
-      $order->save();
 
+      $data = array(
+        'status' =>  $_POST['data']['order_status'],
+      );
+
+      update_order_statuses_history($order, $data);
+
+      $order->save();
 
       $updated = update_post_meta($order_id, '_shoot_started', 1);
 
