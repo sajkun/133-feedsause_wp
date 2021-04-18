@@ -802,7 +802,10 @@ var fds_order = {
           vm.order_was_changed = false;
           vm.is_run_saving = false;
         });
+      },
 
+      update_dates_status_change:function(){
+        console.log('update_dates_status_change');
       },
 
      /**
@@ -854,6 +857,18 @@ var fds_order = {
         if(this.visible){
           clog('update_order_status'),
           this.order_was_changed = true;
+          var index = frontdesk_list.get_index_of_item_by('order_id', this.order_data.order_id);
+          var status = order_status[0].replace('wc-', '');
+          var fmt = new DateFormatter();
+          var date = new Date();
+          var date_formatted = fmt.formatDate(date, 'Y-m-d H:i:s');
+
+          const dates = JSON.parse(JSON.stringify(frontdesk_list.items[index].data.statuses_history[status].dates));
+
+          dates.push(date);
+
+          this.$set(this.order_data.statuses_history[status], 'dates', dates);
+          frontdesk_list.$set(frontdesk_list.items[index].data.statuses_history[status], 'dates', dates);
         }
       },
 
@@ -1948,7 +1963,7 @@ Vue.component('frontdesk-item', {
   props:['_info'],
 
   mounted:function(){
-    clog(this.info);
+    // clog(this.info);
   },
 
   computed: {
@@ -1965,20 +1980,29 @@ Vue.component('frontdesk-item', {
     },
 
     _stage: function(){
-      var days = this.info.is_fasttrack ? parseInt(tracker_options.turnaround.fasttrack) : parseInt(tracker_options.turnaround.regular);
+      var start_status  = tracker_options['orders_misc']['countdown'].replace('wc-', '');
 
-      var multiplier = days / 5;
+      if('undefined' != typeof(this.info.statuses_history[start_status]) && this.info.statuses_history[start_status].dates.length > 0){
+        var ind = this.info.statuses_history[start_status].dates.length - 1;
+        var _date = this.info.statuses_history[start_status].dates[ind];
 
-      var due_date    = new Date(this.info.due_date.date.replace(/\s/, 'T'));
-      var today       = new Date();
-      var diff = days - Math.floor((due_date.getTime() - today.getTime() )/ (1000*60*60*24));
+        var days = this.info.is_fasttrack ? parseInt(tracker_options.turnaround.fasttrack) : parseInt(tracker_options.turnaround.regular);
 
-      diff = diff > days ? days : diff;
-      diff = diff/multiplier;
-      diff = diff <= 0 ? 1 : diff;
-      diff = diff > 5? 5 : diff;
+        var multiplier = tracker_options.turnaround.regular / days;
 
-      return Math.floor(diff);
+        var due_date    = new Date(_date.replace(/\s/, 'T'));
+        var today       = new Date();
+        var diff = days - Math.floor((due_date.getTime() - today.getTime() )/ (1000*60*60*24));
+
+        diff = diff > days ? days : diff;
+        diff = diff*multiplier;
+        diff = diff <= 0 ? 1 : diff;
+        diff = diff > tracker_options.turnaround.regular ? tracker_options.turnaround.regular  : diff;
+
+        return Math.floor(diff);
+      }else{
+        return 0;
+      }
     },
   },
 
@@ -1993,7 +2017,6 @@ Vue.component('frontdesk-item', {
   },
 
   mounted: function(){
-    var test = this._stage;
   },
 
   methods: {
@@ -2003,7 +2026,11 @@ Vue.component('frontdesk-item', {
     }
   },
 
-  template: `<div class="order-preview" :title="info.name" v-on:click="open_order(info.order_id)">
+  template: `<div class="order-preview"
+              :title="info.name"
+               v-on:click="open_order(info.order_id)"
+               :class="{'fasttrack': (is_fasttrack)}"
+              >
   <div class="row no-gutters">
     <div class="col-6">
       <span class="order-preview__name">{{info.name}}</span>
@@ -2034,10 +2061,6 @@ Vue.component('frontdesk-item', {
     </span>
     <div class="col-6" v-bind:class="'stage'+_stage">
       <div class="order-preview__progress">
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
         <span></span>
       </div>
     </div>
@@ -4060,7 +4083,7 @@ Vue.component('user-select', {
 
   computed: {
     is_editing: function(){
-      return this.editing || !this.current_user;
+      return this.editing;
     }
   },
 
@@ -4118,7 +4141,13 @@ Vue.component('user-select', {
     },
 
     expand: function(){
-      this.editing = true;
+      var vm = this;
+      vm.editing = true;
+
+      Vue.nextTick(function(){
+        // vm.$refs.select.set_value('isExpanded', true);
+        vm.$refs.select.$set(vm.$refs.select, 'isExpanded', true);
+      })
     },
 
     update_user_data: function(data){
@@ -4128,8 +4157,10 @@ Vue.component('user-select', {
     },
   },
 
-  template: `<div class="edit-team text-left" v-click-outside="collapse">
-     <table class="team-leads"  v-on:click.stop="expand" v-if="!is_editing"><tbody><tr><td><div class="team-leads__photo"><img v-bind:src="gravatar"  v-if="gravatar" :alt="current_user"></div></td> <td colspan="3"><div class="clearfix"><span class="team-leads__name">{{current_user}}</span></div></td></tr></tbody></table>
+  template: `<div class="edit-team" v-click-outside="collapse">
+     <div class="team-leads"  v-on:click.stop="expand" v-if="!is_editing && current_user"><div class="team-leads__photo"><img v-bind:src="gravatar"  v-if="gravatar" :alt="current_user"></div><span class="team-leads__name">{{current_user}}</span></div>
+
+     <div class="team-leads" v-if="!is_editing && !current_user" v-on:click.stop="expand" ><div class="clearfix"><span class="team-leads__name text-right">Not Set</span></div></div>
 
     <select-imitation
       v-if="is_editing"
@@ -4401,8 +4432,6 @@ Vue.component('input-text-search-product', {
     }
   },
 
-
-
   mixins: [get_set_props],
 
   props: ['_img_url', '_placeholder', '_name'],
@@ -4447,6 +4476,7 @@ Vue.component('input-text-search-product', {
   },
 
   computed: {
+
     found_options: function(){
       var options = [];
       var search = this.title.toLowerCase();
@@ -4886,6 +4916,8 @@ if(document.getElementById('frontdesk_list')){
         const _item_data = JSON.parse(JSON.stringify(item.data));
         return _item_data;
       },
+
+
     },
 
     watch: {
@@ -4945,6 +4977,8 @@ if(document.getElementById('frontdesk_list')){
         var item = this.get_item_by('order_id', data.order_id);
         const _data = JSON.parse(JSON.stringify(item.data));
 
+        clog(_data);
+
         if(typeof(filters) == 'object'){
           filters.update_prop('visible', false);
         }
@@ -4969,7 +5003,17 @@ if(document.getElementById('frontdesk_list')){
           return false;
         }
 
-        console.log(order_status)
+        var index = this.get_index_of_item_by('order_id', order_id);
+        var status = order_status.replace('wc-', '');
+        var fmt = new DateFormatter();
+        var date = new Date();
+        var date_formatted = fmt.formatDate(date, 'Y-m-d H:i:s');
+
+        const dates = JSON.parse(JSON.stringify(this.items[index].data.statuses_history[status].dates));
+
+        dates.push(date);
+
+        this.$set(this.items[index].data.statuses_history[status], 'dates', dates);
 
         jQuery.ajax({
           url: WP_URLS.ajax,
@@ -4980,6 +5024,10 @@ if(document.getElementById('frontdesk_list')){
             order_id     : order_id,
             order_status : order_status,
           },
+        })
+
+        .done(function(e){
+          console.log(e);
         })
       },
 
@@ -5155,11 +5203,23 @@ if(document.getElementById('single-frontdesk-order')){
       enquery_notes_count: 1,
       order_was_changed: false,
       is_run_saving: false,
+      show_product_details:{
+        names: false,
+        custom: false,
+        notes: false,
+      }
     },
 
     watch:{
       visible: function(val){
         var vm = this;
+
+        this.show_product_details ={
+          names: false,
+          custom: false,
+          notes: false,
+        };
+
         if(val){
           Vue.nextTick(function(){
             vm.order_was_changed = false;
@@ -5191,6 +5251,91 @@ if(document.getElementById('single-frontdesk-order')){
     },
 
     computed:{
+      count_photos: function(){
+        if('undefined' == typeof(this.order_data.order_items_data.extra_data.image_count)){
+          return 1;
+        }
+
+        if('undefined' != typeof(this.order_data.order_items_data.extra_data.image_count.value)){
+
+          return this.order_data.order_items_data.extra_data.image_count.value;
+        }
+
+        return 'na';
+      },
+
+      count_photo_label: function(){
+        var label = this.count_photos.toString() == '1' && this.count_photos != 11? 'photo' : 'photos';
+
+        return label;
+      },
+
+      day_label: function(){
+        console.log(this.order_data.due_date.date);
+        return false;
+      },
+
+      count_customisations: function(){
+        var count = 0;
+
+        if('undefined' == typeof(this.order_data.order_items_data)|| !this.order_data.order_items_data ){
+          return count;
+        }
+
+        if('undefined' != typeof(this.order_data.order_items_data.shoot_data.customize.color_pref)){
+          count += this.order_data.order_items_data.shoot_data.customize.color_pref.length
+        }
+
+        if('undefined' != typeof(this.order_data.order_items_data.shoot_data.customize.sizes)){
+          count += (this.order_data.order_items_data.shoot_data.customize.sizes.length - 1);
+        }
+
+        if('undefined' != typeof(this.order_data.order_items_data.shoot_data.customize.props)){
+          count += (this.order_data.order_items_data.shoot_data.customize.props == 'custom') ? 1 : 0;
+        }
+
+        var label = count.toString().slice(-1) == '1' && count != 11? 'Customisation' : 'Customisations';
+
+        return count.toString() + ' ' + label;
+      },
+
+      customisation_data: function(){
+        return{
+          theme: this.order_data.order_items_data.extra_data.colors.value?  this.order_data.order_items_data.extra_data.colors.value : "Don't Care" ,
+          position: this.order_data.order_items_data.extra_data.position.value != 'none'? this.order_data.order_items_data.extra_data.position.value : "Don't Care" ,
+          props: this.order_data.order_items_data.extra_data.props.value != 'none' ? this.order_data.order_items_data.extra_data.props.value : "Don't Care" ,
+          sizes: this.order_data.order_items_data.extra_data.sizes.value.join('\n'),
+        };
+      },
+
+      due_days_left: function(){
+        if('undefined' == typeof(this.order_data.due_date.date)){
+          return -1;
+        }
+
+        var due_date = this.order_data.due_date.date;
+        var now      = new Date();
+        var fmt  = new DateFormatter();
+        var _now = fmt.formatDate(now, 'Y-m-d H:i:s');
+
+        var date_diff = date_diff_indays(_now, due_date);
+        var fmt  = new DateFormatter();
+        return Math.max(0, date_diff);
+      },
+
+      due_days_left_label: function(){
+        if(this.due_days_left < 0){
+          return{
+            before: '',
+            after: '',
+          }
+        }
+
+        var label = this.due_days_left.toString() == '1' && this.due_days_left != 11? 'single' : 'multiple';
+
+        return label == 'single'? {before: 'There is', after: 'day',} : {before: 'There are', after: 'days',}
+      },
+
       get_count_reviews:function(){
           if(!this.order_data.wfp_images){
             return 0;
@@ -5202,11 +5347,181 @@ if(document.getElementById('single-frontdesk-order')){
           }).reduce((a, b) => a + b, 0);
       },
 
+      image_data: function(){
+        if(!this.order_data.wfp_images){
+          return {
+            total: 0,
+            review: 0,
+          }
+        }
+
+        var length = this.order_data.wfp_images.filter(e=>{
+          return e.is_active == 0 && 'undefined' != typeof(e.request);
+        }).length;
+
+        var data = {
+          total: this.order_data.wfp_images.length,
+          review: length,
+        };
+
+
+        return data;
+      },
+
+      notes_label: function(){
+        if('undefined' != typeof(this.order_data.order_items_data.extra_data.shoots)){
+          return 'Custom Shoot List';
+        }
+        if('undefined' != typeof(this.order_data.order_items_data.extra_data.comment) && (this.order_data.order_items_data.extra_data.comment.value) && (this.order_data.order_items_data.extra_data.comment.value != 'false')){
+          return 'Quick Notes';
+        }
+        return '-';
+      },
+
       _order_was_changed: function(){
         if(this.visible){
           return this.order_was_changed;
         }
         return false;
+      },
+
+      orders_in_details: function(){
+        var vm = this;
+        var details = Object.values(orders_in_details).map(el=>{
+          var date;
+
+          var info = Object.values(vm.order_data.statuses_history).filter(e=>{
+            return e.status == el.name;
+          });
+
+          var dates = info[0].dates;
+
+          var date = 'undefined' !== typeof(dates[dates.length -1]) ?dates[dates.length -1] : '';
+
+          if(date){
+            var fmt = new DateFormatter();
+            date = new Date(date);
+            el.date = fmt.formatDate(date, 'd M H:i');
+          }else{
+            el.date = '';
+          }
+
+
+          return el;
+        });
+
+        return details;
+      },
+
+      /*****/
+      /* calculate totals for every item in shoot builder*/
+      /*****/
+      order_sum_details: function(){
+        /* for extra products over 1*/
+        var product_names = 0;
+
+        if('undefined' != typeof(this.order_data.order_items_data.item_name)){
+
+          product_names = (this.order_data.order_items_data.item_name.length - 1) * parseInt(this.order_data.order_items_data.prices.name);
+        }
+
+        var photos = 0;
+
+        if('undefined' != typeof(this.order_data.order_items_data.extra_data.image_count) && 'undefined' != typeof(this.order_data.order_items_data.extra_data.image_count.value)){
+
+          photos = parseInt(this.order_data.order_items_data.extra_data.image_count.value) * parseInt(this.order_data.order_items_data.prices.single_product_price);
+
+        }
+
+        var customize = 0;
+
+        if('undefined' != typeof(this.order_data.order_items_data.shoot_data.customize) && 'undefined' != typeof(this.order_data.order_items_data.shoot_data.customize.color_pref)){
+          customize += this.order_data.order_items_data.shoot_data.customize.color_pref.length * parseInt(this.order_data.order_items_data.prices.color);
+        }
+
+        if('undefined' != typeof(this.order_data.order_items_data.extra_data.sizes.value)){
+          customize += (this.order_data.order_items_data.extra_data.sizes.value.length -1 ) * parseInt(this.order_data.order_items_data.prices.sizes);
+        }
+
+        var shoots = 0;
+        if('undefined' != typeof(this.order_data.order_items_data.extra_data.shoots)){
+          shoots = this.order_data.order_items_data.extra_data.shoots.length * parseInt(this.order_data.order_items_data.prices.shoot)
+        }
+
+        var fast = this.order_data.is_fasttrack == 1? parseInt(this.order_data.fasttrack_price) : 0;
+        var _return = this.order_data.is_return == 1? parseInt(this.order_data.return_price) : 0;
+
+
+        var data = {
+          product_names: product_names,
+          photos: photos,
+          customize: !isNaN(customize) ? customize: 0 ,
+          shoots: shoots,
+          fasttrack: fast,
+          return: _return,
+          addons: fast + _return +  shoots + (!isNaN(customize) ? customize: 0) + product_names,
+        };
+
+        return data;
+      },
+
+      order_status_mumber: function(){
+        var vm = this;
+        var inf = Object.values(tracker_options.orders).filter(e=>{
+          return vm.order_data.order_status == e.slug;
+        });
+
+        return parseInt(inf[0].order);
+      },
+
+      /***
+      product names created in constructor
+      */
+      product_names: function(){
+        if('undefined' != typeof(this.order_data.order_items_data.item_name)){
+          var name = this.order_data.order_items_data.item_name[0];
+          name = name.split(' - ');
+
+          var items = [];
+
+          for(var i of this.order_data.order_items_data.item_name){
+            var temp = i.split(' - ')
+            items.push({name: temp[0], category: temp[1]})
+          }
+
+          return {
+            name: name[0],
+            items: items,
+          }
+
+        }
+        return {
+          name: '',
+          items: [],
+        }
+      },
+
+      shoot_data_set: function(){
+        if(!this.order_data.order_items_data){
+          return false;
+        }
+
+        return this.order_data.order_items_data && 'undefined' != typeof(this.order_data.order_items_data.shoot_data);
+      },
+
+      custom_shoots: function(){
+        clog(tracker_options);
+        if('undefined' != typeof(this.order_data.order_items_data.extra_data.shoots)){
+          var shoots = this.order_data.order_items_data.shoot_data.notes.data;
+
+          return shoots;
+        }else{
+          return [];
+        }
+      },
+
+      tracker_options: function(){
+        return tracker_options;
       },
     },
 
@@ -5266,6 +5581,22 @@ if(document.getElementById('single-frontdesk-order')){
       },
     },
   });
+}
+
+
+jQuery(document).on('click', '.item-details.trigger-details',function(){
+  var target = jQuery(this).data('shoot-target');
+  jQuery('[data-shoot-products='+target+']').slideToggle()
+  jQuery('[data-shoot-parent='+target+']').slideToggle()
+  jQuery(this).find('.trigger').toggleClass('active');
+  jQuery(this).closest('.notes-parent').css({height: 'auto'});
+})
+
+
+var date_diff_indays  = function(date1, date2) {
+dt1 = new Date(date1);
+dt2 = new Date(date2);
+return Math.floor((Date.UTC(dt2.getFullYear(), dt2.getMonth(), dt2.getDate()) - Date.UTC(dt1.getFullYear(), dt1.getMonth(), dt1.getDate()) ) /(1000 * 60 * 60 * 24));
 }
 if(document.getElementById('new-frontdesk-order')){
   frontdesk_order_new = new Vue({
@@ -6046,6 +6377,15 @@ if(document.getElementById('search-field')){
         return all_customers;
        },
 
+      platform: function(){
+        if(navigator.platform.toUpperCase().indexOf('MAC')>=0){
+          return 'mac';
+        }
+
+        return 'notmac';
+      },
+
+
        _users_found: function(){
         var vm = this;
 
@@ -6070,9 +6410,15 @@ if(document.getElementById('search-field')){
 
      mounted: function(){
       this.$refs.dropdown.classList.remove('visuallyhidden');
+      this.$refs.button.classList.remove('visuallyhidden');
+      this.$refs.icon_close.classList.remove('visuallyhidden');
      },
 
      methods:{
+
+      test: function(event){
+        console.log(event.keyCode)
+      },
 
       // search action on form submit
       exec_search: function(){
