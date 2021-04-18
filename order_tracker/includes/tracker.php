@@ -314,6 +314,23 @@ if(!class_exists('theme_order_tracker')){
        /**
        * create array of all data to print
        */
+
+      $orders_in_details = [];
+
+      foreach (wc_get_order_statuses() as $key => $status):
+        $st = new WC_Order_Status_Manager_Order_Status($key);
+        $meta = get_post_meta($st->get_id(), 'custom_order_data', true);
+
+        if(isset($meta['use']) && $meta['use'] == 'yes'){
+          $num = (int)$meta['order'];
+          $orders_in_details[$num]['name'] = $status;
+          $orders_in_details[$num]['obj']  = $st;
+          $orders_in_details[$num]['meta'] = $meta;
+        }
+      endforeach;
+
+      // clog($orders_in_details);
+
       $data = array(
         'tracker_url'             => array(THEME_URL. '/order_tracker/'),
         'theme_debug'             => THEME_DEBUG? 1: 0,
@@ -334,10 +351,11 @@ if(!class_exists('theme_order_tracker')){
         'studio_items'            => $orders,
         'WP_URLS'                 => $urls,
         'tracker_options'         => $options,
+        'orders_in_details'       => $orders_in_details,
         'logged_in_user'          => array('name'=>$user->display_name, 'user_id'=> $user->ID),
       );
 
-      clog($options);
+      clog($data);
 
 
       foreach ($data as $name => $value) {

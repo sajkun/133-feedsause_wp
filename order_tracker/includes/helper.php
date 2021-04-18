@@ -164,7 +164,10 @@ function update_order_statuses_history($order, $data = null){
   }
 
   $date = new DateTime();
-  $history[$status][] =   $date->format('Y-m-d H:i:s');
+  if(!isset($history[$status]['dates'])){
+    $history[$status]['dates'] = array();
+  }
+  $history[$status]['dates'][] =   $date->format('Y-m-d H:i:s');
   $order_id = $order->get_id();
 
   if(!update_post_meta( $order_id , '_statuses_history',  $history)){
@@ -254,17 +257,19 @@ if(!class_exists('map_orders_cb')){
       $order_items = array();
       $handle_id       = (int)get_option('wfp_return_product_id');
       $product_fast_id = (int)get_option('wfp_priority_delivery_product_id');
+      $is_return  = 0;
+      $is_fasttrack  = 0;
 
       foreach ($order->get_items() as $key => $item) {
 
         if($item->get_product_id() == $handle_id ){
-          $has_handle  = 1;
+          $is_return  = 1;
           $p = $item->get_product();
-          $handle_price = $p->get_price();
+          $return_price = $p->get_price();
         }
 
         if($item->get_product_id() == $product_fast_id ){
-          $has_fasttrack = 1;
+          $is_fasttrack = 1;
           $p = $item->get_product();
           $fasttrack_price = $p->get_price();
         }
@@ -274,32 +279,37 @@ if(!class_exists('map_orders_cb')){
         }
 
         $meta = $extra_data = $item->get_meta('extra_data');
-        $product_name = isset($meta['name']['value'])? explode(PHP_EOL, $meta['name']['value']) : '';
+        $product_name  = isset($meta['name']['value'])? explode(PHP_EOL, $meta['name']['value']) : '';
         $product_count = isset($meta['name']['value'])? count($product_name) : '';
         $product = $item->get_product();
-
 
         $order_items[] = array(
           'order_item_id'=> $item->get_id(),
           'extra_data'   => $extra_data,
+          'shoot_data'   => $item->get_meta('shoot_data'),
           'prices'       => $item->get_meta('theme_prices') && !is_null($item->get_meta('theme_prices'))?$item->get_meta('theme_prices'): get_option('theme_settings'),
           'product_name' =>$product ? $product->get_title() : '',
           'item_name'    => $product_name,
           'item_count'   => $product_count,
         );
       }
+
       /***************************/
       /***************************/
       /***************************/
       /***************************/
       /***************************/
 
-      clog( $order_items );
+      // clog( $order_items );
 
       return array(
         'order_id'         => $this->order_id,
         'date_completed'   => $order->get_date_completed(),
         'data'     => array(
+          'coupon_codes' => $order->get_coupon_codes(),
+          'discount'     => $order->get_discount_total() ,
+          'return_price' => $return_price,
+          'fasttrack_price' => $fasttrack_price,
           'order_items_data' => $order_items[0],
           'extra_data' => $order->get_meta('_extra_data'),
           'statuses_history' => $this->get_order_notes_changed($order),
@@ -312,6 +322,7 @@ if(!class_exists('map_orders_cb')){
           'shoot_started'    => $order->get_meta('_shoot_started')? 1 : 0,
           'order_status'     =>  $order_status,
           'is_fasttrack'     => $is_fasttrack,
+          'is_return'        => $is_return,
           'stage'            => 1,
           'message_count'    => (int)$order->get_meta('_message_count'),
           'phone_count'      => (int)$order->get_meta('_phone_count') ,
