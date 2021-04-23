@@ -329,8 +329,6 @@ if(!class_exists('theme_order_tracker')){
         }
       endforeach;
 
-      // clog($orders_in_details);
-
       $data = array(
         'tracker_url'             => array(THEME_URL. '/order_tracker/'),
         'theme_debug'             => THEME_DEBUG? 1: 0,
@@ -354,9 +352,6 @@ if(!class_exists('theme_order_tracker')){
         'orders_in_details'       => $orders_in_details,
         'logged_in_user'          => array('name'=>$user->display_name, 'user_id'=> $user->ID),
       );
-
-      clog($data);
-
 
       foreach ($data as $name => $value) {
         print_javascript_data($name, $value);

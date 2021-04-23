@@ -183,6 +183,63 @@ jQuery(document).on('click', '.site-container', function(e){
     jQuery('.menu-holder').removeClass('shown');
   }
 })
+
+/****/
+
+function init_decoration(){
+
+  jQuery('.my-order__filter-item-2').click(function(event) {
+    event.preventDefault();
+
+    var obj = jQuery(this).closest('.my-order__filter');
+    var width = jQuery(this).width();
+    obj.find('.decoration.pre').width(width);
+    obj.find('.decoration').width(width);
+
+    var offset = jQuery(this).position().left;
+    obj.find('.decoration.pre').css({'left': offset+'px'});
+    obj.find('.decoration').css({'left': offset+'px'});
+
+  });
+
+  jQuery('.my-order__filter-item-2, .my-order__filter-item').hover(function() {
+
+    var obj = jQuery(this).closest('.my-order__filter');
+    var width = jQuery(this).width();
+    obj.find('.decoration.pre').width(width);
+
+    var offset = jQuery(this).position().left;
+    obj.find('.decoration.pre').css({'left': offset+'px'});
+
+  }, function() {
+
+    // var obj = jQuery(this).closest('.my-order__filter');
+    // var width = obj.find('.active').width();
+    // obj.find('.decoration.pre').width(width);
+
+    // var offset = obj.find('.active').position().left;
+    // obj.find('.decoration.pre').css({'left': offset+'px'});
+
+  });
+
+  jQuery('.my-order__filter').hover(function() {
+  }, function() {
+    var obj = jQuery(this);
+    var width = obj.find('.active').width();
+    obj.find('.decoration.pre').width(width);
+
+    var offset = obj.find('.active').position().left;
+    obj.find('.decoration.pre').css({'left': offset+'px'});
+  });
+
+  jQuery(document).ready(function(){
+    jQuery('.my-order__filter').each(function(index, el) {
+      var obj = jQuery(el);
+      var width = obj.find('.active').width();
+      jQuery(el).find('.decoration').width(width);
+    });
+  })
+}
 jQuery(document).ready(function(){
   init_date_range();
 })
@@ -1561,7 +1618,6 @@ var upload_item_mixin = {
         return;
       }
 
-      console.log(data);
 
       var data = JSON.stringify({
         "path": data.dropbox_path
@@ -2893,7 +2949,6 @@ Vue.component('single-studio-content', {
       this.$set(this.files_to_load, data.item_id, data.files);
 
       var count = 0;
-
       for(var i in this.files_to_load){
         count += this.files_to_load[i].length;
       }
@@ -3934,6 +3989,295 @@ Vue.component('ready-item-image', {
         </div>
       </div><!-- upload-item__image-data  -->
     </div><!-- upload-item__image -->
+  `,
+});
+Vue.component('front-ready-item-image', {
+  data: function(){
+    return {
+      name: this._name,
+      size: this._size,
+      dropbox_path: this._dropbox_path,
+      image_url: this._image_url,
+      image_id: this._image_id,
+    };
+  },
+
+  watch:{
+    _name: function(val){
+      this.name = val;
+    },
+
+    _size: function(val){
+      this.size = val;
+    },
+
+    _image_id: function(val){
+      this.image_id = val;
+    },
+
+    _image_url: function(val){
+      this.image_url = val;
+    },
+
+    _dropbox_path: function(val){
+      this.dropbox_path = val;
+    },
+  },
+
+  computed: {
+    image_size: function(){
+      var size = this.size;
+
+      if (size < 1024){
+        return size + ' B';
+      }else if(size < 1048576 ){
+        return (size/1024).toFixed(2) + ' KB';
+      } else if( size < 1048576*1024 ){
+        return (size/(1024 * 1024)).toFixed(2) + ' MB';
+      }
+    },
+  },
+
+  props:['_name', '_size', '_image_id', '_image_url', '_dropbox_path', ],
+
+  methods:{
+
+    delete_image:function(){
+      this.$emit('delete_image_loaded_trigger', {dropbox_path: this.dropbox_path});
+    },
+
+    show_image: function(){
+      this.$emit('show_image_loaded_trigger', {dropbox_path: this.dropbox_path, image_url: this.image_url});
+    },
+
+
+    show_progress: function(val){
+      this.$refs.progress.style = "width:" + val +"%";
+    },
+
+  },
+
+  template: `
+    <div class="frnt-upload-item__image">
+      <div class="frnt-upload-item__image-progress" ref="progress" style="width:100%"></div>
+      <div class="frnt-upload-item__image-data row">
+        <div class="col-7">
+          <span class="frnt-upload-item__image-title">{{name}}</span>
+          <span class="frnt-upload-item__image-size">{{image_size}}</span>
+        </div>
+        <div class="col-5 valign-center text-right">
+          <svg class="icon svg-icon-notes"  v-on:click="show_image"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-notes"></use></svg>
+
+          <svg class="icon svg-icon-equis"
+            v-on:click="delete_image"
+          > <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-equis"></use> </svg>
+        </div>
+      </div><!-- frnt-upload-item__image-data  -->
+    </div><!-- frnt-upload-item__image -->
+  `,
+});
+Vue.component('frontdesk-upload-exists', {
+  data: function(){
+    return {
+      number         : '',
+      thumbnail      : '',
+      is_old_order   : '',
+      is_single_order : '',
+      item_id        : '',
+      state          : this._state,
+      order_id          : "",
+      comments       : [],
+      files          : [],
+      files_uploaded : [],
+      show_comments  : false,
+      display: 'preview',
+    };
+  },
+
+  props : [
+    '_item_id',
+    '_number',
+    '_thumbnail',
+    '_state',
+    '_comments',
+    '_files_uploaded',
+    '_files',
+    '_is_old_order',
+    '_is_single_order',
+    "_order_id",
+  ],
+
+  mixins: [upload_item_mixin, upload_item_thumb],
+
+  beforeMount: function(){
+    this.number =  this._number < 10? '0' + this._number : this._number;
+    this.comments = this._comments? this._comments : [];
+    this.files_uploaded = typeof(this._files_uploaded) !== 'undefined' ?this._files_uploaded : this.files_uploaded  ;
+    this.item_id = this._item_id;
+    this.thumbnail = this._thumbnail;
+    this.is_old_order = this._is_old_order;
+    this.order_id = this._order_id;
+    this.is_single_order = this._is_single_order;
+    var item = this.$parent.order_data.wfp_images[this.item_id];
+    this.is_free = 'undefined' != typeof(item.is_free) && item.is_free == 1;
+  },
+
+  mounted: function(){
+    this.init_drop_area();
+    var vm = this;
+
+    /*
+    * add event listener that will hide view comments state
+    */
+    this.$el.addEventListener('dragenter', function(){
+      vm.show_comments = false;
+      Vue.nextTick(function(){
+        vm.highlight();
+      });
+    }, false);
+  },
+
+  watch :  {
+    _is_old_order: function(val){
+      this.is_old_order = val;
+    },
+
+    _is_single_order: function(val){
+      this.is_single_order = val;
+    },
+
+    _order_id: function(val){
+      this.order_id = val;
+    },
+
+    comments: function(val){
+
+    }
+  },
+
+  methods: {
+    delete_in_dropbox:function(path){
+      var data = JSON.stringify({
+        "path": path
+      });
+
+      var xhr = new XMLHttpRequest();
+
+      xhr.addEventListener("readystatechange", function () {
+        if (this.readyState === 4) {
+          console.log(JSON.parse(this.responseText));
+        }
+      });
+
+      xhr.open("POST", "https://api.dropboxapi.com/2/files/delete_v2");
+      xhr.setRequestHeader("authorization", "Bearer " + dropbox.token);
+      xhr.setRequestHeader("content-type", "application/json");
+      xhr.setRequestHeader("cache-control", "no-cache");
+
+      xhr.send(data);
+    },
+
+    show_comment_window: function(){
+      this.$emit('show_comments_window',{thumbnail: this.thumbnail, comments: this.comments[0]});
+    },
+  },
+
+  template: `
+    <div class="frnt-upload-item" v-bind:class="{'has-files' : has_files}">
+      <div class="frnt-upload-item__header">
+        <div class="frnt-upload-item__state">
+          <span class="number">#FS-{{order_id}}/{{number}} </span>
+          <span class="state" v-bind:class="get_state_slug(this_state)">{{this_state}} </span>
+        </div>
+
+
+        <div class="clearfix valign-center"
+          >
+          <svg class="icon svg-icon-review-mode"
+            v-on:click="show_comment_window"
+            v-if="comments.length > 0"
+            > <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-review-mode"></use> </svg>
+
+
+          <span class="icon-switcher"
+            v-if="display=='preview'"
+          >
+            <svg class="icon svg-icon-notes-mode"
+              v-on:click="display='shoots'"
+            > <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-notes-mode"></use> </svg>
+          </span>
+
+          <span class="icon-switcher"
+           v-if="display=='shoots'"
+          >
+            <svg class="icon svg-icon-notes"
+              v-on:click="display='preview'"
+            ><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-notes"></use></svg>
+          </span>
+        </div>
+      </div><!-- frnt-upload-item__header -->
+
+      <div class="frnt-upload-item__thumbnail"  v-show="display=='preview'">
+       <img :src="thumbnail">
+      </div>
+
+      <div class="frnt-upload-item__body" v-show="display=='shoots'">
+        <div class="frnt-upload-item__drop-area" v-show=" !exec_show_comments && !is_old_order && !is_downloaded" ref="drop_area">
+          <div class="download-cta">
+            <img src="`+tracker_url[0]+`/assets/images/load.png"  class="multiple-image" alt="">
+            <img src="`+tracker_url[0]+`/assets/images/load_blank.png" class="single-image" alt="">
+            <span class="download-cta__text">
+              <b>Drop your images here</b>
+              or
+              <input type="file" multiple :id="'fileupload'+number" v-on:change="upload_from_input">
+
+              <label class="marked" :for="'fileupload'+number">
+                browse
+              </label>
+            </span>
+          </div>
+        </div>
+        <front-ready-item-image
+          v-for="(file, _file_id) in files_to_show_ready"
+          :key="'ready'+_file_id"
+          :_name = 'file.name'
+          :_size = 'file.size'
+          :_dropbox_path = 'file.path'
+          :_image_url    = 'file.image_url'
+          v-on:show_image_loaded_trigger = 'show_image_loaded'
+          v-on:delete_image_loaded_trigger = 'delete_image_loaded'
+          >
+        </front-ready-item-image>
+
+        <div class="frnt-upload-item__scroll">
+          <div class="frnt-upload-item__feedback"
+            v-for="(comment, id) in parsed_comments"
+            :key = "id"
+           >
+            <div class="title">
+               <b>{{comment.author}}</b> · {{date(comment.date)}}
+            </div>
+            <p>
+              {{comment.text}}
+            </p>
+            <div class="spacer-h-20"></div>
+          </div>
+        </div>
+      </div>
+      <div class="frnt-upload-item__footer">
+      </div>
+
+      <div class="paid-free"
+        v-bind:class="{active: is_free}"
+        v-on:click="toggle_free_paid_cb"
+        v-if="!is_single_order"
+      >
+       <span class="paid-free__marker">
+       <svg class="icon svg-icon-lock2"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-lock2"></use> </svg>
+       <svg class="icon svg-icon-unlock"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-unlock"></use> </svg>
+       </span>
+      </div>
+    </div><!-- frnt-upload-item -->
   `,
 });
 select_imitation = Vue.component('select-imitation', {
@@ -5185,6 +5529,264 @@ if(document.getElementById('filters-frontdesk')){
     },
   })
 }
+console.log(document.getElementById('search-field'));
+
+if(document.getElementById('search-field2')){
+  search_field = new Vue({
+    'el' : '#search-field',
+     data: {
+       value: '',
+       focused: false,
+       user_id: -1,
+       search_mode: 'customer',
+     },
+
+     watch: {
+       // fires search value
+       value: function(val){
+        this.focused = true;
+        var vm = this;
+
+        // discard search only by digits in lists
+        if(val.length < 2){
+          if('undefined' != typeof(frontdesk_list)) {
+            frontdesk_list.show_number = false;
+          }
+
+          if('undefined' != typeof(studio_app)) {
+            studio_app.show_number = false;
+          }
+        }
+
+        // search order by number
+        if(val.search(/\D/) < 0 ){
+          this.search_mode = 'order';
+          if(val.length >= 2){
+            if('undefined' != typeof(frontdesk_list)) {
+              frontdesk_list.show_number = val;
+            }
+
+            if('undefined' != typeof(studio_app)) {
+              studio_app.show_number = val;
+            }
+          }
+        // search orderы by customer of brand
+        }else{
+          this.search_mode = 'customer';
+          var search = this.all_customers.filter(e=>{
+            return vm.value.toLowerCase() == e.name.toLowerCase();
+          });
+
+          if(search.length == 1){
+            vm.value   = search[0].name;
+            vm.user_id = search[0].user_id;
+
+            Vue.nextTick(function(){
+              vm.focused = false;
+            })
+          }
+        }
+       },
+     },
+
+     computed:{
+       all_customers: function(){
+        return all_customers;
+       },
+
+        _platform: function(){
+          if(navigator.platform.toUpperCase().indexOf('MAC')>=0){
+            return 'mac';
+          }
+
+          return 'notmac';
+        },
+
+
+       _users_found: function(){
+        var vm = this;
+
+        if(vm.value.length >=2){
+          var users = this.all_customers.filter(e=> {
+
+            return (e.name.toLowerCase().indexOf(vm.value.toLowerCase()) >=0 || e.name.toLowerCase() == vm.value.toLowerCase())
+
+             || e.brand.toLowerCase().indexOf(vm.value.toLowerCase()) >=0
+          });
+
+          return users;
+        }
+
+        return [];
+       },
+
+       users_found:function(){
+         return this.focused? this._users_found : []
+       }
+     },
+
+     mounted: function(){
+      console.log('mounted');
+      this.$refs.dropdown.classList.remove('visuallyhidden');
+      this.$refs.button.classList.remove('visuallyhidden');
+      this.$refs.icon_close.classList.remove('visuallyhidden');
+
+     },
+
+    methods:{
+
+      test: function(event){
+        console.log(event.keyCode)
+      },
+
+      // search action on form submit
+      exec_search: function(){
+        console.log('exec_search');
+        var vm = this;
+        vm.focused = false;
+
+        if(vm.value.length < 2){
+          alert('Enter some text to search, please. At least 3 symbols');
+          return;
+        }
+
+        if(vm._users_found.length == 0 && vm.user_id < 0 && vm.search_mode == 'customer'){
+          alert('No Customers found, please try another request');
+          return;
+        }
+
+        block();
+        slog('Search order by '+ vm.search_mode, 'blue');
+        clog(vm.get_data());
+
+        var data = {action: '', data: vm.get_data()};
+
+        data.action = vm.search_mode == 'customer'? 'get_orders_by_user' : 'get_order_by_number';
+
+
+        jQuery.ajax({
+          url: WP_URLS.ajax,
+          type: 'POST',
+          dataType: 'json',
+          data: data,
+        })
+
+        .done(function(e) {
+          clog('response', 'green')
+
+          if(e.search_mode == 'customer'){
+            vm.apply_items_frontdesk(e.items, e.filters);
+            vm.apply_items_studio(e.items, e.filters);
+          }
+
+          if(e.search_mode == 'order'){
+            if(e.error){
+              alert(e.error);
+            }else{
+              vm.may_be_add_item(e.item)
+            }
+          }
+        })
+
+        .fail(function(e) {
+          alert('Search Failed');
+        })
+
+        .always(function(e) {
+          clog(e);
+          unblock();
+          elog();
+        });
+      },
+
+      get_data: function(){
+        return {
+          search_value:    this.value,
+          user_id:         this.user_id,
+          users_found:     this._users_found,
+          search_mode:     this.search_mode,
+        }
+      },
+
+      input: function(){
+        if(typeof(this.value) == 'undefined') {
+          this.value = '';
+        }
+      },
+
+     // updates customer data;
+      update_customer: function(customer){
+        var vm = this;
+        vm.value   = customer.name;
+        vm.user_id = customer.user_id;
+
+        Vue.nextTick(function(){
+          vm.focused = false;
+        })
+      },
+
+      // changes item data for studio after search
+      // hides detailed view and shows list and filters
+      apply_items_studio: function(_items, _filters){
+        if('undefined' != typeof(studio_app)) {
+          studio_app.visible.columns = true;
+          studio_app.visible.filters = true;
+          studio_app.$refs.detailed_view.visible = false;
+
+          Vue.nextTick(function(){
+            studio_app.items = _items;
+            studio_app.filter_values = _filters;
+          })
+        }
+      },
+
+      // changes item data for frontdesk after search
+      // hides detailed view and shows list and filters
+      apply_items_frontdesk: function(_items, _filters){
+        if('undefined' != typeof(frontdesk_list)) {
+          frontdesk_list.visible = true;
+          frontdesk_order_new.visible = false;
+          frontdesk_order.visible = false;
+
+          if(typeof(filters) == 'object'){
+            filters.set_prop('visible', true);
+          }
+
+          Vue.nextTick(function(){
+            frontdesk_list.items = _items;
+            filters.filter_values = _filters;
+          })
+        }
+      },
+
+
+      may_be_add_item:function(item){
+        if('undefined' != typeof(frontdesk_list)) {
+          frontdesk_list.visible = true;
+          frontdesk_order_new.visible = false;
+          frontdesk_order.visible = false;
+
+          Vue.nextTick(function(){
+            frontdesk_list.may_be_add_item(item);
+          });
+        }
+
+        if('undefined' != typeof(studio_app)) {
+          studio_app.visible.columns = true;
+          studio_app.visible.filters = true;
+          studio_app.$refs.detailed_view.visible = false;
+
+          Vue.nextTick(function(){
+            studio_app.may_be_add_item(item);
+          });
+        }
+      },
+
+    },
+  })
+}
+
+console.log(111)
 if(document.getElementById('single-frontdesk-order')){
   frontdesk_order = new Vue({
     el : '#single-frontdesk-order',
@@ -5194,6 +5796,7 @@ if(document.getElementById('single-frontdesk-order')){
     data: {
       new_order: false,
       visible: false,
+      show_popup_comment: false,
       item_index: -1,
       order_data: {},
       do_save: false,
@@ -5203,12 +5806,18 @@ if(document.getElementById('single-frontdesk-order')){
       enquery_notes_count: 1,
       order_was_changed: false,
       is_run_saving: false,
+      show_popup_preview: false,
       show_product_details:{
         names: false,
         custom: false,
         notes: false,
-      }
+      },
+      filter: 'all',
+
+      image_preview: '',
     },
+
+    mounted: function(){},
 
     watch:{
       visible: function(val){
@@ -5223,6 +5832,14 @@ if(document.getElementById('single-frontdesk-order')){
         if(val){
           Vue.nextTick(function(){
             vm.order_was_changed = false;
+            var el = vm.$refs.deco;
+            var el_pre = vm.$refs.deco_pre;
+
+            var width = jQuery(el).siblings('.active').width();
+            jQuery(el).width(width);
+            jQuery(el_pre).width(width);
+
+            init_decoration()
           })
         }
       },
@@ -5251,6 +5868,84 @@ if(document.getElementById('single-frontdesk-order')){
     },
 
     computed:{
+            /**
+      * detects if order was created before feedsauce hub
+      */
+      is_old_order: function(){
+        if('undefined' == typeof(this.order_data.wfp_images)){
+          return false;
+        }
+
+        if(!this.order_data.wfp_images){
+          return false;
+        }
+
+        var wfp_images = Object.values(this.order_data.wfp_images).filter(e=>{
+          return 'undefined' != typeof(e.archive_url);
+        });
+
+        return wfp_images.length > 0;
+      },
+
+      files_uploaded: function(){
+        var files = [];
+        for(var i = 0; i < this.order_data.wfp_images.length; i++){
+          files.push([]);
+        }
+
+        if(this.order_data.wfp_images){
+          for(image_id in this.order_data.wfp_images){
+            var image = this.order_data.wfp_images[image_id];
+            /**
+            * check if an array of images is set
+            */
+            if(typeof(image.files_uploaded) == 'undefined' && !is_boolean(image.archive_url) && image.archive_url){
+              var file = {
+                            name: typeof(image.name) != 'undefined'? image.name : 'Old version image',
+                            size: typeof(image.size) != 'undefined'? image.size : '',
+                            request: typeof(image.request)       != 'undefined'? image.request : '',
+                            path: typeof(image.dropbox_path)     != 'undefined'? image.dropbox_path : '',
+                            image_url: typeof(image.archive_url) != 'undefined'? image.archive_url.replace('?dl-1', '?dl-0') : '',
+                            archive_url: typeof(image.archive_url) != 'undefined'? image.archive_url.replace('?dl-1', '?dl-0') : '',
+                          };
+              if('undefined' == typeof(files[image_id])){
+                files[image_id] = [];
+              }
+
+              files[image_id].push(file);
+            }else if(typeof(image.files_uploaded) == 'undefined'){
+              file = [];
+            }else{
+              file = [];
+              if(typeof(image.files_uploaded) === 'object'){
+                var images = Object.values(image.files_uploaded);
+              }else{
+                var images = image.files_uploaded;
+              }
+
+              for(var image of images){
+                var file = {
+                        name: typeof(image.name) != 'undefined'? image.name : 'Old version image',
+                        size: typeof(image.size) != 'undefined'? image.size : '',
+                        path: typeof(image.path) != 'undefined'? image.path : '',
+                        image_url: typeof(image.image_url) != 'undefined'? image.image_url : '',
+                        request  : typeof(image.request)   != 'undefined'? image.request : '',
+                      };
+                if(image.image_url || image.path){
+                  if('undefined' == typeof(files[image_id])){
+                    files[image_id] = [];
+                  }
+                  files[image_id].push(file);
+                }
+              }
+            }
+          }
+        }
+
+        files = files.filter(e=>{ return e.length > 0});
+        return files;
+      },
+
       count_photos: function(){
         if('undefined' == typeof(this.order_data.order_items_data.extra_data.image_count)){
           return 1;
@@ -5271,7 +5966,6 @@ if(document.getElementById('single-frontdesk-order')){
       },
 
       day_label: function(){
-        console.log(this.order_data.due_date.date);
         return false;
       },
 
@@ -5510,7 +6204,6 @@ if(document.getElementById('single-frontdesk-order')){
       },
 
       custom_shoots: function(){
-        clog(tracker_options);
         if('undefined' != typeof(this.order_data.order_items_data.extra_data.shoots)){
           var shoots = this.order_data.order_items_data.shoot_data.notes.data;
 
@@ -5526,6 +6219,12 @@ if(document.getElementById('single-frontdesk-order')){
     },
 
     methods:{
+
+      show_comments_window_cb: function(event){
+        console.log(event);
+
+        this.show_popup_comment = true;
+      },
 
       do_toggler: function(){
         this.order_data.product_collection.do_collect =! this.order_data.product_collection.do_collect;
@@ -5551,6 +6250,35 @@ if(document.getElementById('single-frontdesk-order')){
         clog(this.order_data);
         return '';
       },
+    /**
+    * gets comments for current image from all comments
+    */
+    get_comments_for_image: function(id){
+      if('undefined' !== typeof(this.order_data.wfp_images[id]) && 'undefined' !== typeof(this.order_data.wfp_images[id].request)){
+        var wfp_images = Object.values( strip(this.order_data.wfp_images));
+        var comments = wfp_images[id].request;
+      }else{
+        return [];
+      }
+
+      var result = 0;
+
+      try{
+        var result = comments.map(
+          e => {
+            return {
+              author: this.order_data.name,
+              date: e.date,
+              text: e.text,
+            };
+          }
+        );
+      }catch(e){
+
+      }
+
+      return result;
+    },
 
 
 
@@ -5579,6 +6307,63 @@ if(document.getElementById('single-frontdesk-order')){
           }
         })
       },
+
+
+
+      change_thumbnail: function(){
+        this.thumbs_to_load = true;
+      },
+
+
+      show_image_popup: function(data){
+        jQuery('.image-preview-popup__inner').removeAttr('style');
+        jQuery('.image-preview-popup__inner').removeClass('loaded');
+        jQuery('.image-preview-popup__inner').find('img').remove();
+        jQuery('.image-preview-popup__inner').append(data.img);
+        this.show_popup_preview = true;
+
+        jQuery('.image-preview-popup__inner').find('img').on('load', function(){
+         jQuery('.image-preview-popup__inner').addClass('loaded');
+          var width = jQuery('.image-preview-popup__inner').find('img').width();
+          var height = jQuery('.image-preview-popup__inner').find('img').height();
+
+          jQuery('.image-preview-popup__inner').width(width);
+          jQuery('.image-preview-popup__inner').height(height);
+        });
+
+        Vue.nextTick(function(){
+        });
+      },
+
+      update_files: function(data){
+        slog('update_files', 'green')
+        this.$set(this.files_to_load, data.item_id, data.files);
+
+        var count = 0;
+
+        for(var i in this.files_to_load){
+          count += this.files_to_load[i].length;
+        }
+
+        clog(' this.do_submit: ' +  this.do_submit);
+
+        if(count === 0 && this.do_submit){
+          var vm = this;
+          Vue.nextTick(function(){
+            vm.collect_thumbs();
+            vm.update_wfp_meta();
+          })
+        }
+        elog();
+      },
+
+      delete_path_update: function(data){
+        this.delete_paths.push(data.dropbox_path);
+      },
+
+      toggle_free_paid_cb: function(data){
+        this.state_changed = true;
+      }
     },
   });
 }
@@ -6312,261 +7097,6 @@ if(document.getElementById('add-address-billing')){
         return validated;
       },
     }
-  })
-}
-if(document.getElementById('search-field')){
-  search_field = new Vue({
-    'el' : '#search-field',
-     data: {
-       value: '',
-       focused: false,
-       user_id: -1,
-       search_mode: 'customer',
-     },
-
-     watch: {
-       // fires search value
-       value: function(val){
-        this.focused = true;
-        var vm = this;
-
-        // discard search only by digits in lists
-        if(val.length < 2){
-          if('undefined' != typeof(frontdesk_list)) {
-            frontdesk_list.show_number = false;
-          }
-
-          if('undefined' != typeof(studio_app)) {
-            studio_app.show_number = false;
-          }
-        }
-
-        // search order by number
-        if(val.search(/\D/) < 0 ){
-          this.search_mode = 'order';
-          if(val.length >= 2){
-            if('undefined' != typeof(frontdesk_list)) {
-              frontdesk_list.show_number = val;
-            }
-
-            if('undefined' != typeof(studio_app)) {
-              studio_app.show_number = val;
-            }
-          }
-        // search orderы by customer of brand
-        }else{
-          this.search_mode = 'customer';
-          var search = this.all_customers.filter(e=>{
-            return vm.value.toLowerCase() == e.name.toLowerCase();
-          });
-
-          if(search.length == 1){
-            vm.value   = search[0].name;
-            vm.user_id = search[0].user_id;
-
-            Vue.nextTick(function(){
-              vm.focused = false;
-            })
-          }
-        }
-       },
-     },
-
-     computed:{
-       all_customers: function(){
-        return all_customers;
-       },
-
-      platform: function(){
-        if(navigator.platform.toUpperCase().indexOf('MAC')>=0){
-          return 'mac';
-        }
-
-        return 'notmac';
-      },
-
-
-       _users_found: function(){
-        var vm = this;
-
-        if(vm.value.length >=2){
-          var users = this.all_customers.filter(e=> {
-
-            return (e.name.toLowerCase().indexOf(vm.value.toLowerCase()) >=0 || e.name.toLowerCase() == vm.value.toLowerCase())
-
-             || e.brand.toLowerCase().indexOf(vm.value.toLowerCase()) >=0
-          });
-
-          return users;
-        }
-
-        return [];
-       },
-
-       users_found:function(){
-         return this.focused? this._users_found : []
-       }
-     },
-
-     mounted: function(){
-      this.$refs.dropdown.classList.remove('visuallyhidden');
-      this.$refs.button.classList.remove('visuallyhidden');
-      this.$refs.icon_close.classList.remove('visuallyhidden');
-     },
-
-     methods:{
-
-      test: function(event){
-        console.log(event.keyCode)
-      },
-
-      // search action on form submit
-      exec_search: function(){
-        console.log('exec_search');
-        var vm = this;
-        vm.focused = false;
-
-        if(vm.value.length < 2){
-          alert('Enter some text to search, please. At least 3 symbols');
-          return;
-        }
-
-        if(vm._users_found.length == 0 && vm.user_id < 0 && vm.search_mode == 'customer'){
-          alert('No Customers found, please try another request');
-          return;
-        }
-
-        block();
-        slog('Search order by '+ vm.search_mode, 'blue');
-        clog(vm.get_data());
-
-        var data = {action: '', data: vm.get_data()};
-
-        data.action = vm.search_mode == 'customer'? 'get_orders_by_user' : 'get_order_by_number';
-
-
-        console.log(data);
-
-        jQuery.ajax({
-          url: WP_URLS.ajax,
-          type: 'POST',
-          dataType: 'json',
-          data: data,
-        })
-
-        .done(function(e) {
-          clog('response', 'green')
-
-          if(e.search_mode == 'customer'){
-            vm.apply_items_frontdesk(e.items, e.filters);
-            vm.apply_items_studio(e.items, e.filters);
-          }
-
-          if(e.search_mode == 'order'){
-            if(e.error){
-              alert(e.error);
-            }else{
-              vm.may_be_add_item(e.item)
-            }
-          }
-        })
-
-        .fail(function(e) {
-          alert('Search Failed');
-        })
-
-        .always(function(e) {
-          clog(e);
-          unblock();
-          elog();
-        });
-      },
-
-      get_data: function(){
-        return {
-          search_value:    this.value,
-          user_id:         this.user_id,
-          users_found:     this._users_found,
-          search_mode:     this.search_mode,
-        }
-      },
-
-      input: function(){
-        if(typeof(this.value) == 'undefined') {
-          this.value = '';
-        }
-      },
-
-     // updates customer data;
-      update_customer: function(customer){
-        var vm = this;
-        vm.value   = customer.name;
-        vm.user_id = customer.user_id;
-
-        Vue.nextTick(function(){
-          vm.focused = false;
-        })
-      },
-
-      // changes item data for studio after search
-      // hides detailed view and shows list and filters
-      apply_items_studio: function(_items, _filters){
-        console.log(typeof(studio_app));
-        if('undefined' != typeof(studio_app)) {
-          studio_app.visible.columns = true;
-          studio_app.visible.filters = true;
-          studio_app.$refs.detailed_view.visible = false;
-
-          Vue.nextTick(function(){
-            studio_app.items = _items;
-            studio_app.filter_values = _filters;
-          })
-        }
-      },
-
-      // changes item data for frontdesk after search
-      // hides detailed view and shows list and filters
-      apply_items_frontdesk: function(_items, _filters){
-        console.log(typeof(frontdesk_list));
-        if('undefined' != typeof(frontdesk_list)) {
-          frontdesk_list.visible = true;
-          frontdesk_order_new.visible = false;
-          frontdesk_order.visible = false;
-
-          if(typeof(filters) == 'object'){
-            filters.set_prop('visible', true);
-          }
-
-          Vue.nextTick(function(){
-            frontdesk_list.items = _items;
-            filters.filter_values = _filters;
-          })
-         }
-       },
-
-
-      may_be_add_item:function(item){
-        if('undefined' != typeof(frontdesk_list)) {
-          frontdesk_list.visible = true;
-          frontdesk_order_new.visible = false;
-          frontdesk_order.visible = false;
-
-          Vue.nextTick(function(){
-            frontdesk_list.may_be_add_item(item);
-          });
-        }
-
-        if('undefined' != typeof(studio_app)) {
-          studio_app.visible.columns = true;
-          studio_app.visible.filters = true;
-          studio_app.$refs.detailed_view.visible = false;
-
-          Vue.nextTick(function(){
-            studio_app.may_be_add_item(item);
-          });
-        }
-      }
-    },
   })
 }
 if(document.getElementById('studio-vue-app')){

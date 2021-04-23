@@ -115,12 +115,10 @@
     <script src="<?php echo THEME_URL ?>/order_tracker/assets/libs/datepicker/moment.min.js"></script>
     <script src="<?php echo THEME_URL ?>/order_tracker/assets/libs/datepicker/daterangepicker.js"></script>
     <script src="<?php echo THEME_URL ?>/order_tracker/assets/libs/datetimepicker/build/jquery.datetimepicker.full.js"></script>
-
     <script src="<?php echo THEME_URL ?>/order_tracker/assets/libs/vuejs/vue-dev.js"></script>
-
     <script src="<?php echo THEME_URL ?>/order_tracker/assets/libs/sortable/sortable.js"></script>
     <script src="<?php echo THEME_URL ?>/order_tracker/assets/libs/drag/drag.js"></script>
-    <script defer src="<?php echo THEME_URL ?>/order_tracker/assets/script/main.min6.js"></script>
+    <script defer src="<?php echo THEME_URL ?>/order_tracker/assets/script/main.min7.js"></script>
  </head>
  <body  id="site-body" class="not-ready">
   <div class="site-container">

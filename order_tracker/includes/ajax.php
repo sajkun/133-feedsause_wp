@@ -34,6 +34,44 @@ if(!class_exists('tracker_ajax')){
 
       add_action('wp_ajax_add_thumbnails', array($this, 'add_thumbnails_cb'));
 
+      add_action('wp_ajax_apply_request_decision', array($this, 'apply_request_decision_cb'));
+
+    }
+
+
+    public static function apply_request_decision_cb(){
+      $data = $_POST['data'];
+      $image_id = (int)$data['image_id'];
+      $order_id = (int)$data['order_id'];
+
+      unset($data['order_id']);
+      unset($data['image_id']);
+
+      $meta = get_post_meta($order_id, '_wfp_image', true);
+
+      $user_id = get_current_user_id();
+
+      $user = get_user_by('ID', $user_id);
+      $user_meta = get_user_meta($user_id);
+
+      $date = new DateTime();
+      $data['date']      = $date->format('Y-m-d H:i:s');
+      $data['date_formatted']      = $date->format('d M Y');
+      $data['user_id']   = $user_id;
+      $data['user_name'] = $user_meta['first_name'][0] . ' ' . $user_meta['last_name'][0];
+      $meta[$image_id]['request_decision'] = $data;
+
+      update_post_meta($order_id , '_wfp_image', $meta);
+
+
+      wp_send_json(array(
+        'meta' => $meta,
+        'order_id' => $order_id,
+        'approved_decision' => $data['decision'],
+        'request_decision' => $data,
+        'date_formatted' => $data['date_formatted'],
+        'user_name' => $data['user_name'],
+      ));
     }
 
 

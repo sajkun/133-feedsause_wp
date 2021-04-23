@@ -300,7 +300,7 @@ if(!class_exists('map_orders_cb')){
       /***************************/
       /***************************/
 
-      // clog( $order_items );
+      // clog( $wfp_images );
 
       return array(
         'order_id'         => $this->order_id,

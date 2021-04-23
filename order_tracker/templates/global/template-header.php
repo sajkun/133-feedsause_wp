@@ -64,9 +64,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 
                       <i class="icon-clear visuallyhidden" v-show="value" v-on:click="value=''" ref="icon_close">×</i>
 
+
                       <button class="visuallyhidden submit" ref="button">
-                       <span v-if="('mac' == platform)"> ⌘F</span>
-                        <svg v-if="('mac' != platform)" class="icon svg-icon-search"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-search"></use> </svg>
+                       <span v-if="('mac' == _platform)">⌘F</span>
+                        <svg v-if="('mac' != _platform)" class="icon svg-icon-search"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-search"></use> </svg>
                       </button>
                     </div>
 
@@ -92,11 +93,11 @@ if ( ! defined( 'ABSPATH' ) ) {
         <div class="row row-h-80">
           <div class="col-12 valign-center">
             <div class="row no-gutters  justify-content-end">
-              <?php if (!$is_studio): ?>
+              <?php /* if (!$is_studio): ?>
               <a href="javascript:create_new_order()" class="new-user">
                 <span>+</span> New
               </a>
-              <?php endif ?>
+              <?php endif */ ?>
               <div class="curent-user">
                 <div class="curent-user__gravatar">
                   <?php if ($avatar_url): ?>
