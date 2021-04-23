@@ -2038,7 +2038,7 @@ Vue.component('frontdesk-item', {
     _stage: function(){
       var start_status  = tracker_options['orders_misc']['countdown'].replace('wc-', '');
 
-      if(this.info.statuses_history[start_status].dates.length > 0){
+      if('undefined' != typeof(this.info.statuses_history) && this.info.statuses_history[start_status].dates.length > 0){
         var ind = this.info.statuses_history[start_status].dates.length - 1;
         var _date = this.info.statuses_history[start_status].dates[ind];
 
