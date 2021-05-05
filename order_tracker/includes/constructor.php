@@ -32,6 +32,11 @@ if(!class_exists('tracker_content_constructor')){
          add_action('do_tracker_after_footer', array('tracker_content_output', 'print_popups_studio'));
       }
 
+      if($o['review_page'] == get_queried_object_id() ){
+         tracker_content_constructor::validate();
+         add_action('do_tracker_content', array('tracker_content_output', 'print_reviews'));
+      }
+
      add_action('do_tracker_after_footer', array('tracker_content_output', 'print_block_screen'));
     }
 

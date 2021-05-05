@@ -50,8 +50,6 @@ if(!class_exists('tracker_ajax')){
       $meta = get_post_meta($order_id, '_wfp_image', true);
 
       $user_id = get_current_user_id();
-
-      $user = get_user_by('ID', $user_id);
       $user_meta = get_user_meta($user_id);
 
       $date = new DateTime();
@@ -60,9 +58,24 @@ if(!class_exists('tracker_ajax')){
       $data['user_id']   = $user_id;
       $data['user_name'] = $user_meta['first_name'][0] . ' ' . $user_meta['last_name'][0];
       $meta[$image_id]['request_decision'] = $data;
+      $meta[$image_id]['is_active'] =   $data['decision'] == "rejected"? 1 : $meta[$image_id]['is_active'];
+
+      if(!$meta[$image_id]['logs'] ){
+        $meta[$image_id]['logs'] = array();
+      }
+
+      $meta[$image_id]['logs'][] = array(
+        'date' => $date->format('Y-m-d H:i:s'),
+        'date_formatted' => $date->format('d M Y') . ' at '.$date->format('H:i'),
+        'author' => array(
+          'name' => $user_meta['first_name'][0] . ' ' . $user_meta['last_name'][0],
+          'user_id' => $user_id,
+        ),
+        'action' => "Request decision was ". $data['decision'] ,
+        'text'   => $data['reason'],
+      );
 
       update_post_meta($order_id , '_wfp_image', $meta);
-
 
       wp_send_json(array(
         'meta' => $meta,
@@ -582,7 +595,7 @@ if(!class_exists('tracker_ajax')){
       $order->set_status($order_status);
 
       $data = array(
-        'status' =>  $_POST['data']['order_status'],
+        'status' =>  $order_status,
       );
 
       update_order_statuses_history($order, $data);
@@ -604,6 +617,7 @@ if(!class_exists('tracker_ajax')){
       wp_send_json( array(
          'post' => $_POST,
          'options' => $options,
+         'order_status' => $order_status,
       ));
     }
   }

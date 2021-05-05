@@ -164,7 +164,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 
               </div>
             </form> */ ?>
-
         </div><!-- leads-block -->
 
         <div class="leads-block" v-if="shoot_data_set">
@@ -172,8 +171,11 @@ if ( ! defined( 'ABSPATH' ) ) {
             <div class="spacer-h-10"></div>
             <h2 class="leads-block__title"> Order Details</h2>
             <div class="shoot-steps__header">
-              <h2 class="title">
+              <h2 class="title"  v-if="order_data.order_items_data.is_reshoot != '1'">
                   {{order_data.order_items_data.product_name}}
+              </h2>
+              <h2 class="title"  v-if="order_data.order_items_data.is_reshoot === '1'">
+                Re-shoot
               </h2>
             <span class="comment">#FS-{{order_data.order_id}} on  {{order_data.order.date}}</span>
             </div><!-- shoot-steps__header -->
@@ -371,6 +373,106 @@ if ( ! defined( 'ABSPATH' ) ) {
                       <td class="price-td"> <p class="summary__content-price" v-if="order_data.is_return != 1">Free</p><p class="summary__content-price"  v-if="order_data.is_return == 1">{{order_data.order.currency_symbol}}{{order_data.return_price}}</p> </td>
                     </tr>
                   </tbody>
+                  <tbody v-if="order_data.order_items_data.buy_single === '1'">
+                    <tr>
+                      <td> <div class="step-label no-hover">
+                          <svg class="icon svg-icon-images-3">
+                            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href=" #svg-icon-images-3"></use>
+                          </svg>
+                          <span class="step-label__text">Photos</span>
+                        </div> </td>
+
+                      <td > <p class="summary__content-text">{{count_photos}}</p> </td>
+                      <td class="price-td"> <span class="summary__content-price">{{order_data.order.currency_symbol}}{{order_sum_details.photos}}</span> </td>
+                    </tr>
+                  </tbody>
+
+                  <tbody v-if="order_data.order_items_data.is_reshoot === '1'">
+                    <tr>
+                      <td> <div class="step-label no-hover">
+                          <svg class="icon svg-icon-images-3">
+                            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href=" #svg-icon-images-3"></use>
+                          </svg>
+                          <span class="step-label__text">Photos</span>
+                        </div> </td>
+
+                      <td > <p class="summary__content-text">{{count_photos}}</p> </td>
+                      <td class="price-td"> <span class="summary__content-price">{{order_data.order.currency_symbol}}{{order_sum_details.photos}}</span> </td>
+                    </tr>
+
+
+                    <tr>
+                      <td> <div class="step-label trigger-expand"  v-on:click="show_product_details.notes = !show_product_details.notes" >
+                          <svg class="icon svg-icon-notes">
+                            <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-notes"></use>
+                          </svg>
+                          <span class="step-label__text">Studio Notes</span>
+                        </div> <div class="spacer-h-10"></div></td>
+
+                      <td></td>
+
+                      <td class="price-td">
+                        <i class="trigger-expand" v-on:click="show_product_details.notes = !show_product_details.notes" :class="{'rotated': show_product_details.notes}">
+                          <svg  width="46" height="46" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:avocode="https://avocode.com/" viewBox="0 0 46 46"><defs></defs><desc>Generated with Avocode.</desc><g><g clip-path="url(#clip-F41AE82F-F655-4B7A-8911-124D6B464325)"><title>Path</title><path d="M28.88972,20.11213c-0.14705,-0.14951 -0.38562,-0.14951 -0.53267,0l-3.85685,4.28085v0l-3.85724,-4.28085c-0.14705,-0.14951 -0.38563,-0.14951 -0.53268,0c-0.14704,0.1495 -0.14704,0.39197 0,0.54145l4.10445,4.55554c0.0784,0.07969 0.18268,0.11383 0.28509,0.10853c0.10277,0.0053 0.20669,-0.02884 0.28509,-0.10853l4.10482,-4.55594c0.14703,-0.14947 0.14703,-0.39155 -0.00001,-0.54105z" fill="#6f7894" fill-opacity="1"></path><path d="M28.88972,20.11213c-0.14705,-0.14951 -0.38562,-0.14951 -0.53267,0l-3.85685,4.28085v0l-3.85724,-4.28085c-0.14705,-0.14951 -0.38563,-0.14951 -0.53268,0c-0.14704,0.1495 -0.14704,0.39197 0,0.54145l4.10445,4.55554c0.0784,0.07969 0.18268,0.11383 0.28509,0.10853c0.10277,0.0053 0.20669,-0.02884 0.28509,-0.10853l4.10482,-4.55594c0.14703,-0.14947 0.14703,-0.39155 -0.00001,-0.54105z" fill-opacity="0" fill="#ffffff" stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1" stroke="#6d7797" stroke-miterlimit="20" stroke-width="2"></path></g></g></svg>
+                        </i>
+                      </td>
+                    </tr>
+
+                    <tr class="resert-cells">
+                      <td colspan="3" class="text-left">
+                       <transition
+                          v-on:before-enter="animation_beforeEnter"
+                          v-on:animation-after="animation_enterAfter"
+                          v-on:enter="animation_enter"
+                          v-on:leave="animation_leave"
+                          v-bind:css="false"
+                        >
+                          <div class="notes-parent" v-if="show_product_details.notes">
+                            <div class="details">
+                              <table>
+                                <tbody >
+                                  <tr>
+                                    <td class="limit-width"><svg class="icon svg-icon-notes">
+                                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-notes"></use>
+                                      </svg><span class="item-title">Original Photo</span></td>
+                                    <td colspan="2">
+                                      <a href="#" v-on:click.prevent="view_initial_photo">View</a>
+                                    </td>
+                                    <td></td>
+                                    <td class="text-right"> </td>
+                                  </tr>
+                                  <tr>
+                                    <td colspan="3" class="limit-width"><svg class="icon svg-icon-notes">
+                                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-notes"></use>
+                                      </svg><span class="item-title">Correction Request</span></td>
+                                    <td></td>
+                                    <td class="text-right"> </td>
+                                  </tr>
+                                  <tr>
+                                    <td colspan="5">
+                                      <span class="summary__content-text">{{order_data.reshoot_request_text}}</span>
+                                    </td>
+                                  </tr>
+
+                                  <tr v-if="order_data.reshoot_attachment_url">
+                                    <td class="limit-width"><svg class="icon svg-icon-file">
+                                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-file"></use>
+                                      </svg><span class="item-title">Screenshot</span></td>
+                                    <td colspan="2">
+                                      <a :href="order_data.reshoot_attachment_url" target="_blank">View</a>
+                                    </td>
+                                    <td></td>
+                                    <td class="text-right"> </td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        </transition>
+                      </td>
+                    </tr>
+                  </tbody>
+
                 </table>
 
                 <table class="summary__content">
@@ -398,6 +500,25 @@ if ( ! defined( 'ABSPATH' ) ) {
 
                   </tfoot>
                 </table>
+
+                <div v-if="order_data.order_items_data.buy_single_data">
+                  <div class="hr-2" ></div>
+                  <div class="spacer-h-15"></div>
+
+                  <span class="related-shoot-comment">Related Shoot</span>
+                  <div class="related-shoot" v-on:click="open_related_shoot">
+                    <span class="related-shoot__name">
+                      {{order_data.order_items_data.buy_single_data.name}}
+
+                    </span>
+                    <span class="related-shoot__date">
+                      #FS-{{order_data.order_items_data.buy_single_data.order_id}}
+                       on {{order_data.order_items_data.buy_single_data.date_formatted}}
+                    </span>
+
+                    <svg class="icon svg-icon-bracket"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-back-bracket"></use></svg>
+                  </div>
+                </div>
               </div>
             </div><!-- summary -->
             <div class="spacer-h-25"></div>
@@ -427,7 +548,7 @@ if ( ! defined( 'ABSPATH' ) ) {
             <div class="products-block__item" v-for="(item, key) in order_data.order.items" :key="'product_'+key">
               <div class="products-block__item-head row">
                 <div class="col-5">
-                 <span class="products-block__item-title"> {{item.product_name}}</span>
+                 <span class="products-block__item-title"> {{item.product_name}} </span>
                 </div>
 
                 <div class="col-120">
@@ -580,55 +701,78 @@ if ( ! defined( 'ABSPATH' ) ) {
         <ul class="progress-order progress">
           <li class="progress__item"
             v-for="inf, key in orders_in_details"
-            :class="{active: (parseInt(inf.meta.order) >= 0  && order_status_mumber > parseInt(inf.meta.order) )}"
+            :class="{active: (parseInt(inf.meta.order) >= 0  && order_status_number > parseInt(inf.meta.order) )}"
             >
             <span class="progress__item-dots"></span> <span class="progress__item-name">{{inf.name}}</span> <br><span class="progress__item-date">{{inf.date}}</span>
           </li>
         </ul>
       </div>
 
+      <div class="spacer-h-25" v-if="review_notifications"></div>
+
+      <div class="review-notifications" v-if="review_notifications.dates && review_notifications.dates.length > 0">
+
+       <p class="data-no-items__text">You have <span class="marked blue">{{review_notifications.dates.length}}</span> {{review_notifications.label}} <span class="marked"><span class="marked gradient">Awaiting Decision.</span></span> <br>
+
+        <transition-group
+          v-on:before-enter="animation_beforeEnter"
+          v-on:animation-after="animation_enterAfter"
+          v-on:enter="animation_enter"
+          v-on:leave="animation_leave"
+          v-bind:css="false"
+        >
+          <span  v-for="data, key in review_notifications.dates" :key="'review_notifications'+key">
+            You have <span class="marked blue" :class="{'blue': (data.delta > 0), 'red': (data.delta == 0)}" >{{data.delta}} {{data.label}}</span> to submit a decision for image <span class="marked yellow">#FS-{{order_data.order_id}}/{{data.image_id}}</span><br>
+          </span>
+        </transition-group>
+       </p>
+
+      </div>
+
       <div class="spacer-h-25"></div>
 
-      <div class="my-order__filter">
+      <div class="my-order__filter"  v-if="order_data.wfp_images">
         <div class="decoration" ref="deco"></div>
         <div class="decoration pre" ref="deco_pre"></div>
         <a href="#processing"
           class="my-order__filter-item-2"
           v-on:click="filter='all'"
-          :class="{active: (filter== 'all')}">All Photos <span class="count">39</span></a>
+          :class="{active: (filter== 'all')}">All Photos <span class="count">{{files_uploaded_counts.all.length}}</span></a>
 
         <a href="#downloaded"
         class="my-order__filter-item-2"
         v-on:click="filter='downloaded'"
-        :class="{active: (filter== 'downloaded')}">Downloaded <span class="count">18</span></a>
+        :class="{active: (filter== 'downloaded')}">Downloaded <span class="count">{{files_uploaded_counts.downloaded.length}}</span></a>
 
         <a href="#not_downloaded"
         class="my-order__filter-item-2"
         v-on:click="filter='not_downloaded'"
-        :class="{active: (filter== 'not_downloaded')}">Not Downloaded <span class="count">18</span></a>
+        :class="{active: (filter== 'not_downloaded')}">Not Downloaded <span class="count">{{files_uploaded_counts.not_downloaded.length}}</span></a>
 
         <a href="#in_review"
         class="my-order__filter-item-2"
         v-on:click="filter='in_review'"
-        :class="{active: (filter== 'in_review')}">In Review <span class="count">3</span></a>
+        :class="{active: (filter== 'in_review')}">In Review <span class="count">{{files_uploaded_counts.in_review.length}}</span></a>
       </div>
 
-      <div class="spacer-h-25"></div>
-      <div class="spacer-h-25"></div>
+      <div class="spacer-h-25" v-if="order_data.wfp_images"></div>
+      <div class="spacer-h-25" v-if="order_data.wfp_images"></div>
+
 
       <div class="row">
 
         <frontdesk-upload-exists
           v-for="(file, i) in files_uploaded"
-          :_number = "i + 1"
+          :_number = "file[0].image_id  + 1"
           :_item_id = "i"
+          :_image_id = "file[0].image_id"
           :key     = "'upload_item_'+i"
-          :_comments = "get_comments_for_image(i)"
+          :_comments = "get_comments_for_image(file[0].image_id)"
           :_files_uploaded = "file"
           :_is_old_order = "is_old_order"
           :_is_single_order = "0"
           :_order_id = "order_data.order_id"
-          :_thumbnail = "order_data.wfp_thumbnails[i].attachment_url_lg"
+          :_thumbnail = "get_thumbnail( file[0].image_id )"
 
           v-on:show_comments_window ="show_comments_window_cb"
           v-on:show_image = 'show_image_popup'
@@ -645,18 +789,22 @@ if ( ! defined( 'ABSPATH' ) ) {
 
       <div class="spacer-h-30"></div>
 
-      <div class="data-no-items text-center" v-if="!order_data.wfp_images">
+      <div class="data-no-items text-center" v-if="!order_data.wfp_images && !order_data.wfp_image_single">
         <p class="data-no-items__category">GALLERY</p>
         <h2 class="data-no-items__title">No photos yet</h2>
 
         <p class="data-no-items__text">You have a minimum of   <span class="marked blue">{{count_photos}} </span>  {{count_photo_label}} to upload <span v-if="day_label"> by  <span class="marked green"> Friday. </span></span>   <br>
 
-          <span v-if="due_days_left > 0">
+          <span v-if="due_days_left > 0 ">
           {{due_days_left_label.before}}  <span class="marked yellow"> {{due_days_left}} {{due_days_left_label.after}} left </span>   before this shoot will be  <span class="marked red">Overdue</span>.
           </span>
 
           <span v-if="due_days_left == 0">
             Shoot is <span class="marked red">Overdue</span>
+          </span>
+
+          <span v-if="due_days_left < 0">
+            Products are <span class="marked yellow">not in studio yet</span>
           </span>
         </p>
       </div>
@@ -691,16 +839,11 @@ if ( ! defined( 'ABSPATH' ) ) {
                 <td><p class="leads-block__label no-margin">Awaiting Review</p></td>
                 <td class="text-right"><p class="leads-block__info">{{image_data.review}}</p></td>
               </tr>
-              <tr >
+              <tr v-if="due_days_left >= 0">
                 <td class="no-borders"><p class="leads-block__label no-margin">Due</p></td>
                 <td class="no-borders">
-                  <datepicker-styled  v-if="!order_data.due_date.date"
-                    v-bind:class="'fullwidth'"
-                    :_name="'due_date'"
-                    v-on:input_value_changed = "update_due_date($event)"
-                  ></datepicker-styled>
                   <div class="text-right">
-                    <span class="leads-block__info" v-if="order_data.due_date.date" >{{due_date.value}}</span>
+                    <span class="leads-block__info" >{{due_date.value}}</span>
                     <div class="tag-fasttrack" v-if="order_data.is_fasttrack == 1">
                       <svg class="icon svg-icon-fastrack2"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-fastrack2"></use> </svg>
                       <span>fasttrack</span>
@@ -714,7 +857,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
                   <div class="spacer-h-10"></div>
                   <span class="warning-due">
-                     <img src="<?php echo THEME_URL?>/order_tracker/assets/images/warn.png" alt=""><span class="yellow"> {{due_days_left}} days left</span> to submit photos for this order.
+                     <img src="<?php echo THEME_URL?>/order_tracker/assets/images/warn.png" alt=""><span class="yellow"> {{due_days_left}} {{due_days_left_label.after}} left</span> to submit photos for this order.
                   </span>
                   <div class="spacer-h-20"></div>
                 </td>
@@ -961,5 +1104,10 @@ if ( ! defined( 'ABSPATH' ) ) {
     ref="comment_data"
     v-on:update_decision="update_decision_cb"
   ></download-popup-comment>
+
+  <preview-popup
+    ref="preview_popup"
+  >
+  </preview-popup>
 
 </div>

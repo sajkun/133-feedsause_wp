@@ -110,7 +110,8 @@
         $items = $order->get_items();
 
         foreach ($items as $key => $i) {
-          wc_add_order_item_meta($key, 'extra_data',$extra_data);
+          wc_add_order_item_meta($key, '_extra_data',$extra_data);
+          wc_add_order_item_meta($key, '_theme_prices',get_option('theme_settings'));
           wc_add_order_item_meta($key, 'buy_single','1');
         }
 
@@ -126,7 +127,6 @@
           }
         }
 
-
         $order_source->update_meta_data('_wfp_image', $image_meta);
         $order_source->save_meta_data();
         $order_source->save();
@@ -138,7 +138,7 @@
 
         $meta = array(
           array(
-          'files_uploaded' => $image_meta[0],
+          'files_uploaded' => $image_meta[0]['files_uploaded'],
           'id' => "0",
           'is_active' => "1",
           'is_free' => "0",
@@ -146,17 +146,51 @@
           ),
         );
 
-        $order->add_meta_data('_wfp_image', $meta);
+        $order->save();
+
+        $order_id = $order->get_id();
+
+        $order->calculate_totals();
+        $order->update_status("wc-completed", 'Single Image Ordered', TRUE);
+
+
+        $wfp_thumbnails = $order_source->get_meta('_wfp_thumbnails');
+        $thumb = array();
+
+        foreach($wfp_thumbnails as $th){
+          if($th['item_id'] == (int)$_POST['image_id']){
+             $thumb[] = $th;
+          }
+        }
+
+        $order->add_meta_data('_wfp_image_single', $meta);
+        $order->update_meta_data('_wfp_image_single', $meta);
+
+        $order->add_meta_data('_wfp_thumbnails', $thumb);
+        $order->update_meta_data('_wfp_thumbnails', $thumb);
+
         $order->add_meta_data('_wfp_image_limit', 1);
+        $order->update_meta_data('_wfp_image_limit', 1);
+
+        $order->add_meta_data('_is_single', 1);
+        $order->update_meta_data('_is_single', 1);
         $order->save_meta_data();
         $order->save();
 
-        $order->calculate_totals();
-        $order->update_status("wc-completed", 'Reshoot Ordered', TRUE);
+        // if(!update_post_meta($order_id, '_wfp_image', $meta)){
+        //   add_post_meta($order_id, '_wfp_image', $meta);
+        // }
+
+        // if(!update_post_meta($order_id, '_wfp_image_limit', 1)){
+        //   add_post_meta($order_id, '_wfp_image_limit', 1);
+        // }
 
          wp_send_json(array(
           'type'        => $_POST['type'],
           'image_meta'  => $images,
+          'meta'        => $meta,
+          'thumb'       => $thumb,
+          'wfp_thumbnails'       => $wfp_thumbnails,
           'post'        => $_POST,
           'order'       => $order->get_id(),
         ));
@@ -195,6 +229,18 @@
              'name'  => 'order_id'
           ),
 
+          'buy_single_order_id' => array(
+              'value' => $_POST['order_id'],
+              'label' => 'Order id' ,
+              'name'  => 'buy_single_order_id',
+          ),
+
+          'buy_single_image_id' => array(
+              'value' =>  $_POST['image_id'],
+              'label' => 'Reshoot Image' ,
+              'name'  => 'buy_single_image_id',
+          ),
+
           'image_count' => array(
              'value' => 1,
              'label' => 'Number of Images',
@@ -205,19 +251,39 @@
 
         $order = wc_create_order();
         $order->set_customer_id( get_current_user_id());
-
-
         $order->add_product( get_product( $id ), 1, array('total' => $_POST['product_price'], 'subtotal' => $_POST['product_price'] ) );
-
         $items = $order->get_items();
 
         foreach ($items as $key => $i) {
           wc_add_order_item_meta($key, 'extra_data',$extra_data);
+          wc_add_order_item_meta($key, 'theme_prices',get_option('theme_settings'));
+
+          wc_add_order_item_meta($key, 'reshoot_data',array(
+            'order_id' => $_POST['order_id'],
+            'image_id' => $_POST['image_id'],
+          ));
+
           wc_add_order_item_meta($key, 'is_reshoot','1');
         }
 
         $order->calculate_totals();
         $order->update_status("wc-in-production", 'Reshoot Ordered', TRUE);
+
+        $order->add_meta_data('_is_reshoot', 1);
+        $order->update_meta_data('_is_reshoot', 1);
+
+        if(isset($_POST['attachment_url'])){
+          $order->add_meta_data('_reshoot_attachment_url', $_POST['attachment_url']);
+          $order->update_meta_data('_reshoot_attachment_url', $_POST['attachment_url']);
+        }
+
+        if(isset($_POST['request_text'])){
+          $order->add_meta_data('_reshoot_request_text', $_POST['request_text']);
+          $order->update_meta_data('_reshoot_request_text', $_POST['request_text']);
+        }
+
+        $order->save_meta_data();
+        $order->save();
 
          wp_send_json(array(
           'type'       => $_POST['type'],
@@ -246,8 +312,28 @@
           'date' => $_POST['date'],
           'text' => $_POST['request_text'],
         );
+
+        if(!$meta[$key]['logs'] ){
+          $meta[$key]['logs'] = array();
+        }
+
+        $date = new DateTime();
+        $user_id = get_current_user_id();
+        $user_meta = get_user_meta($user_id);
+
+        $meta[$key]['logs'][] = array(
+          'date' => $date->format('Y-m-d H:i:s'),
+          'date_formatted' => $date->format('d M Y') . ' at '.$date->format('H:i'),
+          'author' => array(
+            'name'    => $user_meta['first_name'][0] . ' ' . $user_meta['last_name'][0],
+            'user_id' => $user_id,
+          ),
+          'action' => "Requested shoot edits",
+          'text'   =>  $_POST['request_text'],
+        );
       }
     }
+
 
     if(!update_post_meta($order_id, '_wfp_image', $meta)){
       add_post_meta($order_id, '_wfp_image', $meta);

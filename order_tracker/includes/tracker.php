@@ -329,6 +329,13 @@ if(!class_exists('theme_order_tracker')){
         }
       endforeach;
 
+
+      $user_meta = get_user_meta($user->ID);
+
+      $name =  $user_meta['first_name'][0] . ' ' . $user_meta['last_name'][0];
+
+      $name = trim($name)?: $user->display_name;
+
       $data = array(
         'tracker_url'             => array(THEME_URL. '/order_tracker/'),
         'theme_debug'             => THEME_DEBUG? 1: 0,
@@ -350,7 +357,7 @@ if(!class_exists('theme_order_tracker')){
         'WP_URLS'                 => $urls,
         'tracker_options'         => $options,
         'orders_in_details'       => $orders_in_details,
-        'logged_in_user'          => array('name'=>$user->display_name, 'user_id'=> $user->ID),
+        'logged_in_user'          => array('name'=>$name, 'user_id'=> $user->ID),
       );
 
       foreach ($data as $name => $value) {

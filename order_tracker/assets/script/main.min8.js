@@ -172,6 +172,11 @@ function is_boolean(val){
       break;
   }
 }
+
+
+function cap_string(string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}
 jQuery(document).on('click', '.mobile-menu-switcher', function(){
   jQuery(this).toggleClass('active');
   jQuery('.menu-holder').toggleClass('shown');
@@ -697,29 +702,6 @@ var fds_order = {
         return shown.reduce((a, b) => a + b, 0);
       },
 
-      due_date:function(){
-        var due_date = {
-          value: '',
-          days_left: '<span></span>',
-        };
-
-        var fmt  = new DateFormatter();
-        var date = new Date(this.order_data.due_date.date.replace(/\s/, 'T'));
-        var today = new Date();
-
-        due_date.value = fmt.formatDate(date, 'd F Y');
-
-        var difference = date.getTime() - today.getTime();
-
-        difference = Math.ceil(difference / (1000 * 3600 * 24));
-
-        var tag = (difference == 1 || difference == -1)? 'day' : 'days';
-
-        due_date.days_left ='<span class="mark-tag">' + difference + ' '+ tag +'</span>';
-
-        return due_date;
-      },
-
       messages_left: function(){
         return 3 - this.order_data.message_count;
       },
@@ -870,7 +852,7 @@ var fds_order = {
      */
       update_order: function(data, key){
         if(this.visible){
-          clog('update_order')
+          // clog('update_order')
           this.order_was_changed = true;
         }
 
@@ -922,7 +904,28 @@ var fds_order = {
 
           const dates = JSON.parse(JSON.stringify(frontdesk_list.items[index].data.statuses_history[status].dates));
 
-          dates.push(date);
+          dates.push(date_formatted);
+
+          var start_status  = tracker_options['orders_misc']['countdown'].replace('wc-', '');
+
+          if(status == start_status){
+
+            var _date = new Date();
+
+            var days = this.order_data.is_fasttrack ? parseInt(tracker_options.turnaround.fasttrack) : parseInt(tracker_options.turnaround.regular);
+
+            _date.setDate(_date.getDate() + days);
+
+            var _dates = {
+              'date'           : fmt.formatDate(_date, 'Y-m-d H:i:s'),
+              'date_formatted' : fmt.formatDate(_date, 'd M Y'),
+              'is_overdue'     : false,
+            };
+
+            frontdesk_list.$set(frontdesk_list.items[index].data, 'due_date', _dates);
+            this.$set(this.order_data, 'due_date', _dates);
+          }
+
 
           this.$set(this.order_data.statuses_history[status], 'dates', dates);
           frontdesk_list.$set(frontdesk_list.items[index].data.statuses_history[status], 'dates', dates);
@@ -1326,7 +1329,7 @@ var upload_item_mixin = {
 
     _files_uploaded: function(val){
       if(typeof(val) !== 'undefined'){
-        this.thumbnail =   tracker_url[0]+"/assets/images/blank.svg";
+        this.thumbnail =   tracker_url[0]+"/assets/images/blank_dark.svg";
         this.thumbs_file = false;
         this.files_uploaded =  val;
       }
@@ -1405,19 +1408,17 @@ var upload_item_mixin = {
 
     this_state: function(){
 
+      var wfp_data = typeof(this.$parent.order_data.wfp_images) !== 'undefined' && typeof(this.$parent.order_data.wfp_images[this.image_id]) !== 'undefined' ? strip(this.$parent.order_data.wfp_images[this.image_id]) : [];
 
-      var wfp_data = typeof(this.$parent.order_data.wfp_images) !== 'undefined' && typeof(this.$parent.order_data.wfp_images[this.item_id]) !== 'undefined' ? strip(this.$parent.order_data.wfp_images[this.item_id]) : [];
+      wfp_data = (this.$parent.order_data.wfp_image_single)? strip(this.$parent.order_data.wfp_image_single[0]) : wfp_data;
 
-      wfp_data = (this.$parent.order_data.wfp_image_single)? strip(this.$parent.order_data.wfp_image_single) : wfp_data;
-
-      slog('item: #' + strip(this.item_id) + ' data', 'red');
-      clog('files_uploaded: ' , 'blue');
-      clog(strip(this.files_uploaded));
-      clog('files: ' , 'blue');
-      clog(strip(this.files));
-      clog('wfp_data: ' , 'blue');
-      clog(wfp_data);
-      elog();
+      // slog('item: #' + strip(this.item_id) + ' data', 'red');
+      // clog('files_uploaded: ' , 'blue');
+      // clog(strip(this.files_uploaded));
+      // clog('files: ' , 'blue');
+      // clog(strip(this.files));
+      // clog('wfp_data: ' , 'blue');
+      // elog();
 
       if(this.files.length == 0 &&  this.files_uploaded.length == 0){
         return 'Upload';
@@ -1431,13 +1432,13 @@ var upload_item_mixin = {
         return 'Downloaded';
       }
 
-      if(parseInt(wfp_data.is_active) == 1){
+      if(parseInt(wfp_data.is_active) == 1 && 'undefined' == typeof(wfp_data.request)){
         return 'Ready';
       }
 
-      if(parseInt(wfp_data.is_active) == 0 && 'undefined' == typeof(wfp_data.request_decision)){
+      if('undefined' == typeof(wfp_data.request_decision)){
         return 'Awaiting Decision';
-      }else if(parseInt(wfp_data.is_active) == 0 && 'undefined' != typeof(wfp_data.request_decision)){
+      }else if( 'undefined' != typeof(wfp_data.request_decision)){
         return 'Change request ' + wfp_data.request_decision.decision ;
       }
 
@@ -1517,15 +1518,14 @@ var upload_item_mixin = {
         return e.path == data.dropbox_path
       });
 
-      slog('delete exist item');
-
-      clog(file_id);
-      clog(data);
+      // slog('delete exist item');
+      // clog(file_id);
+      // clog(data);
 
       this.files_uploaded.splice(file_id, 1);
       this.$emit('delete_path_update', data);
 
-      elog();
+      // elog();
     },
 
 
@@ -1600,7 +1600,7 @@ var upload_item_mixin = {
       reader.onloadend = function() {
         let img = document.createElement('img')
         img.src = reader.result
-        vm.$emit('show_image',{img: img});
+        vm.$emit('show_image',{img: img, url: reader.result, image_id: vm.item_id});
       }
     },
 
@@ -1610,6 +1610,7 @@ var upload_item_mixin = {
           return e.image_id === data.image_id
         });
 
+
       this.preview_file(image[0]);
     },
 
@@ -1617,7 +1618,7 @@ var upload_item_mixin = {
 
       if(data.image_url){
         var img = "<img src='"+data.image_url+"'>"
-        this.$emit('show_image',{img: img});
+        this.$emit('show_image',{img: img, url: data.image_url, image_id: this.item_id});
         return;
       }
 
@@ -1645,7 +1646,7 @@ var upload_item_mixin = {
 
       var response = JSON.parse(xhr.responseText);
       var img = "<img src='"+response.link+"'>"
-      this.$emit('show_image',{img: img});
+      this.$emit('show_image',{img: img, url:response.link, image_id: this.item_id});
     },
 
     upload_from_input: function(event){
@@ -1774,7 +1775,7 @@ var column_mixin = {
 var upload_item_thumb = {
   data: function(){
     return{
-      thumbnail       : tracker_url[0]+"/assets/images/blank.svg",
+      thumbnail       : tracker_url[0]+"/assets/images/blank_dark.png",
       thumbs_file     : false,
       thumbs_image_id : -1,
     }
@@ -1854,6 +1855,315 @@ var get_item = {
     },
   }
 };
+var front_studio = {
+  data: function(){
+   return {
+      show_product_details:{
+        names: false,
+        custom: false,
+        notes: false,
+      },
+    };
+  },
+
+  computed:{
+
+    count_photos: function(){
+      if('undefined' == typeof(this.order_data.order_items_data.extra_data.image_count)){
+        return 1;
+      }
+
+      if('undefined' != typeof(this.order_data.order_items_data.extra_data.image_count.value)){
+
+        return this.order_data.order_items_data.extra_data.image_count.value;
+      }
+
+      return 'na';
+    },
+
+    count_photo_label: function(){
+      var label = this.count_photos.toString() == '1' && this.count_photos != 11? 'photo' : 'photos';
+
+      return label;
+    },
+
+    day_label: function(){
+      return false;
+    },
+
+    count_customisations: function(){
+      var count = 0;
+
+      if('undefined' == typeof(this.order_data.order_items_data)|| !this.order_data.order_items_data ){
+        return count;
+      }
+
+      if('undefined' != typeof(this.order_data.order_items_data.shoot_data.customize.color_pref)){
+        count += this.order_data.order_items_data.shoot_data.customize.color_pref.length
+      }
+
+      if('undefined' != typeof(this.order_data.order_items_data.shoot_data.customize.sizes)){
+        count += (this.order_data.order_items_data.shoot_data.customize.sizes.length - 1);
+      }
+
+      if('undefined' != typeof(this.order_data.order_items_data.shoot_data.customize.props)){
+        count += (this.order_data.order_items_data.shoot_data.customize.props == 'custom') ? 1 : 0;
+      }
+
+      var label = count.toString().slice(-1) == '1' && count != 11? 'Customisation' : 'Customisations';
+
+      return count.toString() + ' ' + label;
+    },
+
+    customisation_data: function(){
+      return{
+        theme: this.order_data.order_items_data.extra_data.colors.value?  this.order_data.order_items_data.extra_data.colors.value : "Don't Care" ,
+        position: this.order_data.order_items_data.extra_data.position.value != 'none'? this.order_data.order_items_data.extra_data.position.value : "Don't Care" ,
+        props: this.order_data.order_items_data.extra_data.props.value != 'none' ? this.order_data.order_items_data.extra_data.props.value : "Don't Care" ,
+        sizes: this.order_data.order_items_data.extra_data.sizes.value.join('\n'),
+      };
+    },
+
+
+    image_data: function(){
+      if(!this.order_data.wfp_images){
+        return {
+          total: 0,
+          review: 0,
+        }
+      }
+
+      var length = this.order_data.wfp_images.filter(e=>{
+        return e.is_active == 0 && 'undefined' != typeof(e.request);
+      }).length;
+
+      var data = {
+        total: this.order_data.wfp_images.length,
+        review: length,
+      };
+
+
+      return data;
+    },
+
+    due_date:function(){
+      var due_date = {
+        value: '',
+        days_left: '<span></span>',
+      };
+
+      var fmt  = new DateFormatter();
+      var date = new Date(this.order_data.due_date.date.replace(/\s/, 'T'));
+      var today = new Date();
+
+      due_date.value = fmt.formatDate(date, 'd F Y');
+
+      var difference = date.getTime() - today.getTime();
+
+      difference = Math.ceil(difference / (1000 * 3600 * 24));
+
+      var tag = (difference == 1 || difference == -1)? 'day' : 'days';
+
+      due_date.days_left ='<span class="mark-tag">' + difference + ' '+ tag +'</span>';
+
+      return due_date;
+    },
+
+    due_days_left: function(){
+      if('undefined' == typeof(this.order_data.due_date.date) || !this.order_data.due_date.date){
+        return -1;
+      }
+
+      var due_date = this.order_data.due_date.date;
+      var now      = new Date();
+      var fmt  = new DateFormatter();
+      var _now = fmt.formatDate(now, 'Y-m-d H:i:s');
+
+      var date_diff = date_diff_indays(_now, due_date);
+      var fmt  = new DateFormatter();
+      return Math.max(0, date_diff);
+    },
+
+    due_days_left_label: function(){
+      if(this.due_days_left < 0){
+        return{
+          before: '',
+          after: '',
+        }
+      }
+
+      var label = this.due_days_left.toString() == '1' && this.due_days_left != 11? 'single' : 'multiple';
+
+      return label == 'single'? {before: 'There is', after: 'day',} : {before: 'There are', after: 'days',}
+    },
+
+
+    notes_label: function(){
+      if('undefined' != typeof(this.order_data.order_items_data.extra_data.shoots)){
+        return 'Custom Shoot List';
+      }
+      if('undefined' != typeof(this.order_data.order_items_data.extra_data.comment) && (this.order_data.order_items_data.extra_data.comment.value) && (this.order_data.order_items_data.extra_data.comment.value != 'false')){
+        return 'Quick Notes';
+      }
+      return '-';
+    },
+
+    orders_in_details: function(){
+      var vm = this;
+      var details = Object.values(orders_in_details).map(el=>{
+        var date;
+
+        var info = Object.values(vm.order_data.statuses_history).filter(e=>{
+          return e.status == el.name;
+        });
+
+        var dates = info[0].dates;
+
+        var date = 'undefined' !== typeof(dates[dates.length -1]) ?dates[dates.length -1] : '';
+
+        if(date){
+          var fmt = new DateFormatter();
+          date = new Date(date);
+          el.date = fmt.formatDate(date, 'd M H:i');
+        }else{
+          el.date = '';
+        }
+
+
+        return el;
+      });
+
+      return details;
+    },
+
+    order_status_number: function(){
+      var vm = this;
+      var inf = Object.values(tracker_options.orders).filter(e=>{
+        return vm.order_data.order_status == e.slug;
+      });
+
+      return parseInt(inf[0].order);
+    },
+
+
+
+    /*****/
+    /* calculate totals for every item in shoot builder*/
+    /*****/
+    order_sum_details: function(){
+      /* for extra products over 1*/
+      var product_names = 0;
+
+
+      if('undefined' == typeof(this.order_data.order_items_data.extra_data)){
+
+        var data = {
+          product_names: 0,
+          photos: 0,
+          customize: 0 ,
+          shoots: 0,
+          fasttrack: 0,
+          return: 0,
+          addons: 0,
+        };
+
+        return data;
+      }
+
+      if('undefined' != typeof(this.order_data.order_items_data.item_name)){
+
+        product_names = (this.order_data.order_items_data.item_name.length - 1) * parseInt(this.order_data.order_items_data.prices.name);
+      }
+
+      var photos = 0;
+
+      if('undefined' != typeof(this.order_data.order_items_data.extra_data.image_count) && 'undefined' != typeof(this.order_data.order_items_data.extra_data.image_count.value)){
+
+        if(this.order_data.order_items_data.buy_single == "1"){
+          photos = parseInt(this.order_data.order_items_data.extra_data.image_count.value) * parseInt(this.order_data.order_items_data.prices.buy_single);
+
+        }else if(this.order_data.order_items_data.is_reshoot == "1"){
+          photos = parseInt(this.order_data.order_items_data.extra_data.image_count.value) * parseInt(this.order_data.order_items_data.prices.reshoot);
+        }else{
+
+          photos = parseInt(this.order_data.order_items_data.extra_data.image_count.value) * parseInt(this.order_data.order_items_data.prices.single_product_price);
+        }
+      }
+
+      var customize = 0;
+
+      if('undefined' != typeof(this.order_data.order_items_data.shoot_data.customize) && 'undefined' != typeof(this.order_data.order_items_data.shoot_data.customize.color_pref)){
+        customize += this.order_data.order_items_data.shoot_data.customize.color_pref.length * parseInt(this.order_data.order_items_data.prices.color);
+      }
+
+      if('undefined' != typeof(this.order_data.order_items_data.extra_data.sizes.value)){
+        customize += (this.order_data.order_items_data.extra_data.sizes.value.length -1 ) * parseInt(this.order_data.order_items_data.prices.sizes);
+      }
+
+      var shoots = 0;
+      if('undefined' != typeof(this.order_data.order_items_data.extra_data.shoots)){
+        shoots = this.order_data.order_items_data.extra_data.shoots.length * parseInt(this.order_data.order_items_data.prices.shoot)
+      }
+
+      var fast = this.order_data.is_fasttrack == 1? parseInt(this.order_data.fasttrack_price) : 0;
+      var _return = this.order_data.is_return == 1? parseInt(this.order_data.return_price) : 0;
+
+
+      var data = {
+        product_names: product_names,
+        photos: photos,
+        customize: !isNaN(customize) ? customize: 0 ,
+        shoots: shoots,
+        fasttrack: fast,
+        return: _return,
+        addons: fast + _return +  shoots + (!isNaN(customize) ? customize: 0) + product_names,
+      };
+
+      return data;
+    },
+
+
+
+    /***
+    product names created in constructor
+    */
+    product_names: function(){
+      if('undefined' != typeof(this.order_data.order_items_data.item_name)){
+        var name = this.order_data.order_items_data.item_name[0];
+        name = name.split(' - ');
+
+        var items = [];
+
+        for(var i of this.order_data.order_items_data.item_name){
+          var temp = i.split(' - ')
+          items.push({name: temp[0], category: temp[1]})
+        }
+
+        return {
+          name: name[0],
+          items: items,
+        }
+
+      }
+      return {
+        name: '',
+        items: [],
+      }
+    },
+
+    shoot_data_set: function(){
+      if(!this.order_data.order_items_data){
+        return false;
+      }
+
+      return this.order_data.order_items_data && 'undefined' != typeof(this.order_data.order_items_data.shoot_data);
+    },
+
+    tracker_options: function(){
+      return tracker_options;
+    },
+  },
+};
 var frontdesk_list,
     frontdesk_order,
     frontdesk_order_new,
@@ -1868,6 +2178,7 @@ var frontdesk_list,
     search_field,
     popup_studio_errors,
     get_set_props,
+    review_page,
     popup_shoot
 ;
 
@@ -2042,6 +2353,7 @@ Vue.component('frontdesk-item', {
       var start_status  = tracker_options['orders_misc']['countdown'].replace('wc-', '');
 
       if('undefined' != typeof(this.info.statuses_history[start_status]) && this.info.statuses_history[start_status].dates.length > 0){
+
         var ind = this.info.statuses_history[start_status].dates.length - 1;
         var _date = this.info.statuses_history[start_status].dates[ind];
 
@@ -2050,6 +2362,9 @@ Vue.component('frontdesk-item', {
         var multiplier = tracker_options.turnaround.regular / days;
 
         var due_date    = new Date(_date.replace(/\s/, 'T'));
+        due_date = due_date.setDate(due_date.getDate() + days);
+        due_date = new Date(due_date);
+
         var today       = new Date();
         var diff = days - Math.floor((due_date.getTime() - today.getTime() )/ (1000*60*60*24));
 
@@ -2229,7 +2544,7 @@ Vue.component('studio-item', {
       <svg class="icon svg-icon-bell" v-bind:class="{'green': !is_overdue}" v-if="info.reminder.date"><use xmlns:xlink="ttp://www.w3.org/1999/xlink" xlink:href="#svg-icon-bell"></use> </svg>
 
       <i class="icon-with-popup" v-if="comments_count > 0">
-      <svg class="icon svg-icon-comment"> <use xmlns:xlink="ttp://www.w3.org/1999/xlink" xlink:href="#svg-icon-comment"></use> </svg>
+      <svg class="icon svg-icon-review-mode"> <use xmlns:xlink="ttp://www.w3.org/1999/xlink" xlink:href="#svg-icon-review-mode"></use> </svg>
         <span class="counter" v-if="info.gallery.comments > 0">{{info.gallery.comments}}</span>
       </i>
 
@@ -2272,6 +2587,179 @@ Vue.component('studio-column', {
    @end="end_drag">
    <studio-item v-for="item in items_formatted" v-bind:_info="item.data"  v-bind:key="'studio_item_'+item.data.order_id" v-on:open_order_el_cb="open_order_col_cb"></studio-item></draggable>  </div> </div>`,
 })
+Vue.component('review-item-popup', {
+  data: function(){
+    return {
+      show: false,
+      thumbnail: false,
+      info: {},
+      files: [],
+    };
+  },
+
+  mounted: function(){
+    console.log('review-item-popup');
+  },
+
+  watch: {
+    show: function(show){
+      this.files = [];
+    },
+  },
+
+  computed: {
+    author: function(){
+      return this.info.author? cap_string(this.info.author.name) : 'NA';
+    },
+
+    date_formatted: function(){
+      return this.info.logs? this.info.logs[0].date_formatted : 'NA';
+    },
+
+    decision_text: function(){
+      return cap_string(this.info.image_data.request_decision.decision) +  ' by ' + this.info.image_data.request_decision.user_name + ' on ' + this.info.image_data.request_decision.date_formatted;
+    },
+
+    download_text: function(){
+
+      var template = ('undefined' != typeof(this.info.image_data.attachment_url)) ?this.info.image_data.attachment_url.split('/') : [];
+      template = Object.values(template);
+
+      var data = typeof(template) ==  'object' ? template[template.length - 1] : '';
+
+      return data;
+    },
+
+    due: function(){
+      var date = new Date(this.info.image_data.request[0].date);
+      date.setDate(date.getDate() + 3 );
+
+      var today = new Date();
+
+      var delta = date - today;
+
+      if(delta <=0){
+        return 'Overdue'
+      }
+
+      var may_be_delta = Math.ceil(delta/(1000*60*60*24));
+
+      delta = may_be_delta > 0 ?Math.ceil(delta/(1000*60*60*24)) : Math.ceil(delta/(1000*60*60));
+
+      var labels = may_be_delta > 0 ? ['day', 'days'] : ['hour', 'hours'];
+      var label = delta==1? labels[0] : labels[1];
+
+      return delta +' '+label;
+    },
+
+    request_date:function(){
+      var date = new Date(this.info.image_data.request[0].date);
+      var fmt  = new DateFormatter();
+
+      return fmt.formatDate(date, 'd F') + ', ' + fmt.formatDate(date, 'H:i');
+    },
+  },
+
+  methods:{
+    cap_string: function(string) {
+      return string.charAt(0).toUpperCase() + string.slice(1);
+    },
+
+    do_submit:function(){
+      if(this.files.length == 0){
+        return;
+      }
+
+      var data = {
+        files: this.files,
+        item_id: this.info.image_id,
+      };
+
+      this.$emit('submit_revision', data);
+    },
+
+
+    update_files: function(data){
+      this.files = data.files;
+    },
+  },
+
+  template:`
+    <div class="download-popup shown" v-if="show">
+      <div class="download-popup__window sm">
+        <div class="download-popup__inner">
+          <div class="download-popup__content width50">
+            <div class="download-popup__content-inner">
+              <div class="download-popup__row">
+                <span class="number">#FS-{{info.order_id}}/{{info.image_id}}</span>
+                <div class="spacer-h-10"></div>
+                <span class="download-popup__title">Review Request</span>
+
+                <span class="download-popup__text"><span class="state-marker approved"></span> <span>{{decision_text}}</span></span>
+
+                <div class="spacer-h-20"></div>
+
+                <div class="download-popup__row divider">
+                  <div class="spacer-h-15"></div>
+                    <label class="radio-imitation props-options"><input type="radio" checked="checked" name="review" value="correction"> <span class="radio-imitation__view flex text-left"><span class="radio-imitation__longtext valign-center"><b>Correction | <span class="marked">3 Business Days</span></b> Photo doesn’t match my order notes or there’s a blemish that needs to be fixed. </span> <span class="radio-imitation__icon valign-center"><span class="price-marker">Free</span></span></span></label>
+
+                    <div class="spacer-h-15"></div>
+
+                    <span class="author-data">
+                      {{info.author}} · {{request_date}}
+                    </span>
+
+                    <div class="spacer-h-10"></div>
+                    <div class="download-popup__text-comment"> {{info.image_data.request[0].text}} </div>
+                    <div class="spacer-h-10"></div>
+
+                    <div class="download-popup__attachment clearfix" v-if="info.image_data.attachment_url">
+                      <a :href="info.image_data.attachment_url" target="_blank">{{download_text}}</a>
+
+                      <a :href="info.image_data.attachment_url" download> <svg class="icon svg-icon-download2"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-download2"></use></svg></a>
+                    </div>
+
+                    <div class="spacer-h-20"></div>
+                </div>
+
+              </div>
+              <div class="download-popup__row flex">
+              </div>
+            </div>
+          </div>
+
+          <div class="download-popup__image dark">
+            <div class="spacer-h-30"></div>
+            <span class="close" v-on:click="show=false"> <svg class="icon svg-icon-close"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-close"></use></svg>Close</span>
+            <div class="spacer-h-50"></div>
+            <div class="center">
+              <upload-item-blank-review
+                :_blank_number = "info.image_id  + 1"
+                :_order_id = "info.order_id"
+                :_blank_item_id = "info.image_id"
+                v-on:file_changed_blank = "update_files"
+              ></upload-item-blank-review>
+            </div>
+            <div class="spacer-h-50"></div>
+            <div class="download-popup__row justify-content-between flex">
+              <span class="download-popup__revision-text valign-center" v-if="'Overdue' != due">
+                Revision due in <b>{{due}}</b>
+              </span>
+              <span class="download-popup__revision-text valign-center"  v-if="'Overdue' == due">
+                Revision is <b class="red">{{due}}</b>
+              </span>
+              <span class="download-popup__revision-button" :class="{'active': files.length > 0}" v-on:click="do_submit">
+                Submit Revision
+              </span>
+            </div>
+          </div><!-- download-popup__images -->
+
+
+        </div><!-- download-popup__inner -->
+      </div><!-- download-popup__window -->
+    </div><!-- download-popup -->
+  `,
+})
 Vue.component('single-studio-content', {
   data: function(){
     return {
@@ -2287,8 +2775,10 @@ Vue.component('single-studio-content', {
       do_submit: false,
       state_changed : false,
       delete_paths: [],
+      items_changed: [],
     };
   },
+
 
   computed:{
     computed_studio_notes: function(){
@@ -2351,21 +2841,21 @@ Vue.component('single-studio-content', {
     },
 
 
-    /**
-    * return formatted date when photos should be ready
-    *
-    * @return string
-    */
-    due_date: function(){
+    // /**
+    // * return formatted date when photos should be ready
+    // *
+    // * @return string
+    // */
+    // due_date: function(){
 
-      if('undefined' == typeof(this.order_data.due_date.date) || !this.order_data.due_date.date){
-        return '-';
-      }
+    //   if('undefined' == typeof(this.order_data.due_date.date) || !this.order_data.due_date.date){
+    //     return '-';
+    //   }
 
-      var date = new Date(this.order_data.due_date.date.replace(/\s/, 'T'));
-      var fmt  = new DateFormatter();
-      return fmt.formatDate(date, 'D d M');
-    },
+    //   var date = new Date(this.order_data.due_date.date.replace(/\s/, 'T'));
+    //   var fmt  = new DateFormatter();
+    //   return fmt.formatDate(date, 'D d M');
+    // },
 
     /**
     * numbers of days left to complete photos
@@ -2604,6 +3094,15 @@ Vue.component('single-studio-content', {
   },
 
   watch: {
+    delete_paths: function(val){
+      console.log(val);
+      // this.exec_delete_paths();
+    },
+
+    items_changed: function(val){
+      console.log(val);
+    },
+
     visible: function(val){
         var vm = this;
       if(!val){
@@ -2633,7 +3132,7 @@ Vue.component('single-studio-content', {
     this.update_thumbs();
   },
 
-  mixins: [get_set_props, animation_mixin],
+  mixins: [get_set_props, animation_mixin, front_studio],
 
   methods:{
     add_note: function(type){
@@ -2668,36 +3167,6 @@ Vue.component('single-studio-content', {
       this.$refs.note_textarea_studio.style.height = '';
       this.save_notes();
     },
-
-    update_thumbs: function(){
-      var data = [];
-
-      if('undefined'!== typeof(this.order_data.wfp_thumbnails)){
-        data = strip(this.order_data.wfp_thumbnails);
-      }
-
-      var children = (this.$children).filter(e => {
-        return e.constructor.options.name == 'upload-item-exists' || e.constructor.options.name == 'upload-item'});
-
-      for( var child of children){
-        var item_id = child.item_id;
-
-        if('undefined' !== typeof(data[item_id])){
-          child.thumbnail       = data[item_id].attachment_url;
-          child.thumbs_image_id = data[item_id].attachment_id;
-          child.thumbs_file = false;
-        }else{
-          child.thumbs_file = false;
-          child.thumbnail       =  tracker_url[0]+"/assets/images/blank.svg";
-          child.thumbs_image_id =  -1;
-        }
-      }
-    },
-
-    get_index_prepared: function(id){
-      return this.files_uploaded.length + id;
-    },
-
 
     /**
     * hides this component
@@ -2736,18 +3205,97 @@ Vue.component('single-studio-content', {
       this.save_notes();
     },
 
-    /**
-    * displays and hides details of every product row
-    */
-    expand_product: function(key){
-      var exp = this.order_data.order.items[key].expanded;
-      this.$set(this.order_data.order.items[key], 'expanded', !exp);
+    collect_thumbs: function(){
+
+      if(!this.thumbs_to_load){
+        return;
+      }
+
+      block();
+      var vm = this;
+      var childs = (this.$children).filter(e => {return e.constructor.options.name == 'upload-item-exists' || e.constructor.options.name == 'upload-item'}).filter(e=>{ return e.thumbs_file});
+
+      var fd   = new FormData();
+      var images = childs.map(e=>{
+
+        if('undefined' !== typeof(fd)){
+          fd.append('thumb_'+e.item_id, e.thumbs_file);
+        }
+
+        return JSON.stringify({
+                  'item_id'         : e.item_id,
+                  'thumbs_image_id' : e.thumbs_image_id,
+                  'thumbs_file'     :  e.thumbs_file,
+                })
+      });
+
+      fd.append('action', 'add_thumbnails');
+      fd.append('order_id', this.order_data.order_id);
+
+
+      jQuery.ajax({
+        url: WP_URLS.ajax,
+        type: 'POST',
+        processData: false,
+        contentType: false,
+        data: fd,
+      })
+
+      .done(function(e){
+        if('undefined' != typeof(e.meta)){
+          vm.order_data.wfp_thumbnails = e.meta;
+          vm.update_thumbs();
+        }
+      })
+
+      .always(function(e){
+        console.log(e);
+        vm.thumbs_to_load = false;
+        unblock();
+      });
     },
 
-    show_shoot_popup:function(){
-      popup_shoot.visible  = true;
-      popup_shoot.due_date = this.order_data.due_date.date_formatted;
-      popup_shoot.number_of_dates_left = this.number_of_dates_left;
+    delete_path_update: function(data){
+      this.delete_paths.push(data.dropbox_path);
+    },
+
+    do_upload: function(){
+
+      if(!this.files_to_load_exist){
+        return;
+      }
+
+      var valid = this.exec_validate();
+
+      if(!valid){
+        return;
+      }
+
+      popup_quality.visible = true;
+    },
+
+
+    exec_delete_paths:function(){
+      for(var path of this.delete_paths){
+        var data = JSON.stringify({
+          "path": path
+        });
+
+        var xhr = new XMLHttpRequest();
+
+        xhr.addEventListener("readystatechange", function () {
+          if (this.readyState === 4) {
+            console.log(JSON.parse(this.responseText));
+          }
+        });
+
+        xhr.open("POST", "https://api.dropboxapi.com/2/files/delete_v2");
+        xhr.setRequestHeader("authorization", "Bearer " + dropbox.token);
+        xhr.setRequestHeader("content-type", "application/json");
+        xhr.setRequestHeader("cache-control", "no-cache");
+
+        xhr.send(data);
+      }
     },
 
     exec_start_shoot: function(){
@@ -2784,6 +3332,7 @@ Vue.component('single-studio-content', {
 
           item.data.order_status = tracker_options['orders_misc']['shoot'];
           item.data.shoot_started = 1;
+          vm.update_order_status({val: e.order_status});
         })
         .fail(function(e) {
           if('undefined' !== typeof(e.responseJSON.data)){
@@ -2793,25 +3342,14 @@ Vue.component('single-studio-content', {
           }
         })
         .always(function(e) {
+          slog('exec_start_shoot')
+          console.log(e);
+          elog();
           unblock();
         });
       });
     },
 
-    do_upload: function(){
-
-      if(!this.files_to_load_exist){
-        return;
-      }
-
-      var valid = this.exec_validate();
-
-      if(!valid){
-        return;
-      }
-
-      popup_quality.visible = true;
-    },
 
     exec_upload: function(){
       var vm = this;
@@ -2844,13 +3382,57 @@ Vue.component('single-studio-content', {
       // vm = null;
     },
 
+    exec_validate: function(){
+      var validate = this.validate();
+
+      if(!validate.valid){
+        unblock();
+        var files_prepared = this.watch_files_prepared.filter(e => {return e.length > 0})
+        popup_studio_errors.errors = validate.errors;
+        popup_studio_errors.visible = true;
+        popup_studio_errors.images_to_show = this.number_of_photos;
+        popup_studio_errors.images_uploaded = files_prepared.length + this.files_uploaded.length;
+      }
+
+      return validate.valid;
+    },
+
+    /**
+    * displays and hides details of every product row
+    */
+    expand_product: function(key){
+      var exp = this.order_data.order.items[key].expanded;
+      this.$set(this.order_data.order.items[key], 'expanded', !exp);
+    },
+
+    get_index_prepared: function(id){
+      return this.files_uploaded.length + id;
+    },
+
+    get_thumbs: function(){
+      var vm = this;
+      var child = this.get_upload_childs();
+
+       var images = child.map(e=>{
+
+
+        return {
+                  'item_id'         :  e.item_id,
+                  'thumbs_image_id' :  e.thumbs_image_id,
+                  'thumbs_file'     :  e.thumbs_file,
+                }
+      });
+
+      return images;
+    },
+
     /**
     * gets comments for current image from all comments
     */
     get_comments_for_image: function(id){
       if('undefined' !== typeof(this.order_data.wfp_images[id]) && 'undefined' !== typeof(this.order_data.wfp_images[id].request)){
         var wfp_images = Object.values( strip(this.order_data.wfp_images));
-        var comments = wfp_images[id].request;
+        var comments = ('undefined' != typeof(wfp_images[id].request_decision) || wfp_images[id].request_decision.decision != 'rejected')  && parseInt(wfp_images[id].is_active) !== 1 ? wfp_images[id].request : [];
       }else{
         return [];
       }
@@ -2874,8 +3456,27 @@ Vue.component('single-studio-content', {
       return result;
     },
 
+    get_upload_childs: function(){
+      var childs = (this.$children).filter(e => {
+        return e.constructor.options.name == 'upload-item-exists' || e.constructor.options.name == 'upload-item'}).filter(e=>{
+          if(!e.thumbs_file && e.thumbs_image_id < 0){
+            e.$refs.thumb.classList.add('error');
+          }else{
+            e.$refs.thumb.classList.remove('error');
+          }
+          return e});
+
+        return childs;
+    },
+
+    get_item_visibility: function(id){
+      var file          = this.watch_files_prepared[id];
+      var files_uploaded = this.files_uploaded[this.get_index_prepared(id)];
+
+      return ('undefined' != typeof(file) && file.length > 0) || ('undefined' != typeof(files_uploaded) && files_uploaded.length > 0);
+    },
+
     save_notes : function(){
-      console.log(this.order_data.messages.studio);
 
       jQuery.ajax({
         url: WP_URLS.ajax,
@@ -2901,23 +3502,39 @@ Vue.component('single-studio-content', {
     },
 
     show_image_popup: function(data){
-      jQuery('.image-preview-popup__inner').removeAttr('style');
-      jQuery('.image-preview-popup__inner').removeClass('loaded');
-      jQuery('.image-preview-popup__inner').find('img').remove();
-      jQuery('.image-preview-popup__inner').append(data.img);
-      this.show_popup_preview = true;
+      var order_id = 'undefined' != typeof(data.order_id) ? data.order_id : this.order_data.order_id;
+      this.$refs.preview_popup.$set(this.$refs.preview_popup, 'thumbnail', data.url);
+      this.$refs.preview_popup.$set(this.$refs.preview_popup, 'show', true);
 
-      jQuery('.image-preview-popup__inner').find('img').on('load', function(){
-       jQuery('.image-preview-popup__inner').addClass('loaded');
-        var width = jQuery('.image-preview-popup__inner').find('img').width();
-        var height = jQuery('.image-preview-popup__inner').find('img').height();
+      var author = 'undefined' != typeof(this.order_data.wfp_images[data.image_id].logs) && this.order_data.wfp_images[data.image_id].logs[0]?  this.order_data.wfp_images[data.image_id].logs[0].author : false;
 
-        jQuery('.image-preview-popup__inner').width(width);
-        jQuery('.image-preview-popup__inner').height(height);
+      this.$refs.preview_popup.$set(this.$refs.preview_popup, 'info', {
+        order_id: order_id,
+        image_id: data.image_id < 10? '0' + (data.image_id + 1)  : data.image_id + 1,
+        author: author,
+        logs:'undefined' != typeof(this.order_data.wfp_images[data.image_id].logs)? this.order_data.wfp_images[data.image_id].logs : false,
       });
 
-      Vue.nextTick(function(){
-      });
+
+     // return;
+
+     //  jQuery('.image-preview-popup__inner').removeAttr('style');
+     //  jQuery('.image-preview-popup__inner').removeClass('loaded');
+     //  jQuery('.image-preview-popup__inner').find('img').remove();
+     //  jQuery('.image-preview-popup__inner').append(data.img);
+     //  this.show_popup_preview = true;
+
+     //  jQuery('.image-preview-popup__inner').find('img').on('load', function(){
+     //   jQuery('.image-preview-popup__inner').addClass('loaded');
+     //    var width = jQuery('.image-preview-popup__inner').find('img').width();
+     //    var height = jQuery('.image-preview-popup__inner').find('img').height();
+
+     //    jQuery('.image-preview-popup__inner').width(width);
+     //    jQuery('.image-preview-popup__inner').height(height);
+     //  });
+
+     //  Vue.nextTick(function(){
+     //  });
     },
 
     show_image_loaded: function(dropbox_path){
@@ -2947,9 +3564,20 @@ Vue.component('single-studio-content', {
       return response.link;
     },
 
+    show_shoot_popup:function(){
+      popup_shoot.visible  = true;
+      popup_shoot.due_date = this.order_data.due_date.date_formatted;
+      popup_shoot.number_of_dates_left = this.number_of_dates_left;
+    },
+
     update_files: function(data){
       slog('update_files', 'green')
       this.$set(this.files_to_load, data.item_id, data.files);
+
+      /* track ids of changed items*/
+      var items_changed = this.items_changed;
+      items_changed.push(data.item_id);
+      this.$set(this, 'items_changed', items_changed);
 
       var count = 0;
       for(var i in this.files_to_load){
@@ -2971,7 +3599,37 @@ Vue.component('single-studio-content', {
     update_files_blank: function(data){
       this.$set(this.files_to_load, data.item_id, data.files);
       this.$set(this.files_prepared, data.item_id, data.files);
+
+      var items_changed = this.items_changed;
+      items_changed.push(data.item_id);
+      this.$set(this, 'items_changed', items_changed);
     },
+
+    update_thumbs: function(){
+      var data = [];
+
+      if('undefined'!== typeof(this.order_data.wfp_thumbnails)){
+        data = strip(this.order_data.wfp_thumbnails);
+      }
+
+      var children = (this.$children).filter(e => {
+        return e.constructor.options.name == 'upload-item-exists' || e.constructor.options.name == 'upload-item'});
+
+      for( var child of children){
+        var item_id = child.item_id;
+
+        if('undefined' !== typeof(data[item_id])){
+          child.thumbnail       = data[item_id].attachment_url;
+          child.thumbs_image_id = data[item_id].attachment_id;
+          child.thumbs_file = false;
+        }else{
+          child.thumbs_file = false;
+          child.thumbnail       =  tracker_url[0]+"/assets/images/blank.svg";
+          child.thumbs_image_id =  -1;
+        }
+      }
+    },
+
 
     upload_file: function(path, file,folder_id){
       var parent = this.$children.filter(
@@ -3044,6 +3702,109 @@ Vue.component('single-studio-content', {
       xhr.send(file);
     },
 
+
+    update_wfp_meta: function(){
+      slog('update_wfp_meta', 'green');
+      var vm = this;
+
+      block();
+
+      var meta = vm.get_upload_childs().filter(el=>{
+        console.log(el.files_uploaded);
+        return 'undefined' !== typeof(el.files_uploaded);
+      }).map(el => {
+
+        var file_uploaded = el.files_uploaded.map(e=>{
+          var url;
+          if('undefined' !== e.archive_url && e.archive_url){
+            url = e.archive_url;
+          }else if(e.path){
+            url = '';
+          }
+
+          return {
+            name: e.name,
+            size: e.size,
+            path: e.path,
+            image_url: url,
+          };
+        });
+
+        if(vm.items_changed.indexOf(el.item_id) >= 0){
+          var was_downloaded = 'undefined' != typeof(vm.order_data.wfp_images[el.item_id])? vm.order_data.wfp_images[el.item_id].was_downloaded : 0;
+          var date = new Date();
+          var fmt  = new DateFormatter();
+
+          var logs = 'undefined' != typeof(vm.order_data.wfp_images[el.item_id])? vm.order_data.wfp_images[el.item_id].logs: [];
+
+          var action = logs.length == 0 && 'undefined' == typeof(vm.order_data.wfp_images[el.item_id]) ? 'created' : 'updated';
+
+          logs.push({
+            date: fmt.formatDate(date, 'Y-m-d H:i:s'),
+            date_formatted: fmt.formatDate(date, 'd F Y') + ' at ' + fmt.formatDate(date, 'H:i'),
+            author: logged_in_user,
+            action: action,
+          });
+
+          var meta = {
+            logs            : logs,
+            author          : logged_in_user,
+            id              : el.item_id,
+            files_uploaded  : file_uploaded,
+            was_downloaded  : 'undefined' !== typeof(was_downloaded) ?  was_downloaded : 0,
+            is_active       : 1,
+            is_free         : is_boolean(el.is_free)? 1 : 0,
+          };
+
+          if('undefined' != typeof(vm.order_data.wfp_images[el.item_id])  && 'undefined' != typeof(vm.order_data.wfp_images[el.item_id].request)){
+            meta['request'] = vm.order_data.wfp_images[el.item_id].request;
+          }
+
+          if('undefined' != typeof(vm.order_data.wfp_images[el.item_id])  && 'undefined' != typeof(vm.order_data.wfp_images[el.item_id].request_decision)){
+            meta['request_decision'] = vm.order_data.wfp_images[el.item_id].request_decision;
+          }
+        }else{
+          meta = vm.order_data.wfp_images[el.item_id];
+        }
+
+        return meta;
+      })
+
+      clog(meta);
+      elog();
+
+      jQuery.ajax({
+        url: WP_URLS.ajax,
+        type: 'POST',
+        dataType: 'json',
+        data: {
+          action: 'update_order_images',
+          order_id: this.order_data.order_id,
+          meta: meta,
+          limit: this.number_of_photos_bought,
+        },
+      })
+      .done(function(e) {
+        vm.files_to_load  = {};
+        vm.files_prepared = {},
+        vm.order_data.wfp_images     = e.meta;
+      })
+
+      .fail(function() {
+      })
+
+      .always(function(e) {
+        unblock();
+        vm.do_submit = false;
+        vm.state_changed = false;
+        vm.items_changed = [];
+        vm.update_thumbs();
+        slog('update_wfp_meta result', 'green')
+        clog(e);
+        elog();
+      });
+    },
+
     validate: function(){
       valid = true;
       errors = [];
@@ -3105,226 +3866,106 @@ Vue.component('single-studio-content', {
       }
     },
 
-    exec_validate: function(){
-      var validate = this.validate();
+    show_review_window_cb: function(data){
+      var image_data = strip(this.order_data.wfp_images[data.item_id]);
 
-      if(!validate.valid){
-        unblock();
-        var files_prepared = this.watch_files_prepared.filter(e => {return e.length > 0})
-        popup_studio_errors.errors = validate.errors;
-        popup_studio_errors.visible = true;
-        popup_studio_errors.images_to_show = this.number_of_photos;
-        popup_studio_errors.images_uploaded = files_prepared.length + this.files_uploaded.length;
+      console.log(image_data);
+
+      var info = {
+        order_id:   'undefined' != typeof(data.order_id) ? data.order_id : this.order_data.order_id,
+        image_id:   data.item_id,
+        image_data: image_data,
+        author:     this.order_data.name,
       }
 
-      return validate.valid;
+      this.$refs.review_item_popup.$set(this.$refs.review_item_popup, 'info', info);
+      this.$refs.review_item_popup.$set(this.$refs.review_item_popup, 'show', true);
     },
 
-    get_upload_childs: function(){
-      var childs = (this.$children).filter(e => {
-        return e.constructor.options.name == 'upload-item-exists' || e.constructor.options.name == 'upload-item'}).filter(e=>{
-          if(!e.thumbs_file && e.thumbs_image_id < 0){
-            e.$refs.thumb.classList.add('error');
-          }else{
-            e.$refs.thumb.classList.remove('error');
-          }
-          return e});
-
-        return childs;
-    },
-
-    get_thumbs: function(){
+    submit_revision_cb: function(data){
       var vm = this;
-      var child = this.get_upload_childs();
+      var children = (vm.$children).filter(e => {
+        return e.item_id == data.item_id});
 
-       var images = child.map(e=>{
+      var files_uploaded = children[0].files_uploaded;
+      children[0].$set(children[0], 'files_uploaded', []);
 
-
-        return {
-                  'item_id'         :  e.item_id,
-                  'thumbs_image_id' :  e.thumbs_image_id,
-                  'thumbs_file'     :  e.thumbs_file,
-                }
-      });
-
-      return images;
-    },
-
-    collect_thumbs: function(){
-
-      if(!this.thumbs_to_load){
-        return;
+      for(var file of files_uploaded){
+        vm.delete_paths.push(file.path)
       }
 
-      block();
-      var vm = this;
-      var childs = (this.$children).filter(e => {return e.constructor.options.name == 'upload-item-exists' || e.constructor.options.name == 'upload-item'}).filter(e=>{ return e.thumbs_file});
+      children[0].$set(children[0], 'files', data.files);
 
-      var fd   = new FormData();
-      var images = childs.map(e=>{
+      vm.do_submit = true;
 
-        if('undefined' !== typeof(fd)){
-          fd.append('thumb_'+e.item_id, e.thumbs_file);
-        }
-
-        return JSON.stringify({
-                  'item_id'         : e.item_id,
-                  'thumbs_image_id' : e.thumbs_image_id,
-                  'thumbs_file'     :  e.thumbs_file,
-                })
-      });
-
-      fd.append('action', 'add_thumbnails');
-      fd.append('order_id', this.order_data.order_id);
-
-
-      jQuery.ajax({
-        url: WP_URLS.ajax,
-        type: 'POST',
-        processData: false,
-        contentType: false,
-        data: fd,
+      Vue.nextTick(function(){
+        vm.do_upload();
       })
 
-      .done(function(e){
-        if('undefined' != typeof(e.meta)){
-          vm.order_data.wfp_thumbnails = e.meta;
-          vm.update_thumbs();
-        }
-      })
-
-      .always(function(e){
-        console.log(e);
-        vm.thumbs_to_load = false;
-        unblock();
-      });
     },
 
-    update_wfp_meta: function(){
-      slog('update_wfp_meta', 'green');
-      var vm = this;
-
-      block();
-      var meta = vm.get_upload_childs().filter(el=>{
-        console.log(el.files_uploaded);
-        return 'undefined' !== typeof(el.files_uploaded);
-      }).map(el => {
-
-        var file_uploaded = el.files_uploaded.map(e=>{
-          var url;
-          if('undefined' !== e.archive_url && e.archive_url){
-            url = e.archive_url;
-          }else if(e.path){
-            url = '';
-          }
-
-          return {
-            name: e.name,
-            size: e.size,
-            path: e.path,
-            image_url: url,
-          };
-        });
-
-        var was_downloaded = 'undefined' != typeof(vm.order_data.wfp_images[el.item_id])? vm.order_data.wfp_images[el.item_id].was_downloaded : 0;
-
-        var meta = {
-          id              :  el.item_id,
-          files_uploaded  :  file_uploaded,
-          request         :  el.comments,
-          was_downloaded  : 'undefined' !== typeof(was_downloaded) ?  was_downloaded : 0,
-          is_active       : 1,
-          is_free         : is_boolean(el.is_free)? 1 : 0,
-        };
-
-        return meta;
-      })
-
-      clog(meta);
-      elog();
-
-      jQuery.ajax({
-        url: WP_URLS.ajax,
-        type: 'POST',
-        dataType: 'json',
-        data: {
-          action: 'update_order_images',
-          order_id: this.order_data.order_id,
-          meta: meta,
-          limit: this.number_of_photos_bought,
-        },
-      })
-      .done(function(e) {
-        vm.files_to_load  = {};
-        vm.files_prepared = {},
-        vm.order_data.wfp_images     = e.meta;
-      })
-
-      .fail(function() {
-      })
-
-      .always(function(e) {
-        unblock();
-        vm.do_submit = false;
-        vm.state_changed = false;
-        vm.update_thumbs();
-        slog('update_wfp_meta reuslt', 'green')
-        clog(e);
-        elog();
-      });
-    },
-
-    get_item_visibility: function(id){
-      var file          = this.watch_files_prepared[id];
-      var files_uploaded = this.files_uploaded[this.get_index_prepared(id)];
-
-
-      return ('undefined' != typeof(file) && file.length > 0) || ('undefined' != typeof(files_uploaded) && files_uploaded.length > 0);
-    },
-
-
-    delete_path_update: function(data){
-      this.delete_paths.push(data.dropbox_path);
-    },
-
-    exec_delete_paths:function(){
-      for(var path of this.delete_paths){
-        var data = JSON.stringify({
-          "path": path
-        });
-
-        var xhr = new XMLHttpRequest();
-
-        xhr.addEventListener("readystatechange", function () {
-          if (this.readyState === 4) {
-            console.log(JSON.parse(this.responseText));
-          }
-        });
-
-        xhr.open("POST", "https://api.dropboxapi.com/2/files/delete_v2");
-        xhr.setRequestHeader("authorization", "Bearer " + dropbox.token);
-        xhr.setRequestHeader("content-type", "application/json");
-        xhr.setRequestHeader("cache-control", "no-cache");
-
-        xhr.send(data);
-      }
-    },
 
     toggle_free_paid_cb: function(data){
       this.state_changed = true;
-    }
+    },
+
+
+    /**
+    * updates order status
+    *
+    * @param - obj {val: value, name: select_name}
+    */
+    update_order_status: function(data){
+      // var order_status = Object.keys(order_statuses).filter(id => {return order_statuses[id].title == data.val} );
+      // this.order_data.order_status = order_status[0];
+
+      if(this.visible){
+        clog('update_order_status'),
+        this.order_was_changed = true;
+        var index = studio_app.get_index_of_item_by('order_id', this.order_data.order_id);
+        var status = data.val.replace('wc-', '');
+        var fmt = new DateFormatter();
+        var date = new Date();
+        var date_formatted = fmt.formatDate(date, 'Y-m-d H:i:s');
+
+        const dates = JSON.parse(JSON.stringify(studio_app.items[index].data.statuses_history[status].dates));
+
+        dates.push(date_formatted);
+
+        var start_status  = tracker_options['orders_misc']['countdown'].replace('wc-', '');
+
+        // if(status == start_status){
+
+        //   var _date = new Date();
+
+        //   var days = this.order_data.is_fasttrack ? parseInt(tracker_options.turnaround.fasttrack) : parseInt(tracker_options.turnaround.regular);
+
+        //   _date.setDate(_date.getDate() + days);
+
+        //   var _dates = {
+        //     'date'           : fmt.formatDate(_date, 'Y-m-d H:i:s'),
+        //     'date_formatted' : fmt.formatDate(_date, 'd M Y'),
+        //     'is_overdue'     : false,
+        //   };
+
+        //   studio_app.$set(studio_app.items[index].data, 'due_date', _dates);
+        //   this.$set(this.order_data, 'due_date', _dates);
+        // }
+
+        this.$set(this.order_data.statuses_history[status], 'dates', dates);
+        studio_app.$set(studio_app.items[index].data.statuses_history[status], 'dates', dates);
+      }
+    },
   },
 
   template: '#studio-single-content',
 });
-
-
-console.log('test 4');
 Vue.component('upload-item', {
   data: function(){
     return {
       number         : '',
       item_id             : '',
+      order_id             : '',
       state          : this._state,
       comments       : [],
       files          : [],
@@ -3338,6 +3979,7 @@ Vue.component('upload-item', {
 
   props : [
     '_item_id',
+    '_order_id',
     '_number',
     '_state',
     '_comments',
@@ -3352,6 +3994,7 @@ Vue.component('upload-item', {
     this.files_uploaded = typeof(this._files_uploaded) !== 'undefined' ?this._files_uploaded : this.files_uploaded  ;
     this.files = this._files;
     this.item_id = this._item_id;
+    this.order_id = this._order_id;
     this.is_single_order = this._is_single_order;
 
     var item = this.$parent.order_data.wfp_images[this.item_id];
@@ -3374,7 +4017,11 @@ Vue.component('upload-item', {
     }, false);
   },
 
-  watch :  {},
+  watch :  {
+    _order_id:function(val){
+      this.order_id = val;
+    }
+  },
 
   methods: {},
 
@@ -3382,7 +4029,7 @@ Vue.component('upload-item', {
     <div class="upload-item" v-bind:class="{'has-files' : has_files}">
       <div class="upload-item__header">
         <div class="upload-item__state">
-          <span class="number">{{number}} </span>
+          <span class="number">#FS-{{order_id}}/{{number}} </span>
           <span class="state" v-bind:class="get_state_slug(this_state)">{{this_state}} </span>
         </div>
         <div class="col"></div>
@@ -3391,21 +4038,13 @@ Vue.component('upload-item', {
           <img :src="thumbnail">
           <input type="file" v-on:change="upload_from_input_thumb">
         </label>
-
-        <div class="upload-item__comments "
-          v-bind:class="{cup: has_comment , active: exec_show_comments}"
-          v-on:click="show_comments = !show_comments"
-          >
-          <svg class="icon svg-icon-comment" v-bind:class="{red: has_comment}"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-comment"></use> </svg>
-          <span class="count">{{comments.length}}</span>
-        </div>
       </div><!-- upload-item__header -->
 
       <div class="upload-item__body">
         <div class="upload-item__drop-area" v-show=" !exec_show_comments && !is_downloaded" ref="drop_area">
           <div class="download-cta">
-            <img src="`+tracker_url[0]+`assets/images/load.png"  class="multiple-image" alt="">
-            <img src="`+tracker_url[0]+`assets/images/load_blank.png" class="single-image" alt="">
+            <img src="`+tracker_url[0]+`assets/images/blank_dark.svg"  class="multiple-image" alt="">
+            <img src="`+tracker_url[0]+`assets/images/blank_dark.svg" class="single-image" alt="">
             <span class="download-cta__text">
               <b>Drop your images here</b>
               or
@@ -3459,14 +4098,16 @@ Vue.component('upload-item', {
       </div>
 
       <div class="upload-item__footer">
-        <div class="paid-free"
-          v-bind:class="{active: is_free}"
-          v-if="!is_single_order"
-          v-on:click="toggle_free_paid_cb">
-          <span class="paid">Paid</span>
-          <span class="free">Free</span>
-          <span class="paid-free__marker"></span>
-        </div>
+      </div>
+      <div class="paid-free"
+        v-bind:class="{active: is_free}"
+        v-on:click="toggle_free_paid_cb"
+        v-if="!is_single_order"
+      >
+       <span class="paid-free__marker">
+       <svg class="icon svg-icon-lock2"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-lock2"></use> </svg>
+       <svg class="icon svg-icon-unlock"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-unlock"></use> </svg>
+       </span>
       </div>
     </div><!-- upload-item -->
   `,
@@ -3477,6 +4118,7 @@ Vue.component('upload-item-exists', {
       number         : '',
       is_old_order   : '',
       is_single_order : '',
+      order_id : '',
       item_id        : '',
       state          : this._state,
       comments       : [],
@@ -3488,6 +4130,7 @@ Vue.component('upload-item-exists', {
 
   props : [
     '_item_id',
+    '_order_id',
     '_number',
     '_state',
     '_comments',
@@ -3505,6 +4148,7 @@ Vue.component('upload-item-exists', {
     this.files_uploaded = typeof(this._files_uploaded) !== 'undefined' ?this._files_uploaded : this.files_uploaded  ;
     this.item_id = this._item_id;
     this.is_old_order = this._is_old_order;
+    this.order_id = this._order_id;
     this.is_single_order = this._is_single_order;
     var item = this.$parent.order_data.wfp_images[this.item_id];
     this.is_free = 'undefined' != typeof(item.is_free) && item.is_free == 1;
@@ -3533,6 +4177,10 @@ Vue.component('upload-item-exists', {
     _is_single_order: function(val){
       this.is_single_order = val;
     },
+
+    _order_id:function(val){
+      this.order_id = val;
+    },
   },
 
   methods: {
@@ -3556,36 +4204,36 @@ Vue.component('upload-item-exists', {
 
       xhr.send(data);
     },
+
+    show_review_window: function(){
+      this.$emit('show_review_window', {item_id: this.item_id});
+    },
   },
 
   template: `
     <div class="upload-item" v-bind:class="{'has-files' : has_files}">
       <div class="upload-item__header">
         <div class="upload-item__state">
-          <span class="number">{{number}} </span>
+          <span class="number">#FS-{{order_id}}/{{number}} </span>
           <span class="state" v-bind:class="get_state_slug(this_state)">{{this_state}} </span>
         </div>
         <div class="col"></div>
+
+        <svg class="icon svg-icon-review-mode valign-center"
+        v-on:click = "show_review_window"
+        v-if="has_comment"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-review-mode"></use></svg>
 
         <label class="upload-item__thumb" ref="thumb" v-if="!is_old_order">
           <img :src="thumbnail">
           <input type="file" v-on:change="upload_from_input_thumb">
         </label>
-
-        <div class="upload-item__comments "
-          v-bind:class="{cup: has_comment , active: exec_show_comments}"
-          v-on:click="show_comments = !show_comments"
-          >
-          <svg class="icon svg-icon-comment" v-bind:class="{red: has_comment}"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-comment"></use> </svg>
-          <span class="count">{{comments.length}}</span>
-        </div>
       </div><!-- upload-item__header -->
 
       <div class="upload-item__body">
         <div class="upload-item__drop-area" v-show=" !exec_show_comments && !is_old_order && !is_downloaded" ref="drop_area">
           <div class="download-cta">
-            <img src="`+tracker_url[0]+`/assets/images/load.png"  class="multiple-image" alt="">
-            <img src="`+tracker_url[0]+`/assets/images/load_blank.png" class="single-image" alt="">
+            <img src="`+tracker_url[0]+`/assets/images/blank_dark.svg"  class="multiple-image" alt="">
+            <img src="`+tracker_url[0]+`/assets/images/blank_dark.svg" class="single-image" alt="">
             <span class="download-cta__text">
               <b>Drop your images here</b>
               or
@@ -3638,15 +4286,16 @@ Vue.component('upload-item-exists', {
         </div>
       </div>
       <div class="upload-item__footer">
-        <div class="paid-free"
+      </div>
+      <div class="paid-free"
         v-bind:class="{active: is_free}"
         v-on:click="toggle_free_paid_cb"
         v-if="!is_single_order"
-        >
-          <span class="paid">Paid</span>
-          <span class="free">Free</span>
-          <span class="paid-free__marker"></span>
-        </div>
+      >
+       <span class="paid-free__marker">
+       <svg class="icon svg-icon-lock2"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-lock2"></use> </svg>
+       <svg class="icon svg-icon-unlock"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-unlock"></use> </svg>
+       </span>
       </div>
     </div><!-- upload-item -->
   `,
@@ -3656,12 +4305,14 @@ Vue.component('upload-item-blank', {
     return {
       blank_number         : '',
       blank_item_id        :  '',
+      order_id        :  '',
     };
   },
 
   props : [
     '_blank_item_id',
     '_blank_number',
+    '_order_id',
   ],
 
   computed:{
@@ -3673,6 +4324,7 @@ Vue.component('upload-item-blank', {
   beforeMount: function(){
     this.blank_number =  this._blank_number < 10? '0' + this._blank_number : this._blank_number;
     this.blank_item_id = this._blank_item_id;
+    this.order_id = this._order_id;
   },
 
   mounted: function(){
@@ -3696,6 +4348,10 @@ Vue.component('upload-item-blank', {
 
     _blank_item_id: function(val){
       this.blank_item_id = val;
+    },
+    _order_id: function(val){
+      console.log(val);
+      this.order_id = val;
     },
   },
 
@@ -3792,19 +4448,15 @@ Vue.component('upload-item-blank', {
     <div class="upload-item upload-item_blank">
       <div class="upload-item__header">
         <div class="upload-item__state">
-          <span class="number">{{blank_number}} </span>
-          <span class="state upload">{{this_state}} </span>
-        </div>
-        <div class="upload-item__comments ">
-          <svg class="icon svg-icon-comment"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-comment"></use> </svg>
-          <span class="count">-</span>
+          <span class="number">#FS-{{order_id}}/{{blank_number}} </span>
+          <span class="state upload">Upload </span>
         </div>
       </div><!-- upload-item__header -->
 
       <div class="upload-item__body">
         <div class="upload-item__drop-area" ref="drop_area_blank">
           <div class="download-cta">
-            <img src="`+tracker_url[0]+`/assets/images/load.png"  class="single-image-2" alt="">
+            <img src="`+tracker_url[0]+`/assets/images/blank_dark.svg"  class="single-image-2" alt="">
              <span class="download-cta__text">
               <b>Drop your images here</b>
               or
@@ -3816,6 +4468,220 @@ Vue.component('upload-item-blank', {
             </span>
           </div>
         </div>
+      </div>
+    </div><!-- upload-item -->
+  `,
+});
+Vue.component('upload-item-blank-review', {
+  data: function(){
+    return {
+      blank_number         : '',
+      blank_item_id        :  '',
+      order_id        :  '',
+      files: [],
+    };
+  },
+
+  mixins: [upload_item_mixin, upload_item_thumb],
+
+  props : [
+    '_blank_item_id',
+    '_blank_number',
+    '_order_id',
+  ],
+
+  computed:{
+    this_state: function(){
+      return 'Add New';
+    },
+
+    has_files: function(){
+      return this.files.length > 0;
+    },
+  },
+
+  beforeMount: function(){
+    this.blank_number =  this._blank_number < 10? '0' + this._blank_number : this._blank_number;
+    this.blank_item_id = this._blank_item_id;
+    this.order_id = this._order_id;
+  },
+
+  mounted: function(){
+    this.init_drop_area();
+    var vm = this;
+
+    /*
+    * add event listener that will hide view comments state
+    */
+    this.$el.addEventListener('dragenter', function(){
+      Vue.nextTick(function(){
+        vm.highlight();
+      });
+    }, false);
+  },
+
+  watch :  {
+    _blank_number: function(val){
+      this.blank_number =  val < 10? '0'+val: val;
+    },
+
+    _blank_item_id: function(val){
+      this.blank_item_id = val;
+    },
+    _order_id: function(val){
+      console.log(val);
+      this.order_id = val;
+    },
+  },
+
+  methods: {
+    delete_in_dropbox:function(path){
+      var data = JSON.stringify({
+        "path": path
+      });
+
+      var xhr = new XMLHttpRequest();
+
+      xhr.addEventListener("readystatechange", function () {
+        if (this.readyState === 4) {
+          console.log(JSON.parse(this.responseText));
+        }
+      });
+
+      xhr.open("POST", "https://api.dropboxapi.com/2/files/delete_v2");
+      xhr.setRequestHeader("authorization", "Bearer " + dropbox.token);
+      xhr.setRequestHeader("content-type", "application/json");
+      xhr.setRequestHeader("cache-control", "no-cache");
+
+      xhr.send(data);
+    },
+
+    /**
+    * calculates date and return it in formatted view
+    *
+    * @param d - string 'Y-m-d H:i:s'
+    *
+    * @return string
+    */
+    date: function(d){
+      var date = new Date(d);
+      var fmt  = new DateFormatter();
+      return fmt.formatDate(date, 'M d, H:i');
+
+    },
+
+    /**
+    * handles drop image in drag-n-drop area
+    *
+    * @param e - event
+    */
+    handledrop: function(e){
+      let dt = e.dataTransfer;
+      let files = dt.files;
+      var items = dt.items;
+
+      var files_temp = [];
+
+      for(var file of files){
+        if(file.type != 'image/jpeg' && file.type != "image/png"){
+          continue;
+        }
+        files_temp.push(file);
+        this.files.push(file);
+      }
+
+      this.$emit('file_changed_blank', {files: files_temp, number: this.blank_number, item_id:this.blank_item_id});
+    },
+
+    /**
+    * adds highlight style for drag area
+    */
+    highlight: function(e) {
+      this.$refs.drop_area_blank.classList.add('highlight')
+    },
+
+    init_drop_area: function(){
+      var dropArea = this.$refs.drop_area_blank;
+
+      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, this.prevent_defaults, false)
+      });
+
+      ['dragenter', 'dragover'].forEach(eventName => {
+        dropArea.addEventListener(eventName, this.highlight, false)
+      })
+
+      ;['dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, this.unhighlight, false)
+      })
+
+      dropArea.addEventListener('drop', this.handledrop, false);
+    },
+
+    prevent_defaults: function(e) {
+      e.preventDefault()
+      e.stopPropagation()
+    },
+
+    upload_from_input: function(event){
+      console.log(1);
+      var files_temp = [];
+      for(var file of event.target.files){
+        if(file.type != 'image/jpeg' && file.type != "image/png"){
+          continue;
+        }else{
+          files_temp.push(file);
+          this.files.push(file);
+        }
+      }
+
+      if(files_temp.length > 0){
+        this.$emit('file_changed_blank', {files: files_temp, number: this.blank_number, item_id:this.blank_item_id});
+      }
+    },
+
+    unhighlight: function(e) {
+      this.$refs.drop_area_blank.classList.remove('highlight')
+    },
+  },
+
+  template: `
+    <div class="upload-item upload-item_blank" v-bind:class="{'has-files' : has_files}">
+      <div class="upload-item__header">
+        <div class="upload-item__state">
+          <span class="number">#FS-{{order_id}}/{{blank_number}} </span>
+          <span class="state upload">Upload </span>
+        </div>
+      </div><!-- upload-item__header -->
+
+      <div class="upload-item__body">
+        <div class="upload-item__drop-area" ref="drop_area_blank">
+          <div class="download-cta">
+            <img src="`+tracker_url[0]+`/assets/images/blank_dark.svg"  class="single-image-2" alt="">
+             <span class="download-cta__text">
+              <b>Drop your images here</b>
+              or
+              <input type="file" multiple id="fileupload_new" v-on:change="upload_from_input">
+
+              <label class="marked" for="fileupload_new">
+                browse
+              </label>
+            </span>
+          </div>
+        </div>
+
+         <upload-item-image
+          v-for="(file, file_id) in files_to_show"
+          :key="'upload'+file_id"
+          :_name = 'file.name'
+          :_size = 'file.size'
+          :_state = 'file.state'
+          :_image_id = 'file.image_id'
+          v-on:show_image_trigger = "show_image"
+          v-on:delete_image_trigger = "delete_image"
+        >
+        </upload-item-image>
+
       </div>
     </div><!-- upload-item -->
   `,
@@ -3890,18 +4756,18 @@ Vue.component('upload-item-image', {
     <div class="upload-item__image">
       <div class="upload-item__image-progress" ref="progress"></div>
       <div class="upload-item__image-data row">
-        <div class="col-7">
-          <span class="upload-item__image-title">{{name}}</span>
+        <div class="col-8">
+          <span class="upload-item__image-title" :title="name">{{name}}</span>
           <span class="upload-item__image-size">{{image_size}}</span>
         </div>
-        <div class="col-5 valign-center text-right">
-          <svg class="icon svg-icon-eye"
+        <div class="col-4 valign-center text-right">
+          <svg class="icon svg-icon-notes"
             v-on:click="show_image"
-          > <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-eye"></use> </svg>
+          > <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-notes"></use> </svg>
 
-          <svg class="icon svg-icon-can"
+          <svg class="icon svg-icon-equis"
             v-on:click="delete_image"
-          > <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-can"></use> </svg>
+          > <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-equis"></use> </svg>
         </div>
       </div><!-- upload-item__image-data  -->
     </div><!-- upload-item__image -->
@@ -3977,18 +4843,18 @@ Vue.component('ready-item-image', {
     <div class="upload-item__image">
       <div class="upload-item__image-progress" ref="progress" style="width:100%"></div>
       <div class="upload-item__image-data row">
-        <div class="col-7">
-          <span class="upload-item__image-title">{{name}}</span>
+        <div class="col-8">
+          <span class="upload-item__image-title" :title="name">{{name}}</span>
           <span class="upload-item__image-size">{{image_size}}</span>
         </div>
-        <div class="col-5 valign-center text-right">
-          <svg class="icon svg-icon-eye"
+        <div class="col-4 valign-center text-right">
+          <svg class="icon svg-icon-notes"
             v-on:click="show_image"
-          > <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-eye"></use> </svg>
+          > <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-notes"></use> </svg>
 
-          <svg class="icon svg-icon-can"
+          <svg class="icon svg-icon-equis"
             v-on:click="delete_image"
-          > <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-can"></use> </svg>
+          > <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-equis"></use> </svg>
         </div>
       </div><!-- upload-item__image-data  -->
     </div><!-- upload-item__image -->
@@ -4094,11 +4960,13 @@ Vue.component('frontdesk-upload-exists', {
       files_uploaded : [],
       show_comments  : false,
       display: 'preview',
+      image_id: '',
     };
   },
 
   props : [
     '_item_id',
+    '_image_id',
     '_number',
     '_thumbnail',
     '_state',
@@ -4117,6 +4985,7 @@ Vue.component('frontdesk-upload-exists', {
     this.comments = this._comments? this._comments : [];
     this.files_uploaded = typeof(this._files_uploaded) !== 'undefined' ?this._files_uploaded : this.files_uploaded  ;
     this.item_id = this._item_id;
+    this.image_id = this._image_id;
     this.thumbnail = this._thumbnail;
     this.is_old_order = this._is_old_order;
     this.order_id = this._order_id;
@@ -4149,11 +5018,20 @@ Vue.component('frontdesk-upload-exists', {
       this.is_single_order = val;
     },
 
+    _image_id: function(val){
+      this.image_id = val;
+    },
+
+    _thumbnail: function(val){
+      this.thumbnail = val;
+    },
+
     _order_id: function(val){
       this.order_id = val;
     },
 
-    comments: function(val){
+    _comments: function(val){
+      this.comments = val;
     }
   },
 
@@ -4180,6 +5058,7 @@ Vue.component('frontdesk-upload-exists', {
     },
 
     show_comment_window: function(){
+      console.log( this.comments[0] );
       this.$emit('show_comments_window',{thumbnail: this.thumbnail, comments: this.comments[0], item_id:'#FS-'+this.order_id + '/' + this.number, order_id:  this.order_id });
     },
   },
@@ -4191,7 +5070,6 @@ Vue.component('frontdesk-upload-exists', {
           <span class="number">#FS-{{order_id}}/{{number}} </span>
           <span class="state" v-bind:class="get_state_slug(this_state)">{{this_state}} </span>
         </div>
-
         <div class="clearfix valign-center"
           >
           <svg class="icon svg-icon-review-mode"
@@ -4218,7 +5096,7 @@ Vue.component('frontdesk-upload-exists', {
       </div><!-- frnt-upload-item__header -->
 
       <div class="frnt-upload-item__thumbnail"  v-show="display=='preview'">
-       <img :src="thumbnail">
+       <img :src="files_uploaded[0].thumb">
       </div>
 
       <div class="frnt-upload-item__body" v-show="display=='shoots'">
@@ -5203,6 +6081,101 @@ Vue.component('customer_name', {
     </div>
    </div>`,
 })
+Vue.component('my-date-range',{
+
+  data: function(){
+    return{
+      label: 'All Time',
+      text: "Jan 01 1999 → Mar 17 2021",
+    };
+  },
+
+  mounted: function(){
+    var now     = new Date();
+    var last_7  = new Date();
+    var last_30  = new Date();
+    var last_90 = new Date();
+    last_7.setDate(last_7.getDate() - 7);
+    last_30.setDate(last_30.getDate() - 30);
+    last_90.setDate(last_7.getDate() - 90);
+
+    var now     = new Date();
+
+    var today_str = (now.getMonth() + 1) + '/' + now.getDate() + '/' + now.getFullYear();
+
+
+    var last_7_str = (last_7.getMonth() + 1) + '/' + last_7.getDate() + '/' + last_7.getFullYear();
+
+    var last_30_str = (last_30.getMonth() + 1) + '/' + last_30.getDate() + '/' + last_30.getFullYear();
+
+    var last_90_str = (last_90.getMonth() + 1) + '/' + last_90.getDate() + '/' + last_90.getFullYear();
+
+    var for_last_day = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+    var month_first_day = (now.getMonth() + 1) + '/' + 1 + '/' + now.getFullYear();
+
+    var month_last_day = (now.getMonth() + 1) + '/' + for_last_day.getDate() + '/' + now.getFullYear();
+    var vm = this;
+
+    jQuery(vm.$el).daterangepicker({
+      "autoApply": true,
+      "ranges": {
+          "Today": [
+              today_str,
+              today_str
+          ],
+          'This Month': [
+            month_first_day,
+            today_str
+          ],
+
+          'Past 7 Days': [
+            last_7_str,
+            today_str
+          ],
+
+          'Past 30 Days':[
+            last_30_str,
+            today_str
+          ],
+
+          'Past 90 Days': [
+            last_90_str,
+            today_str
+          ],
+          'All time':[
+            '01/01/1999',
+            today_str,
+          ],
+      },
+      "alwaysShowCalendars": true,
+      "startDate": '01/01/1999',
+      "endDate": today_str
+    }, function(start, end, label) {
+
+      vm.text = start.format('MMM DD YYYY') + ' → ' + end.format('MMM DD YYYY');
+      vm.label = label;
+
+      var data = {start: start.format('YYYY-MM-DDT00:00:00'), end: end.format('YYYY-MM-DDT23:59:59'), }
+
+      vm.$emit('change_dates', data);
+
+    });
+  },
+
+
+  template: `
+    <div class="my-order__date-range-picker-2">
+      <svg class="icon svg-icon-calendar"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-calendar"></use> </svg>
+
+      <span class="label">{{label}}</span>
+
+      <span class="dates">{{text}}</span>
+
+      <svg class="icon svg-icon-arrows"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-arrows"></use> </svg>
+    </div>
+  `,
+});
 if(document.getElementById('frontdesk_list')){
 
   frontdesk_list = new Vue({
@@ -5260,8 +6233,6 @@ if(document.getElementById('frontdesk_list')){
         const _item_data = JSON.parse(JSON.stringify(item.data));
         return _item_data;
       },
-
-
     },
 
     watch: {
@@ -5782,11 +6753,10 @@ if(document.getElementById('search-field')){
     },
   })
 }
-if(document.getElementById('single-frontdesk-order')){
-  frontdesk_order = new Vue({
+if(document.getElementById('single-frontdesk-order')){frontdesk_order = new Vue({
     el : '#single-frontdesk-order',
 
-    mixins: [get_set_props, animation_mixin, fds_order, upload_pdf_mixin],
+    mixins: [get_set_props, animation_mixin, fds_order, upload_pdf_mixin, front_studio],
 
     data: {
       new_order: false,
@@ -5799,8 +6769,7 @@ if(document.getElementById('single-frontdesk-order')){
       enquery_note_text: '',
       studio_notes_count:  1,
       enquery_notes_count: 1,
-      order_was_changed: false,
-      is_run_saving: false,
+      order_was_changed: false, is_run_saving: false,
       show_popup_preview: false,
       show_product_details:{
         names: false,
@@ -5840,7 +6809,7 @@ if(document.getElementById('single-frontdesk-order')){
       },
 
       'order_was_changed': function(val){
-        clog('order_was_changed: ' + val, 'red');
+        // clog('order_was_changed: ' + val, 'red');
       },
 
       'order_data.location.unit': function(val){
@@ -5882,26 +6851,61 @@ if(document.getElementById('single-frontdesk-order')){
         return wfp_images.length > 0;
       },
 
+      /* filters images by statuses downloaded, in review etc*/
+      files_uploaded_counts: function(){
+        var elements = this.order_data.wfp_images;
+
+        if(!elements){
+          return {
+            all : [],
+            downloaded : [],
+            not_downloaded : [],
+            in_review : [],
+          };
+        }
+
+        var elements_downloaded = elements.filter(e=>{return e.was_downloaded == 1})
+        var elements_not_downloaded = elements.filter(e=>{return e.was_downloaded == 0})
+        var elements_in_review = elements.filter(e=>{return ('undefined' != typeof(e.request) && 'undefined' == typeof(e.request_decision)) })
+
+        return {
+          all : elements,
+          downloaded : elements_downloaded,
+          not_downloaded : elements_not_downloaded,
+          in_review : elements_in_review,
+        };
+      },
+
       files_uploaded: function(){
         var files = [];
-        for(var i = 0; i < this.order_data.wfp_images.length; i++){
+
+        if(this.order_data.wfp_image_single){
+          var elements = this.order_data.wfp_image_single;
+        }else{
+          var elements = this.files_uploaded_counts[this.filter];
+        }
+
+        for(var i = 0; i < elements.length; i++){
           files.push([]);
         }
 
-        if(this.order_data.wfp_images){
-          for(image_id in this.order_data.wfp_images){
-            var image = this.order_data.wfp_images[image_id];
+        if(elements){
+          for(var image_id in elements){
+            var image = elements[image_id];
             /**
             * check if an array of images is set
             */
             if(typeof(image.files_uploaded) == 'undefined' && !is_boolean(image.archive_url) && image.archive_url){
               var file = {
+                            image_id: parseInt(image.id),
                             name: typeof(image.name) != 'undefined'? image.name : 'Old version image',
                             size: typeof(image.size) != 'undefined'? image.size : '',
                             request: typeof(image.request)       != 'undefined'? image.request : '',
                             path: typeof(image.dropbox_path)     != 'undefined'? image.dropbox_path : '',
                             image_url: typeof(image.archive_url) != 'undefined'? image.archive_url.replace('?dl-1', '?dl-0') : '',
                             archive_url: typeof(image.archive_url) != 'undefined'? image.archive_url.replace('?dl-1', '?dl-0') : '',
+
+                            thumb : this.get_thumbnail(parseInt(image.id)),
                           };
               if('undefined' == typeof(files[image_id])){
                 files[image_id] = [];
@@ -5918,15 +6922,18 @@ if(document.getElementById('single-frontdesk-order')){
                 var images = image.files_uploaded;
               }
 
-              for(var image of images){
+              for(var _image of images){
                 var file = {
-                        name: typeof(image.name) != 'undefined'? image.name : 'Old version image',
-                        size: typeof(image.size) != 'undefined'? image.size : '',
-                        path: typeof(image.path) != 'undefined'? image.path : '',
-                        image_url: typeof(image.image_url) != 'undefined'? image.image_url : '',
-                        request  : typeof(image.request)   != 'undefined'? image.request : '',
+                        image_id: parseInt(image.id),
+                        thumb : this.get_thumbnail(parseInt(image.id)),
+                        name: typeof(_image.name) != 'undefined'? _image.name : 'Old version image',
+                        size: typeof(_image.size) != 'undefined'? _image.size : '',
+                        path: typeof(_image.path) != 'undefined'? _image.path : '',
+                        image_url: typeof(_image.image_url) != 'undefined'? _image.image_url : '',
+                        request  : typeof(_image.request)   != 'undefined'? _image.request : '',
                       };
-                if(image.image_url || image.path){
+
+                if(_image.image_url || _image.path){
                   if('undefined' == typeof(files[image_id])){
                     files[image_id] = [];
                   }
@@ -5941,90 +6948,6 @@ if(document.getElementById('single-frontdesk-order')){
         return files;
       },
 
-      count_photos: function(){
-        if('undefined' == typeof(this.order_data.order_items_data.extra_data.image_count)){
-          return 1;
-        }
-
-        if('undefined' != typeof(this.order_data.order_items_data.extra_data.image_count.value)){
-
-          return this.order_data.order_items_data.extra_data.image_count.value;
-        }
-
-        return 'na';
-      },
-
-      count_photo_label: function(){
-        var label = this.count_photos.toString() == '1' && this.count_photos != 11? 'photo' : 'photos';
-
-        return label;
-      },
-
-      day_label: function(){
-        return false;
-      },
-
-      count_customisations: function(){
-        var count = 0;
-
-        if('undefined' == typeof(this.order_data.order_items_data)|| !this.order_data.order_items_data ){
-          return count;
-        }
-
-        if('undefined' != typeof(this.order_data.order_items_data.shoot_data.customize.color_pref)){
-          count += this.order_data.order_items_data.shoot_data.customize.color_pref.length
-        }
-
-        if('undefined' != typeof(this.order_data.order_items_data.shoot_data.customize.sizes)){
-          count += (this.order_data.order_items_data.shoot_data.customize.sizes.length - 1);
-        }
-
-        if('undefined' != typeof(this.order_data.order_items_data.shoot_data.customize.props)){
-          count += (this.order_data.order_items_data.shoot_data.customize.props == 'custom') ? 1 : 0;
-        }
-
-        var label = count.toString().slice(-1) == '1' && count != 11? 'Customisation' : 'Customisations';
-
-        return count.toString() + ' ' + label;
-      },
-
-      customisation_data: function(){
-        return{
-          theme: this.order_data.order_items_data.extra_data.colors.value?  this.order_data.order_items_data.extra_data.colors.value : "Don't Care" ,
-          position: this.order_data.order_items_data.extra_data.position.value != 'none'? this.order_data.order_items_data.extra_data.position.value : "Don't Care" ,
-          props: this.order_data.order_items_data.extra_data.props.value != 'none' ? this.order_data.order_items_data.extra_data.props.value : "Don't Care" ,
-          sizes: this.order_data.order_items_data.extra_data.sizes.value.join('\n'),
-        };
-      },
-
-      due_days_left: function(){
-        if('undefined' == typeof(this.order_data.due_date.date)){
-          return -1;
-        }
-
-        var due_date = this.order_data.due_date.date;
-        var now      = new Date();
-        var fmt  = new DateFormatter();
-        var _now = fmt.formatDate(now, 'Y-m-d H:i:s');
-
-        var date_diff = date_diff_indays(_now, due_date);
-        var fmt  = new DateFormatter();
-        return Math.max(0, date_diff);
-      },
-
-      due_days_left_label: function(){
-        if(this.due_days_left < 0){
-          return{
-            before: '',
-            after: '',
-          }
-        }
-
-        var label = this.due_days_left.toString() == '1' && this.due_days_left != 11? 'single' : 'multiple';
-
-        return label == 'single'? {before: 'There is', after: 'day',} : {before: 'There are', after: 'days',}
-      },
-
       get_count_reviews:function(){
           if(!this.order_data.wfp_images){
             return 0;
@@ -6036,37 +6959,6 @@ if(document.getElementById('single-frontdesk-order')){
           }).reduce((a, b) => a + b, 0);
       },
 
-      image_data: function(){
-        if(!this.order_data.wfp_images){
-          return {
-            total: 0,
-            review: 0,
-          }
-        }
-
-        var length = this.order_data.wfp_images.filter(e=>{
-          return e.is_active == 0 && 'undefined' != typeof(e.request);
-        }).length;
-
-        var data = {
-          total: this.order_data.wfp_images.length,
-          review: length,
-        };
-
-
-        return data;
-      },
-
-      notes_label: function(){
-        if('undefined' != typeof(this.order_data.order_items_data.extra_data.shoots)){
-          return 'Custom Shoot List';
-        }
-        if('undefined' != typeof(this.order_data.order_items_data.extra_data.comment) && (this.order_data.order_items_data.extra_data.comment.value) && (this.order_data.order_items_data.extra_data.comment.value != 'false')){
-          return 'Quick Notes';
-        }
-        return '-';
-      },
-
       _order_was_changed: function(){
         if(this.visible){
           return this.order_was_changed;
@@ -6074,129 +6966,40 @@ if(document.getElementById('single-frontdesk-order')){
         return false;
       },
 
-      orders_in_details: function(){
-        var vm = this;
-        var details = Object.values(orders_in_details).map(el=>{
-          var date;
+      /*information about review countdown*/
+      review_notifications: function(){
 
-          var info = Object.values(vm.order_data.statuses_history).filter(e=>{
-            return e.status == el.name;
-          });
-
-          var dates = info[0].dates;
-
-          var date = 'undefined' !== typeof(dates[dates.length -1]) ?dates[dates.length -1] : '';
-
-          if(date){
-            var fmt = new DateFormatter();
-            date = new Date(date);
-            el.date = fmt.formatDate(date, 'd M H:i');
-          }else{
-            el.date = '';
-          }
-
-
-          return el;
-        });
-
-        return details;
-      },
-
-      /*****/
-      /* calculate totals for every item in shoot builder*/
-      /*****/
-      order_sum_details: function(){
-        /* for extra products over 1*/
-        var product_names = 0;
-
-        if('undefined' != typeof(this.order_data.order_items_data.item_name)){
-
-          product_names = (this.order_data.order_items_data.item_name.length - 1) * parseInt(this.order_data.order_items_data.prices.name);
-        }
-
-        var photos = 0;
-
-        if('undefined' != typeof(this.order_data.order_items_data.extra_data.image_count) && 'undefined' != typeof(this.order_data.order_items_data.extra_data.image_count.value)){
-
-          photos = parseInt(this.order_data.order_items_data.extra_data.image_count.value) * parseInt(this.order_data.order_items_data.prices.single_product_price);
-
-        }
-
-        var customize = 0;
-
-        if('undefined' != typeof(this.order_data.order_items_data.shoot_data.customize) && 'undefined' != typeof(this.order_data.order_items_data.shoot_data.customize.color_pref)){
-          customize += this.order_data.order_items_data.shoot_data.customize.color_pref.length * parseInt(this.order_data.order_items_data.prices.color);
-        }
-
-        if('undefined' != typeof(this.order_data.order_items_data.extra_data.sizes.value)){
-          customize += (this.order_data.order_items_data.extra_data.sizes.value.length -1 ) * parseInt(this.order_data.order_items_data.prices.sizes);
-        }
-
-        var shoots = 0;
-        if('undefined' != typeof(this.order_data.order_items_data.extra_data.shoots)){
-          shoots = this.order_data.order_items_data.extra_data.shoots.length * parseInt(this.order_data.order_items_data.prices.shoot)
-        }
-
-        var fast = this.order_data.is_fasttrack == 1? parseInt(this.order_data.fasttrack_price) : 0;
-        var _return = this.order_data.is_return == 1? parseInt(this.order_data.return_price) : 0;
-
-
-        var data = {
-          product_names: product_names,
-          photos: photos,
-          customize: !isNaN(customize) ? customize: 0 ,
-          shoots: shoots,
-          fasttrack: fast,
-          return: _return,
-          addons: fast + _return +  shoots + (!isNaN(customize) ? customize: 0) + product_names,
-        };
-
-        return data;
-      },
-
-      order_status_mumber: function(){
-        var vm = this;
-        var inf = Object.values(tracker_options.orders).filter(e=>{
-          return vm.order_data.order_status == e.slug;
-        });
-
-        return parseInt(inf[0].order);
-      },
-
-      /***
-      product names created in constructor
-      */
-      product_names: function(){
-        if('undefined' != typeof(this.order_data.order_items_data.item_name)){
-          var name = this.order_data.order_items_data.item_name[0];
-          name = name.split(' - ');
-
-          var items = [];
-
-          for(var i of this.order_data.order_items_data.item_name){
-            var temp = i.split(' - ')
-            items.push({name: temp[0], category: temp[1]})
-          }
-
-          return {
-            name: name[0],
-            items: items,
-          }
-
-        }
-        return {
-          name: '',
-          items: [],
-        }
-      },
-
-      shoot_data_set: function(){
-        if(!this.order_data.order_items_data){
+        if('undefined' == typeof(this.order_data.wfp_images) ){
           return false;
         }
 
-        return this.order_data.order_items_data && 'undefined' != typeof(this.order_data.order_items_data.shoot_data);
+        if('object' != typeof(this.order_data.wfp_images) ){
+          return false;
+        }
+
+        var review_requests = strip(this.order_data.wfp_images).filter(e=>{
+          return 'undefined' != typeof(e.request) && 'undefined' == typeof(e.request_decision);
+        });
+
+        var today = new Date();
+
+        var dates = review_requests.map(e=>{
+          var request_time = new Date(e.request[0].date);
+          var delta = 24 - Math.floor((today - request_time)/(1000*60*24));
+
+          return {
+            delta: Math.max(delta, 0),
+            label: Math.max(delta, 0) == 1? 'hour' : 'hours',
+            image_id: parseInt(e.id) < 9? '0'+ (parseInt(e.id) + 1) : parseInt(e.id) + 1,
+          };
+        });
+
+        return {
+          dates: dates,
+          label: dates.length == 1? 'photo' : 'photos',
+        };
       },
+
 
       custom_shoots: function(){
         if('undefined' != typeof(this.order_data.order_items_data.extra_data.shoots)){
@@ -6207,15 +7010,64 @@ if(document.getElementById('single-frontdesk-order')){
           return [];
         }
       },
-
-      tracker_options: function(){
-        return tracker_options;
-      },
     },
 
     methods:{
 
+      get_url_image_loaded: function(path, image_id,order_id){
+
+        var data = JSON.stringify({
+          "path": path
+        });
+
+        var xhr = new XMLHttpRequest();
+
+        xhr.addEventListener("readystatechange", function () {
+          if (this.readyState === 4) {
+            // slog('show_image_loaded', 'blue')
+            // clog(JSON.parse(this.responseText));
+            // elog();
+          }
+        });
+
+
+        xhr.open("POST", "https://api.dropboxapi.com/2/files/get_temporary_link", false);
+        xhr.setRequestHeader("authorization", "Bearer "+ dropbox.token);
+        xhr.setRequestHeader("content-type", "application/json");
+        xhr.setRequestHeader("cache-control", "no-cache");
+        xhr.send(data);
+
+        var response = JSON.parse(xhr.responseText);
+
+        var url = response.link;
+
+        var info = {
+          url: response.link,
+          image_id:parseInt(image_id),
+          order_id:order_id,
+        };
+
+        this.show_image_popup(info);
+      },
+
+      view_initial_photo: function(){
+        var path = this.order_data.source_wfp_data.files_uploaded[0].path;
+        var image_id = this.order_data.source_wfp_data.id;
+        var order_id = this.order_data.order_items_data.extra_data.buy_single_order_id.value;
+
+        this.get_url_image_loaded(path, image_id, order_id);
+      },
+
+      get_thumbnail: function(image_id){
+        if('undefined' == typeof(this.order_data.wfp_thumbnails[image_id])){
+          return '';
+        }
+
+        return this.order_data.wfp_thumbnails[image_id].attachment_url_lg;
+      },
+
       show_comments_window_cb: function(event){
+        console.log('show_comments_window_cb');
         console.log(event);
         this.$refs.comment_data.$set(this.$refs.comment_data, 'show_popup_comment', true);
         this.$refs.comment_data.$set(this.$refs.comment_data, 'popup_comment_data', event);
@@ -6313,25 +7165,50 @@ if(document.getElementById('single-frontdesk-order')){
         this.thumbs_to_load = true;
       },
 
-
-      show_image_popup: function(data){
-        jQuery('.image-preview-popup__inner').removeAttr('style');
-        jQuery('.image-preview-popup__inner').removeClass('loaded');
-        jQuery('.image-preview-popup__inner').find('img').remove();
-        jQuery('.image-preview-popup__inner').append(data.img);
-        this.show_popup_preview = true;
-
-        jQuery('.image-preview-popup__inner').find('img').on('load', function(){
-         jQuery('.image-preview-popup__inner').addClass('loaded');
-          var width = jQuery('.image-preview-popup__inner').find('img').width();
-          var height = jQuery('.image-preview-popup__inner').find('img').height();
-
-          jQuery('.image-preview-popup__inner').width(width);
-          jQuery('.image-preview-popup__inner').height(height);
-        });
+      open_related_shoot: function(){
+        var order_id = this.order_data.order_items_data.buy_single_data.order_id;
+        this.return_to_list();
 
         Vue.nextTick(function(){
+          frontdesk_list.open_order({order_id:order_id })
+        })
+
+      },
+
+      show_image_popup: function(data){
+        var order_id = 'undefined' != typeof( data.order_id )? data.order_id :this.order_data.order_id
+        this.$refs.preview_popup.$set(this.$refs.preview_popup, 'thumbnail', data.url);
+        this.$refs.preview_popup.$set(this.$refs.preview_popup, 'show', true);
+
+        var author = 'undefined' != typeof(this.order_data.wfp_images[data.image_id].logs) && this.order_data.wfp_images[data.image_id].logs[0]?  this.order_data.wfp_images[data.image_id].logs[0].author : false;
+
+        this.$refs.preview_popup.$set(this.$refs.preview_popup, 'info', {
+          order_id: data.order_id,
+          image_id: data.image_id < 10? '0' + (data.image_id + 1)  : data.image_id + 1,
+          author: author,
+          logs:'undefined' != typeof(this.order_data.wfp_images[data.image_id].logs)? this.order_data.wfp_images[data.image_id].logs : false,
         });
+
+
+        return;
+
+        // jQuery('.image-preview-popup__inner').removeAttr('style');
+        // jQuery('.image-preview-popup__inner').removeClass('loaded');
+        // jQuery('.image-preview-popup__inner').find('img').remove();
+        // jQuery('.image-preview-popup__inner').append(data.img);
+        // this.show_popup_preview = true;
+
+        // jQuery('.image-preview-popup__inner').find('img').on('load', function(){
+        //  jQuery('.image-preview-popup__inner').addClass('loaded');
+        //   var width = jQuery('.image-preview-popup__inner').find('img').width();
+        //   var height = jQuery('.image-preview-popup__inner').find('img').height();
+
+        //   jQuery('.image-preview-popup__inner').width(width);
+        //   jQuery('.image-preview-popup__inner').height(height);
+        // });
+
+        // Vue.nextTick(function(){
+        // });
       },
 
       update_files: function(data){
@@ -6366,10 +7243,14 @@ if(document.getElementById('single-frontdesk-order')){
 
       update_decision_cb: function(data){
 
+        console.log(data);
+        return;
         var index = frontdesk_list.get_index_of_item_by('order_id', data.order_id);
         var item = frontdesk_list.get_item_by('order_id', data.order_id);
 
         frontdesk_list.$set(frontdesk_list.items[index].data, 'wfp_images', data.meta)
+
+        this.$set(this.order_data, 'wfp_images', data.meta);
       },
     },
 
@@ -6396,6 +7277,7 @@ Vue.component('download-popup-comment', {
     return {
       show_popup_comment: false,
       popup_comment_data: false,
+      show_block: false,
       reason: '',
       approved_decision: '',
       dicision_class: '',
@@ -6423,6 +7305,10 @@ Vue.component('download-popup-comment', {
 
       return data;
     },
+
+    wp_urls: function(){
+      return WP_URLS;
+    }
   },
 
   watch:{
@@ -6433,7 +7319,7 @@ Vue.component('download-popup-comment', {
         var e = val.comments.request_decision;
         vm.approved_decision = e.decision;
         vm.dicision_class = e.decision;
-        vm.dicision_text = e.decision.charAt(0).toUpperCase() + e.decision.slice(1) + ' by '+ e.user_name + 'on '+ e.date_formatted;
+        vm.dicision_text = e.decision.charAt(0).toUpperCase() + e.decision.slice(1) + ' by '+ e.user_name + ' on '+ e.date_formatted;
       }else{
         vm.approved_decision = '';
         vm.dicision_class = '';
@@ -6451,6 +7337,7 @@ Vue.component('download-popup-comment', {
         decision : decision,
         reason   : this.reason
       };
+      vm.show_block = true;
 
       jQuery.ajax({
         url: WP_URLS.ajax,
@@ -6463,7 +7350,7 @@ Vue.component('download-popup-comment', {
         vm.$emit('update_decision',{meta: e.meta, order_id: parseInt(vm.popup_comment_data.order_id)});
         vm.approved_decision = e.approved_decision;
         vm.dicision_class = e.approved_decision;
-        vm.dicision_text = e.approved_decision.charAt(0).toUpperCase() + e.approved_decision.slice(1) + ' by '+ e.user_name + 'on '+ e.date_formatted;
+        vm.dicision_text = e.approved_decision.charAt(0).toUpperCase() + e.approved_decision.slice(1) + ' by '+ e.user_name + ' on '+ e.date_formatted;
 
         vm.$set(vm.popup_comment_data.comments, 'request_decision', e.request_decision);
       })
@@ -6471,6 +7358,7 @@ Vue.component('download-popup-comment', {
         console.log("error");
       })
       .always(function(e) {
+        vm.show_block = false;
         console.log(e);
       });
 
@@ -6486,7 +7374,21 @@ Vue.component('download-popup-comment', {
             <img :src="popup_comment_data.thumbnail" alt="">
           </div><!-- download-popup__images -->
 
-          <div class="download-popup__content">
+          <div class="download-popup__content" >
+            <div class="download-popup__block-screen" v-if="show_block">
+              <div class="center">
+                <div class="row">
+                  <span class="col-2"></span>
+                  <span class="col-2"></span>
+                  <span class="col-2"></span>
+                  <span class="col-2"></span>
+                  <span class="col-2"></span>
+                  <span class="col-2"></span>
+                </div>
+
+                 <img :src="wp_urls.theme_url + '/order_tracker/assets/images/spinner2.gif'" alt="">
+              </div>
+            </div>
             <div class="download-popup__content-inner">
               <div class="download-popup__row">
                 <span class="number">{{popup_comment_data.item_id}}</span>
@@ -6577,6 +7479,99 @@ Vue.component('download-popup-comment', {
     </div><!-- download-popup -->
   `,
 });
+Vue.component('preview-popup', {
+  data: function(){
+    return {
+      show: false,
+      thumbnail: false,
+      info: {}
+    };
+  },
+
+  computed: {
+    author: function(){
+      return this.info.author? cap_string(this.info.author.name) : 'NA';
+    },
+
+    date_formatted: function(){
+      return this.info.logs? this.info.logs[0].date_formatted : 'NA';
+    },
+
+    initial_action: function(){
+      return this.info.logs? cap_string(this.info.logs[0].action) : 'NA';
+    },
+
+    logs: function(){
+      if(!this.info.logs){
+        return [];
+      }
+
+      var logs = strip(this.info.logs);
+      logs.splice(0,1);
+
+      console.log(this.info.logs);
+      console.log(logs);
+      return logs;
+    },
+  },
+
+  methods:{
+    cap_string: function(string) {
+      return string.charAt(0).toUpperCase() + string.slice(1);
+    },
+  },
+
+  template:`
+    <div class="download-popup shown" v-if="show">
+      <div class="download-popup__window">
+        <div class="download-popup__inner">
+
+          <div class="download-popup__image">
+            <img :src="thumbnail" alt="">
+          </div><!-- download-popup__images -->
+
+          <div class="download-popup__content">
+            <div class="download-popup__content-inner">
+              <div class="download-popup__row">
+                <span class="number">#FS-{{info.order_id}}/{{info.image_id}}</span>
+                <span class="close" v-on:click="show=false">
+                  <svg class="icon svg-icon-close"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-close"></use></svg>Close</span>
+                <div class="spacer-h-10"></div>
+                <span class="download-popup__title"  v-if="info.logs">History</span>
+
+                <span class="download-popup__text" v-if="info.logs">
+                  <span>{{initial_action}} by {{author}} on {{date_formatted}}</span>
+                </span>
+                <div class="spacer-h-20"></div>
+
+                <div class="download-popup__logs-window">
+                 <div class="download-popup__row divider" v-for="log, key in logs" :key="'log_'+key">
+                   <div class="spacer-h-10"></div>
+                     <p class="download-popup__customer-label"><span class="download-popup__customer-icon"><svg class="icon svg-icon-tick"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-tick"></use></svg></span>
+                    {{cap_string(log.action)}} by {{cap_string(log.author.name)}} on {{log.date_formatted}}</p>
+                    <p class="download-popup__customer-comment">{{log.text}}</p>
+                    <div class="spacer-h-20"></div>
+                  </div>
+                </div><!-- download-popup__logs-window -->
+
+                <div class="spacer-h-20"></div>
+              </div>
+
+
+              <div class="download-popup__row flex">
+              </div>
+
+              <div class="download-popup__row">
+              <a class="download-popup__button green" download :href="thumbnail">Download</a>
+                <div class="spacer-h-25"></div>
+              </div>
+            </div>
+          </div>
+        </div><!-- download-popup__inner -->
+      </div><!-- download-popup__window -->
+    </div><!-- download-popup -->
+  `,
+})
 if(document.getElementById('new-frontdesk-order')){
   frontdesk_order_new = new Vue({
     el : '#new-frontdesk-order',
@@ -7350,6 +8345,8 @@ if(document.getElementById('studio-vue-app')){
       items_by_load: function(){
         return 50;
       },
+
+
     },
 
     watch: {
@@ -7376,6 +8373,10 @@ if(document.getElementById('studio-vue-app')){
         var item = this.get_item_by('order_id', _data.order_id);
         var item_index = this.get_index_of_item_by('order_id', _data.order_id);
         const data = strip(item.data);
+
+        slog('studio item data')
+        console.log(data)
+        elog();
 
         this.$refs.detailed_view.order_data = data;
         this.$refs.detailed_view.item_index = item_index;
@@ -7581,6 +8582,186 @@ if(document.getElementById('popup_quality')){
         studio_app.$refs.detailed_view.exec_upload();
       },
     }
+  });
+}
+if(document.getElementById('review_page')){
+  review_page = new Vue({
+     el : '#review_page',
+
+    mixins: [get_set_props, animation_mixin],
+
+    data: {
+      thumbs: thumbs_data,
+      review_images: review_images,
+      order_dates: order_dates,
+      filter: 'all',
+      start_date: false,
+      end_date: false,
+    },
+
+    mounted: function(){
+      init_decoration()
+      // slog('review data');
+      // clog('thumbs_data');
+      // clog(strip(thumbs_data));
+      // clog('review_images');
+      // clog(strip(review_images));
+      // elog();
+    },
+
+    computed:{
+      _items: function(){
+        var vm = this;
+        var items = strip(this.filtered_items);
+
+        switch(vm.filter){
+          case 'awaiting':
+            return items.awating;
+            break;
+
+          case 'review':
+            return items.review;
+            break;
+
+          default:
+            return items.all;
+            break;
+        }
+      },
+
+      filtered_items: function(){
+        var vm = this;
+        var items = this.review_images;
+
+        items = items.map(e=>{
+          e.thumbnail = vm.get_thumbnail(e);
+          e.date = vm.get_dates(e);
+          return e;
+        });
+
+        items = items.filter(e=>{
+          var valid = true;
+          var date = e.date.replace(' ', 'T');
+          date = new Date(date);
+
+          if(vm.start_date){
+            valid = date < new Date(vm.start_date)? false : valid;
+          }
+
+          if(vm.end_date){
+            valid = date > new Date(vm.end_date)? false : valid;
+          }
+
+          return valid;
+        });
+
+        items.sort(function(a, b) {
+          return b.order_id - a.order_id;
+        });
+
+
+
+        var items_awating = items.filter(e=>{
+          return e.is_active == '0' && 'undefined' == typeof(e.request_decision);
+        });
+
+        var items_review = items.filter(e=>{
+          return e.is_active == '0' && 'undefined' != typeof(e.request_decision);
+        });
+
+        return {
+          all: items,
+          awating: items_awating,
+          review: items_review,
+        };
+      }
+    },
+
+    methods: {
+      change_dates_cb: function(data){
+        this.start_date = data.start;
+        this.end_date = data.end;
+      },
+
+      get_dates: function(data){
+        var date_data = this.order_dates.filter(e=>{
+          return e.order_id == data.order_id;
+        });
+
+        return date_data[0].post_date;
+      },
+
+      get_thumbnail: function(data){
+        var thumb_data = this.thumbs.filter(e=>{
+          return e.order_id == data.order_id;
+        });
+
+        if('undefined' == typeof(thumb_data[0]) ){
+          return {
+            "attachment_url": "",
+            "attachment_url_lg": "",
+          }
+        }
+
+        var image_id = parseInt(data.id);
+
+        var images = Object.values(thumb_data[0].items).filter(e=>{return image_id == e.item_id});
+
+        return images[0]
+      },
+
+      show_popup_correction: function(data){
+
+      },
+
+      show_STUDIO_review_window_cb: function(data){
+        var image_data = strip(this.order_data.wfp_images[data.item_id]);
+
+        console.log(image_data);
+
+        var info = {
+          order_id:   'undefined' != typeof(data.order_id) ? data.order_id : this.order_data.order_id,
+          image_id:   data.item_id,
+          image_data: image_data,
+          author:     this.order_data.name,
+        }
+
+        this.$refs.review_item_popup.$set(this.$refs.review_item_popup, 'info', info);
+        this.$refs.review_item_popup.$set(this.$refs.review_item_popup, 'show', true);
+      },
+
+      show_comments_window_cb: function(data){
+        var name    = 'undefined' != typeof(data.author)? data.author.name: 'Na';
+        var item_id = data.id < 10 ? '0'+data.id : data.id ;
+
+        var event = {
+          comments: {
+            attachment_url: data.attachment_url,
+            author: name,
+            date: data.request[0].date,
+            image_id: data.id,
+            request_data: {
+              author: name,
+              date: data.request[0].date,
+              text: data.request[0].text,
+            },
+            request_decision: data.request_decision,
+            text: data.request[0].text,
+          },
+          order_id: data.order_id,
+          item_id: '#FS-'+data.order_id + '/' + item_id,
+          thumbnail: 'undefined' != typeof(data.thumbnail.attachment_url_lg) ? data.thumbnail.attachment_url_lg : data.thumbnail.attachment_url,
+        };
+
+        this.$refs.comment_data.$set(this.$refs.comment_data, 'show_popup_comment', true);
+        this.$refs.comment_data.$set(this.$refs.comment_data, 'popup_comment_data', event);
+      },
+
+      update_decision_cb: function(data){
+        console.log(data);
+      },
+
+    },
   });
 }
 ctime('vue script', 'green');

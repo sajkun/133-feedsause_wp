@@ -1,6 +1,8 @@
 <?php
   $obj_id = get_queried_object_id();
   $o = get_option(duh()->slug_options);
+  $script_version = 8;
+  $style_version = 5;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -11,7 +13,7 @@
 
   <link rel="stylesheet" href="<?php echo THEME_URL ?>/order_tracker/assets/libs/datepicker/daterangepicker.css">
   <link rel="stylesheet" href="<?php echo THEME_URL ?>/order_tracker/assets/libs/datetimepicker/build/jquery.datetimepicker.min.css">
-  <link rel="stylesheet" href="<?php echo THEME_URL ?>/order_tracker/assets/css/main.min4.css">
+  <link rel="stylesheet" href="<?php echo THEME_URL ?>/order_tracker/assets/css/main.min<?php echo  $style_version;?>.css">
   <link rel="icon" href="<?php echo get_site_icon_url(192)?>"/>
   <link rel="apple-touch-icon" href="<?php echo get_site_icon_url(180)?>" />
    <script>
@@ -118,7 +120,7 @@
     <script src="<?php echo THEME_URL ?>/order_tracker/assets/libs/vuejs/vue-dev.js"></script>
     <script src="<?php echo THEME_URL ?>/order_tracker/assets/libs/sortable/sortable.js"></script>
     <script src="<?php echo THEME_URL ?>/order_tracker/assets/libs/drag/drag.js"></script>
-    <script defer src="<?php echo THEME_URL ?>/order_tracker/assets/script/main.min7.js"></script>
+    <script defer src="<?php echo THEME_URL ?>/order_tracker/assets/script/main.min<?php echo  $script_version;?>.js"></script>
  </head>
  <body  id="site-body" class="not-ready">
   <div class="site-container">

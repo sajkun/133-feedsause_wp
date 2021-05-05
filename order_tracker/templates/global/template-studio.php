@@ -17,7 +17,8 @@ if ( ! defined( 'ABSPATH' ) ) {
              <span class="checkbox-imitation__view"></span>
           </label>
         </div>
-        <svg class="icon svg-icon-comment"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-comment"></use> </svg>
+
+        <svg class="icon svg-icon-review-mode"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-review-mode"></use> </svg>
         <span class="alert__count">{{comment_count}}</span>
       </div>
 

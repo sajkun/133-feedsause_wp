@@ -205,6 +205,7 @@ if(!class_exists('map_orders_cb')){
 
     public function create_item_array($order){
       $due_date              = $this->get_due_date($order);
+
       $date_created_order    = $order->get_date_created();
       $date_created_customer = $this->user->get_date_created();
       $today                 = new DateTime();
@@ -240,9 +241,10 @@ if(!class_exists('map_orders_cb')){
       $wfp_images = $order->get_meta('_wfp_image');
 
       if($wfp_images){
-        $wfp_images = array_values(array_filter($order->get_meta('_wfp_image'), function($el){
-                  return !isset($el['was_bought']);
-                }));
+        // $wfp_images = array_values(array_filter($order->get_meta('_wfp_image'), function($el){
+        //           return !isset($el['was_bought']);
+        //         }));
+        $wfp_images = array_values( $wfp_images);
       }
 
       $order_status = $order->get_status();
@@ -254,6 +256,7 @@ if(!class_exists('map_orders_cb')){
       /***************************/
       /***************************/
       /***************************/
+
       $order_items = array();
       $handle_id       = (int)get_option('wfp_return_product_id');
       $product_fast_id = (int)get_option('wfp_priority_delivery_product_id');
@@ -283,24 +286,70 @@ if(!class_exists('map_orders_cb')){
         $product_count = isset($meta['name']['value'])? count($product_name) : '';
         $product = $item->get_product();
 
+        $buy_single_data = false;
+
+        if($item->get_meta('buy_single') == '1' || $item->get_meta('is_reshoot') == '1' ){
+          if(isset($extra_data['buy_single_order_id'])){
+            $buy_single_order_id = (int)$extra_data['buy_single_order_id']['value'];
+            $ordr = wc_get_order( $buy_single_order_id );
+
+            $_customer_id = $ordr->get_customer_id();
+            $_user        = new WC_Customer( $_customer_id);
+
+            $_date = $ordr->get_date_created();
+
+            $buy_single_data = array(
+              'date'     => $_date->format('Y-m-d H:i:s'),
+              'date_formatted'     => $_date->format('d M Y'),
+              'order_id' => $buy_single_order_id,
+              'name'     => $_user->get_display_name(),
+            );
+          }
+        }
+
+        $is_reshoot = $item->get_meta('is_reshoot');
         $order_items[] = array(
-          'order_item_id'=> $item->get_id(),
+          'buy_single'   => $item->get_meta('buy_single'),
+          'is_reshoot'   => $item->get_meta('is_reshoot'),
+         'order_item_id' => $item->get_id(),
           'extra_data'   => $extra_data,
           'shoot_data'   => $item->get_meta('shoot_data'),
           'prices'       => $item->get_meta('theme_prices') && !is_null($item->get_meta('theme_prices'))?$item->get_meta('theme_prices'): get_option('theme_settings'),
           'product_name' =>$product ? $product->get_title() : '',
           'item_name'    => $product_name,
           'item_count'   => $product_count,
+          'buy_single_data'   => $buy_single_data,
         );
+
       }
 
+      if($is_reshoot){
+        $source_order_id = (int)$order_items[0]['extra_data']['buy_single_order_id']['value'];
+        $source_image_id = (int)$order_items[0]['extra_data']['buy_single_image_id']['value'];
+        $source_wfp_data = get_post_meta($source_order_id, '_wfp_image', true);
+
+        $_source_wfp_data = '';
+
+
+        if($source_wfp_data){
+          foreach ($source_wfp_data as $key => $v) {
+            if((int)$v['id'] == $source_image_id ){
+              $_source_wfp_data = $v;
+            }
+          }
+        }
+
+      }
+
+
       /***************************/
       /***************************/
       /***************************/
       /***************************/
       /***************************/
 
-      // clog( $wfp_images );
+      // clog($this->order_id);
+      // clog($this->get_order_notes_changed($order));
 
       return array(
         'order_id'         => $this->order_id,
@@ -310,12 +359,15 @@ if(!class_exists('map_orders_cb')){
           'discount'     => $order->get_discount_total() ,
           'return_price' => $return_price,
           'fasttrack_price' => $fasttrack_price,
+          'source_wfp_data' => $_source_wfp_data,
           'order_items_data' => $order_items[0],
-          'extra_data' => $order->get_meta('_extra_data'),
+          'extra_data'       => $extra_data ,
           'statuses_history' => $this->get_order_notes_changed($order),
           'order_id'      => $this->order_id,
           'name'          => $this->user->get_display_name(),
           'created_order' => $order->get_meta('_is_created_order'),
+          'reshoot_attachment_url' => $order->get_meta('_reshoot_attachment_url'),
+          'reshoot_request_text'   => $order->get_meta('_reshoot_request_text'),
           'wfp_images'      =>  $wfp_images,
           'wfp_image_single' => $order->get_meta('_wfp_image_single'),
           'wfp_thumbnails'   => $order->get_meta('_wfp_thumbnails'),
@@ -334,9 +386,9 @@ if(!class_exists('map_orders_cb')){
           ),
 
           'due_date' => array(
-            'date'           => $due_date->format('Y-m-d H:i:s'),
-            'date_formatted' => $due_date->format('d M Y'),
-            'is_overdue'     => $today > $due_date,
+            'date'           => $due_date? $due_date->format('Y-m-d H:i:s') : '',
+            'date_formatted' => $due_date? $due_date->format('d M Y') : '',
+            'is_overdue'     => $due_date? $today > $due_date : '',
           ),
 
           'filters'    => array (
@@ -462,8 +514,23 @@ if(!class_exists('map_orders_cb')){
     }
 
     protected function get_due_date($order){
+
+      $countdown = str_replace('wc-', '', $this->options['orders_misc']['countdown']);
+      $shoot = str_replace('wc-', '', $this->options['orders_misc']['shoot']);
+      $notes = $this->get_order_notes_changed($order);
+
+      if(count($notes[$countdown]['dates'] ) > 0){
+        $count = count( $notes[$countdown]['dates'] );
+        $due_date = new DateTime(  $notes[$countdown]['dates'][$count] );
+      } else if (count($notes[$shoot]['dates'] ) > 0) {
+        $count = count( $notes[$shoot]['dates'] );
+        $due_date = new DateTime(  $notes[$shoot]['dates'][$count] );
+      }else{
+        return false;
+      }
+
       $is_fasttrack          = in_array($this->fasttrack_product_id, $this->product_ids);
-      $due_date              = new DateTime($order->get_date_created());
+
       $delta    = $is_fasttrack? '+'.$this->options['turnaround']['fasttrack'].' days' : '+'.$this->options['turnaround']['regular'].' days';
 
       $due_date->modify($delta);

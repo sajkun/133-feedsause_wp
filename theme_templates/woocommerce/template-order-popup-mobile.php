@@ -282,7 +282,15 @@
 
                   <div class="spacer-h-20"></div>
 
-                  <label class="radio-imitation props-options" v-if="!image.meta.request">
+                <transition
+                  v-bind:css="false"
+                  v-on:before-enter="beforeEnter"
+                  v-on:enter="enter"
+                  v-on:leave="leave"
+                  v-on:after-enter="enterAfter"
+                  v-on:after-leave="leaveAfter"
+                >
+                  <label class="radio-imitation props-options" v-if="!image.meta.request || !request_type || request_type =='correction'">
                     <input type="radio" name="review" value="correction" v-model="request_type" >
                     <span class="radio-imitation__view flex text-left">
                       <span class="radio-imitation__longtext valign-center">
@@ -294,6 +302,7 @@
                       </span>
                     </span>
                   </label>
+                </transition>
 
                   <transition
                     class="studio-content"
@@ -328,7 +337,15 @@
 
                   <div class="spacer-h-15"></div>
 
-                  <label class="radio-imitation props-options">
+                <transition
+                  v-bind:css="false"
+                  v-on:before-enter="beforeEnter"
+                  v-on:enter="enter"
+                  v-on:leave="leave"
+                  v-on:after-enter="enterAfter"
+                  v-on:after-leave="leaveAfter"
+                >
+                  <label class="radio-imitation props-options" v-if="!request_type || request_type =='reshoot'">
                     <input type="radio" name="review" value="reshoot" v-model="request_type">
                     <span class="radio-imitation__view flex text-left">
                       <span class="radio-imitation__longtext valign-center">
@@ -340,6 +357,39 @@
                       </span>
                     </span>
                   </label>
+                </transition>
+
+                  <transition
+                    class="studio-content"
+                    name="studio-content"
+                    tag="div"
+                    v-bind:css="false"
+                    v-on:before-enter="beforeEnter"
+                    v-on:enter="enter"
+                    v-on:leave="leave"
+                    v-on:after-enter="enterAfter"
+                    v-on:after-leave="leaveAfter"
+                  >
+                    <div class="clearfix" v-if="request_type == 'reshoot'">
+                      <div class="spacer-h-20"></div>
+                      <textarea
+                        class="download-popup__textarea"
+                        placeholder="Enter request (max 500 characters)"
+                        v-model = "request_text"
+                        ref="request_text"
+                        ></textarea>
+                      <div class="spacer-h-15"></div>
+
+                      <form action="javascript:void(0)">
+                        <label  class="download-popup__file-imitation">
+                          <span class="text">{{request_attachment_title}}</span>
+                          <input type="file" @change="get_file">
+                          <svg class="icon svg-icon-file"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-file"></use> </svg>
+                        </label>
+                      </form>
+                    </div>
+                  </transition>
+
                   <transition
                     class="studio-content"
                     name="studio-content"

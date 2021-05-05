@@ -6,6 +6,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 <div class="container-xxl switchers" id="filters-frontdesk" v-if="visible">
   <div class="spacer-h-40"></div>
   <div class="row  justify-content-start ">
+
+    <?php /*
     <div class="alert">
       <svg class="icon svg-icon-bell green"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-bell"></use> </svg>
       <span class="alert__count">{{due_count}}</span>
@@ -19,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
            <span class="checkbox-imitation__view"></span>
         </label>
       </div>
-    </div>
+    </div> */ ?>
 
       <div class="range-datepicker">
       <svg class="icon svg-icon-calendar"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-calendar"></use> </svg>
