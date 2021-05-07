@@ -40,7 +40,7 @@
         v-on:click = show_comments_window_cb(item)
         v-for="item, key in _items"
         :key="'img'+key">
-        <img :src="item.thumbnail.attachment_url" alt="">
+        <img v-if="item.thumbnail" :src="item.thumbnail.attachment_url" alt="">
       </div>
 
       <div class="images-item-blank" key="blank1"></div>
