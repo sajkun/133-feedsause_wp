@@ -418,7 +418,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                       </td>
                     </tr>
 
-                    <tr class="resert-cells">
+                    <tr class="resert-cells no-borders">
                       <td colspan="3" class="text-left">
                        <transition
                           v-on:before-enter="animation_beforeEnter"

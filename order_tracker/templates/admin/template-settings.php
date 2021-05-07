@@ -82,6 +82,16 @@ if ( ! defined( 'ABSPATH' ) ) {
           <td><input type="number" name="<?php echo $slug ?>[turnaround][regular]" value="<?php echo $options['turnaround']['regular'] ?:''; ?>"></td>
           <td>days</td>
         </tr>
+        <tr>
+          <th>Reshoot: </th>
+          <td><input type="number" name="<?php echo $slug ?>[timing][reshoot]" value="<?php echo $options['timing']['reshoot'] ?:'3'; ?>"></td>
+          <td>days</td>
+        </tr>
+        <tr>
+          <th>Correction: </th>
+          <td><input type="number" name="<?php echo $slug ?>[timing][correction]" value="<?php echo $options['timing']['correction'] ?:'5'; ?>"></td>
+          <td>days</td>
+        </tr>
       </table>
 
       <div class="spacer-h-30"></div>

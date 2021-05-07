@@ -204,7 +204,6 @@ if(!class_exists('map_orders_cb')){
     }
 
     public function create_item_array($order){
-      $due_date              = $this->get_due_date($order);
 
       $date_created_order    = $order->get_date_created();
       $date_created_customer = $this->user->get_date_created();
@@ -347,6 +346,7 @@ if(!class_exists('map_orders_cb')){
       /***************************/
       /***************************/
       /***************************/
+      $due_date              = $this->get_due_date($order, $is_reshoot);
 
       // clog($this->order_id);
       // clog($this->get_order_notes_changed($order));
@@ -513,7 +513,7 @@ if(!class_exists('map_orders_cb')){
       $this->product_ids = $this->get_product_ids();
     }
 
-    protected function get_due_date($order){
+    protected function get_due_date($order, $is_reshoot = false){
 
       $countdown = str_replace('wc-', '', $this->options['orders_misc']['countdown']);
       $shoot = str_replace('wc-', '', $this->options['orders_misc']['shoot']);
@@ -521,10 +521,10 @@ if(!class_exists('map_orders_cb')){
 
       if(count($notes[$countdown]['dates'] ) > 0){
         $count = count( $notes[$countdown]['dates'] );
-        $due_date = new DateTime(  $notes[$countdown]['dates'][$count] );
+        $due_date = new DateTime(  $notes[$countdown]['dates'][$count-1] );
       } else if (count($notes[$shoot]['dates'] ) > 0) {
         $count = count( $notes[$shoot]['dates'] );
-        $due_date = new DateTime(  $notes[$shoot]['dates'][$count] );
+        $due_date = new DateTime(  $notes[$shoot]['dates'][$count-1] );
       }else{
         return false;
       }
@@ -532,6 +532,8 @@ if(!class_exists('map_orders_cb')){
       $is_fasttrack          = in_array($this->fasttrack_product_id, $this->product_ids);
 
       $delta    = $is_fasttrack? '+'.$this->options['turnaround']['fasttrack'].' days' : '+'.$this->options['turnaround']['regular'].' days';
+
+      $delta    = $is_reshoot? '+'.$this->options['timing']['reshoot'].' days' : $delta;
 
       $due_date->modify($delta);
 

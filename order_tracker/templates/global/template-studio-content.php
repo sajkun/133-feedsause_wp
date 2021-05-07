@@ -373,7 +373,7 @@ echo '<script type="text/x-template" id="studio-single-content">';
                       </tr>
 
                       <tr class="resert-cells">
-                        <td colspan="3" class="text-left">
+                        <td colspan="3" class="text-left no-borders">
                          <transition
                             v-on:before-enter="animation_beforeEnter"
                             v-on:animation-after="animation_enterAfter"
