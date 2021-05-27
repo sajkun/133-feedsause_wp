@@ -149,7 +149,7 @@ class theme_construct_page{
     $obj = get_queried_object();
     switch ($type){
       case 'new-styles':
-        return (function_exists('is_product') && is_product()) || ($obj->ID == (int)get_option('theme_page_constructor'))  || ( is_checkout() && !empty( is_wc_endpoint_url('order-received') ) || is_checkout() || (is_account_page() && is_user_logged_in()));
+        return (function_exists('is_product') && is_product()) || ($obj->ID == (int)get_option('theme_page_constructor'))  || ( is_checkout() && !empty( is_wc_endpoint_url('order-received') ) || is_checkout() || (is_account_page() ));
         break;
       case 'constructor':
       return $obj->ID == (int)get_option('theme_page_constructor');

@@ -174,6 +174,11 @@ class theme_content_output{
   }
 
   public static function print_new_header(){
+
+    if(is_account_page() && !is_user_logged_in()){
+      return;
+    }
+
     global $wp;
     $page = get_queried_object();
 
@@ -426,7 +431,9 @@ class theme_content_output{
       $queried = get_queried_object();
       $o = get_post_meta($queried->ID, '_header_style', true);
 
-        if(!is_home() && ('contrast' !== $o)  && !is_front_page() && !theme_construct_page::is_page_type('woo-my-account') && !theme_construct_page::is_page_type('showcase') && !theme_construct_page::is_page_type('customer') && ! ( is_checkout() && !empty( is_wc_endpoint_url('order-received') ) )){
+        if(!is_home() && ('contrast' !== $o)  && !is_front_page() &&
+         (is_account_page() && is_user_logged_in()) &&
+         !theme_construct_page::is_page_type('woo-my-account') && !theme_construct_page::is_page_type('showcase') && !theme_construct_page::is_page_type('customer') && ! ( is_checkout() && !empty( is_wc_endpoint_url('order-received') ) )){
           echo '<div class="spacer-h-40"></div>';
         }
 
