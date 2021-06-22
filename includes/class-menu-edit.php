@@ -40,24 +40,24 @@ class custom_edit_menu_image{
        <?php
          $description   = get_post_meta($item_id, '_descr', true);
        ?>
-      <div class="field-custom_image custom_image custom_image-wide">
+      <div class="field-custom_image custom_image custom_image-wide description-wide">
         <div class="menu-item-custom_image">
           <p class="target-column-hidden"><i>
             <?php
-              _e('Add custom icon. Regular state','theme-translations').'. ';
+              _e('Add custom icon','theme-translations').'. ';
              ?>
           </i></p>
 
           <?php
             $image_id   = get_post_meta($item_id, '_custom-image-url', true);
-            $image_data = wp_get_attachment_image_src($image_id, 'thumbnail', true);
+            $image_data = wp_get_attachment_image_src($image_id, 'full', true);
             $image_url  = ( $image_data  && isset($image_data[0]) )? $image_data[0] : '';
            ?>
 
           <div class="image-download target-column-hidden">
             <input type="hidden" id="custom-image-url[<?php echo $item_id;?>]" name="custom-image-url[<?php echo $item_id;?>]" class="image-id" value="<?php echo (!empty($image_id) && isset($image_id))? $image_id: -1; ?>">
             <div class="image-placeholder" onclick="load_image(this)">
-              <img src=" <?php echo $image_url; ?>" width="64" height="64" style="width:32px; height: auto" alt="">
+              <img src=" <?php echo $image_url; ?>" width="64" height="64" <?php echo 'style="width:32px; height: auto"'; ?> alt="">
             </div>
             <br>
 
@@ -74,56 +74,12 @@ class custom_edit_menu_image{
                  ?>
               </a>
             </div>
-
             <br>
-          </div>
+          </div><!-- image-download -->
 
-          <p class="target-column-hidden"><i>
-            <?php
-              _e('Add custom image, hover state','theme-translations').'. ';
-             ?>
-          </i></p>
-
-          <?php
-            $image_id   = get_post_meta($item_id, '_custom-image-url-hover', true);
-            $image_data = wp_get_attachment_image_src($image_id, 'thumbnail', true);
-            $image_url  = ( $image_data  && isset($image_data[0]) )? $image_data[0] : '';
-           ?>
-          <div class="image-download target-column-hidden">
-            <input type="hidden" id="custom-image-url-hover[<?php echo $item_id;?>]" name="custom-image-url-hover[<?php echo $item_id;?>]" class="image-id" value="<?php echo (!empty($image_id) && isset($image_id))? $image_id: -1; ?>">
-            <div class="image-placeholder" onclick="load_image(this)">
-              <img src=" <?php echo $image_url; ?>" width="64" height="64" style="width:32px; height: auto" alt="">
-            </div>
-            <br>
-
-            <div class="button-holder">
-              <a href="javascript:void(0)" class="button submit-add-to-menu left" onclick="load_image(this)">
-                <?php
-                _e('Set Image','theme-translations');
-                 ?>
-              </a>
-              &nbsp;
-              <a href="javascript:void(0)" onclick="clear_image(this)">
-                <?php
-                _e('Clear Image','theme-translations');
-                 ?>
-              </a>
-            </div>
-
-            <br>
-          </div>
-        </div>
+        </div><!-- menu-item-custom_image -->
       </div>
-      <div class="field-custom_description custom_description custom_image-wide">
 
-        <div class="menu-item-set_columns">
-          <label for="descr_<?php echo $item_id;?>">
-            <?php _e('Description', 'theme-translations') ?>.
-          </label>
-          <input type="text" class="large-text" id="descr_<?php echo $item_id;?>" name="descr[<?php echo $item_id;?>]" value='<?php echo $description ?>'  >
-
-        </div>
-      </div>
       <?php
   }
 

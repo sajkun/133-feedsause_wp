@@ -13,7 +13,7 @@ class velesh_theme_customizer{
   public function __construct() {
     add_action( 'customize_register', array( $this, 'add_sections' ) );
 
-    add_action( 'customize_controls_enqueue_scripts', array( $this, 'add_scripts' ), 999 );
+    // add_action( 'customize_controls_enqueue_scripts', array( $this, 'add_scripts' ), 999 );
     // add_action( 'wp_enqueue_scripts', array( $this, 'add_scripts' ), 999 );
     // add_action( 'customize_controls_print_styles', array( $this, 'add_styles' ) );
     // add_action( 'customize_controls_print_scripts', array( $this, 'add_scripts' ), 30 );
@@ -29,11 +29,9 @@ class velesh_theme_customizer{
    */
   public function add_sections( $wp_customize ) {
     $this->add_site_footer_section( $wp_customize );
-    $this->add_site_header( $wp_customize );
+    // $this->add_site_header( $wp_customize );
     $this->add_site_static_sections( $wp_customize );
     $this->add_site_woo_scections( $wp_customize );
-    // $this->add_product_images_section( $wp_customize );
-    // $this->add_checkout_section( $wp_customize );
   }
 
 
@@ -1454,7 +1452,7 @@ class velesh_theme_customizer{
        }
      }
 
-     if(count($choices_contact > 1)) :
+     if($choices_contact) :
        $wp_customize->add_setting(
             'theme_page_support_form_type',
             array(

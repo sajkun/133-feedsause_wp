@@ -322,6 +322,118 @@ class theme_content_output{
     endif;
   }
 
+  public static function print_new_header_dark(){
+
+    if(is_account_page() && !is_user_logged_in()){
+      return;
+    }
+
+    global $wp;
+    $page = get_queried_object();
+
+    $right_menu = wp_nav_menu( array(
+      'theme_location'  => 'main_menu_right',
+      'menu'            => '',
+      'container'       => '',
+      'container_class' => '',
+      'container_id'    => '',
+      'menu_class'      => 'right-menu',
+      'menu_id'         => '',
+      'echo'            => false,
+      // 'fallback_cb'     => '',
+      'before'          => '',
+      'after'           => '',
+      'link_before'     => '',
+      'link_after'      => '',
+      'items_wrap'      => '<ul id="%1$s" class="%2$s">%3$s</ul>',
+      'depth'           => 2,
+    ));
+
+    $custom_logo_id = get_theme_mod( 'custom_logo' );
+    $custom_logo_url = wp_get_attachment_image_url( $custom_logo_id , 'full' );
+    $custom_logo_url = THEME_URL.'/images/logo_contrast.png';
+    global $wp_registered_sidebars, $wp_registered_widgets;
+
+    $sidebars_widgets = wp_get_sidebars_widgets();
+
+    $myaccount_page_id = get_option( 'woocommerce_myaccount_page_id' );
+
+    if ( $myaccount_page_id ) {
+
+      $logout_url = wp_logout_url( get_permalink( $myaccount_page_id ) );
+
+      if ( get_option( 'woocommerce_force_ssl_checkout' ) == 'yes' )
+        $logout_url = str_replace( 'http:', 'https:', $logout_url );
+    }
+
+    $url_shoots = wc_get_account_endpoint_url('orders');
+    $url_gallery = wc_get_account_endpoint_url('my-gallery');
+
+    $user_id = get_current_user_id();
+
+    $myaccount_page_id = get_option( 'woocommerce_myaccount_page_id' );
+    if ( $myaccount_page_id ) {
+      $myaccount_page_url = get_permalink( $myaccount_page_id );
+    }
+
+    $username = get_user_meta( $user_id, 'first_name', true );
+
+
+
+    $shop_url = function_exists('woocommerce_get_page_id')? get_permalink( woocommerce_get_page_id( 'shop' ) ) : false;
+
+    if(is_product()){
+     global $product;
+     $product_id = $product->get_id();
+     $shop_url = get_permalink(get_option('theme_page_constructor'));
+     $myaccount_page = get_option( 'woocommerce_myaccount_page_id' );
+     $myaccount_page_url = get_permalink( $myaccount_page );
+     $shop_url = is_user_logged_in() ? $shop_url.'?product_id='.$product_id.'?add_to_cart='.$product_id : $myaccount_page_url.'?product_id='.$product_id ;
+    }
+
+
+
+    $args = array(
+      'username'            => $username,
+      'custom_logo_url'     => $custom_logo_url,
+      'myaccount_page_url'  => $myaccount_page_url,
+      'url_shoots'          => $url_shoots,
+      'url_gallery'         => $url_gallery,
+      'user_id'             => $user_id,
+      'logout_url'          => $logout_url,
+      'right_menu'          => $right_menu,
+      'avatar_url'          => $user_id > 0 ? get_avatar_url($user_id) : '',
+      'shop_url'            => $shop_url,
+    );
+
+    print_theme_template_part('header-new', 'globals', $args);
+    print_theme_template_part('header-mobile-new2', 'globals', $args);
+  }
+
+  public static function print_footer_new_dark(){
+    $custom_logo_id = get_theme_mod( 'custom_logo' );
+    $custom_logo_url = wp_get_attachment_image_url( $custom_logo_id , 'full' );
+    $custom_logo_url = THEME_URL.'/images/logo_contrast.png';
+
+    $copyrights =  get_option('theme_footer_copyrights');
+    $today = new DateTime();
+    $year = $today->format('Y');
+    $copyrights = str_replace('{year}', $year, $copyrights );
+
+
+    $args = array(
+      'custom_logo_url'      => $custom_logo_url,
+      'copyrights'      => $copyrights,
+    );
+    print_theme_template_part('footer-new', 'globals', $args);
+  }
+
+
+  public static function print_shop_content(){
+    $args = array();
+    print_theme_template_part('shop-new', 'woocommerce', $args);
+  }
+
 
   /*
   * prints header button
@@ -911,54 +1023,6 @@ class theme_content_output{
     </section>
     <?php
   }
-
-  /**
-  * Prints a  section that call to visit a shop page
-  *
-  * @hookedto do_theme_after_content - home page , 90
-  */
-  public static function print_pre_footer_cta(){
-            $title   = get_option('cta_title');
-            $search  = get_option('cta_moto_marked');
-            $replace = sprintf('<span class="marked marked_blue">%s</span>',$search );
-            $title   = str_replace($search, $replace, $title);
-            $moto =  get_option('cta_moto');
-            if(empty( $title ) && empty($moto) ) return;
-           ?>
-       <section class="section section_white cta-recipe">
-        <div class="container container_sm">
-          <div class="row">
-            <div class="decoration">
-              <i class="icon-cool"></i>
-              <i class="icon-heart"></i>
-              <i class="icon-smile"></i>
-              <i class="icon-vote"></i>
-            </div>
-          </div><!-- row -->
-
-
-          <div class="row">
-            <?php
-
-             ?>
-            <div class="col-12">
-              <p class="section-title"><?php echo $title ?></p>
-              <p class="section-comment"><?php echo $moto ?></p>
-
-              <?php if (function_exists('wc_get_page_id') && (wc_get_page_id( 'shop' ) >=0 )):
-                         ?>
-              <p class="textcenter">
-                <a href="<?php echo get_permalink( wc_get_page_id( 'shop' ) );?>" class="button button_plus"><span class="plus"></span><?php echo (!empty(get_option('cta_button_text')))?get_option('cta_button_text') : __('Start Creating', 'theme-translations'); ?></a>
-              </p>
-              <?php endif;?>
-            </div>
-          </div><!-- row -->
-        </div><!-- container -->
-
-      </section>
-    <?php
-  }
-
 
   /**
   * Prints page footer
@@ -1595,163 +1659,6 @@ class theme_content_output{
 
       <div class="spacer-h-60"></div>
     <?php
-  }
-
-
-  /**
-  * prints a header of a woocommerce shop page
-  */
-  public static function print_woo_shop_header(){
-    if (theme_construct_page::is_page_type( 'woo-shop' )){
-
-    $title        = get_option('theme_woo_shop_title');
-    $title_marked = get_option('theme_woo_shop_title_marked');
-    $marked_new   = sprintf('<span class="marked marked_blue">%s</span>', $title_marked );
-
-    $title   = str_replace($title_marked, $marked_new , $title );
-    $comment = get_option('theme_woo_shop_comment');
-    }
-
-    if (theme_construct_page::is_page_type( 'woo-shop-category' )){
-      $term  = get_queried_object();
-
-      $display_title        = get_term_meta($term->term_id, '_display_title', true);
-      $display_title_marked = get_term_meta($term->term_id, '_display_title_marked', true);
-
-      $comment = $term->description;
-
-      $marked_new   = sprintf('<span class="marked marked_blue">%s</span>', $display_title_marked );
-
-      $title = ( $display_title )? $display_title : $term->name;
-
-      $title = ( $display_title )? str_replace($display_title_marked, $marked_new , $title ) : $title;
-    }
-    ?>
-    <div class="container container_sm theme-shop-header">
-        <h1 class="page-title page-title_xl">
-          <?php echo $title ?>
-        </h1>
-
-        <div class="page-title__comment page-title__comment_xl">
-          <pre><?php echo $comment ?></pre> </div>
-     </div>
-    <div class="spacer-h-45"></div>
-    <?php
-  }
-
-
-  /**
-  * prints an after header section of a woocommerce shop page
-  * includes categories for product display type;
-  */
-  public static function print_woo_shop_after_header(){
-    $display_type = woocommerce_get_loop_display_mode();
-
-    switch($display_type){
-      case 'products':
-        $args = array(
-          'taxonomy' => 'product_cat',
-          'hide_empty' => true,
-          'posts_per_page' => -1,
-          'limit' => -1,
-        );
-
-        $categories = get_terms($args);
-
-      ?>
-      <section class="categories">
-        <div class="container container_sm2">
-          <div class="row">
-          <a href="<?php echo esc_url(get_permalink(wc_get_page_id( 'shop' ) )) ?>" class=" categories__item"><span class="categories__item-image"><img src="<?php echo THEME_URL ?>/images/icons/c11.png" alt="Shop"></span><span class="categories__item-title"><span>All</span></span></a>
-          <?php
-          $num = 1;
-          foreach ($categories as $id => $c):
-            if('plans' === $c->slug ||'uncategorized' === $c->slug || 'uncategorized' === strtolower($c->name)) continue;
-            $image_id  = get_term_meta($c->term_id, 'thumbnail_id', true);
-            $image_url = wp_get_attachment_image_url($image_id, 'icon');
-            $prefix    = ($num < 10)? '0' : '';
-            $image_url = ($image_id && (int)$image_id > 0)?$image_url : sprintf('%s/images/icons/c%s%s.png', THEME_URL, $prefix, $num);
-            ?>
-            <a href="<?php echo esc_url(get_term_link($c)) ?>"   class="categories__item"><span class="categories__item-image"><img width="48" height="48" src="<?php echo  $image_url; ?>" alt=""></span><span class="categories__item-title"><span><?php echo $c->name ?></span></span></a>
-          <?php
-          $num++;
-          $num = ($num>5)? 1 : $num;
-        endforeach; ?>
-          </div>
-        </div>
-      </section>
-      <div class="spacer-h-10"></div>
-      <div class="spacer-h-10"></div>
-      <?php
-        break;
-      case 'subcategories':
-        // echo woocommerce_maybe_show_product_subcategories();
-        break;
-      case 'both':
-        // echo woocommerce_maybe_show_product_subcategories();
-        break;
-    }
-
-
-    if(is_active_sidebar('theme_woo_shop_before_loop') && is_shop()){
-      dynamic_sidebar('theme_woo_shop_before_loop');
-    }
-
-    if(theme_construct_page::is_page_type( 'woo-shop-category' )){
-      $term  = get_queried_object();
-
-      $args = array(
-        'fields'  => 'ids',
-        'post_type' => 'product',
-        'meta_query' =>array(
-            'relation' => 'AND',
-            array(
-              'key'     => '_is_theme_featured',
-              'compare' => 'LIKE',
-              'value'   => 'yes',
-            ),
-          ),
-       'tax_query' => array(
-            array(
-              'taxonomy' => 'product_cat',
-              'field'    => 'slug',
-              'terms'    => $term->slug
-            )
-       ),
-
-      );
-
-      $featured = get_posts( $args);
-
-      if ($featured ) {
-        $products = wc_get_products(array('include' => $featured));
-
-      ?>
-      <section class="section-products">
-        <div class="container container_sm">
-          <div class="row products-large no-gutters">
-            <?php
-            global $product;
-            global $theme_product_widget_size;
-            $old_theme_product_widget_size = $theme_product_widget_size;
-            $old_product = $product;
-            $theme_product_widget_size = 'large';
-
-            foreach ($products as $key => $p):
-              $product = $p;
-              wc_get_template_part( 'content', 'product' );
-            endforeach;
-
-            $theme_product_widget_size = $old_theme_product_widget_size;
-            $product = $old_product;
-             ?>
-
-          </div><!-- row -->
-        </div><!-- container -->
-      </section><!-- products -->
-      <?php
-      }
-    }
   }
 
 
@@ -3626,20 +3533,9 @@ class theme_content_output{
     echo '</div>';
   }
 
-
-  public static function print_product_notification(){
-    $args = array(
-      'url' => HOME_URL,
-
-    );
-    if(wp_is_mobile()):
-    else:
-      print_theme_template_part('studio-notification', 'woocommerce', $args);
-    endif;
-  }
-
-
-
+  /**
+  * @deprecated
+  */
   public static function print_product_content(){
     if(!function_exists('get_field')){
       echo 'Install ACF PLUGIN';
@@ -3722,11 +3618,116 @@ class theme_content_output{
     wp_localize_script($theme_init->main_script_slug, 'gallery_items', $gallery);
 
     if(wp_is_mobile()):
-      print_theme_template_part('product-mobile', 'woocommerce', $args);
+      // print_theme_template_part('product-mobile', 'woocommerce', $args);
     else:
-      print_theme_template_part('product-desktop', 'woocommerce', $args);
+      // print_theme_template_part('product-desktop', 'woocommerce', $args);
     endif;
   }
+
+
+  public static function print_product_content_new(){
+    if(!function_exists('get_field')){
+      echo 'Install ACF PLUGIN';
+      return;
+    }
+
+    global $product;
+
+    /*get category*/
+
+    $_ids = $product->get_category_ids();
+    $terms = array();
+
+    foreach ($_ids as $key => $_term_id) {
+      $term = get_term($_term_id, 'product_cat');
+      $thumbnail_id = (int)get_term_meta($_term_id, 'thumbnail_id', true );
+      $term->icon =  wp_get_attachment_image_url($thumbnail_id, 'full');
+      $terms[] = $term;
+    }
+
+    if(function_exists('yoast_get_primary_term_id')){
+      $term_id = yoast_get_primary_term_id('product_cat');
+    }else{
+      $term_id = $_ids[0];
+    }
+
+    $term = get_term($term_id, 'product_cat');
+
+    $term_tree = get_term_tree($term);
+
+    /** get gallery urls*/
+    $gallery_ids = $product->get_gallery_image_ids();
+
+    foreach ($gallery_ids as $id) {
+      $size = 'large';
+      $gallery[] = wp_get_attachment_image_url($id, $size);
+    }
+
+
+
+    /** add product to cart to initiate shoot builder **/
+    $product_id = $product->get_id();
+
+    wc()->cart->empty_cart();
+    wc()->cart->add_to_cart((int)$product_id , 1, (int)$product_id);
+
+
+    /** GET CONSTRUCTOR URL**/
+    $constructor_url = get_permalink(get_option('theme_page_constructor'));
+    $myaccount_page = get_option( 'woocommerce_myaccount_page_id' );
+    $myaccount_page_url = get_permalink( $myaccount_page );
+    $constructor_url = is_user_logged_in() ? $constructor_url.'?product_id='.$product_id.'?add_to_cart='.$product_id : $myaccount_page_url.'?product_id='.$product_id ;
+
+    /**bottom image data**/
+
+    $bottom_image_id = get_field('bottom_image', $product_id);
+    $bottom_image_regular   = wp_get_attachment_image_url($bottom_image_id, 'image_1920');
+    $bottom_image_retina   = wp_get_attachment_image_url($bottom_image_id, 'full');
+
+    $args = array(
+      'constructor_url'   => $constructor_url,
+      'gallery'   => $gallery,
+      'product'   => $product,
+      'term_tree' => $term_tree ,
+      'product_id' => $product_id ,
+      'terms'     => $terms,
+      'bottom_image'     => array(
+        'show'    =>(int)$bottom_image_id  >  0? true : false,
+        'regular' =>  $bottom_image_regular ,
+        'retina'  => $bottom_image_retina ,
+      ),
+      'what_to_expect'     => get_field( 'what_to_expect' ,$product_id),
+      'faq'     => get_field( '_faq' ,$product_id),
+      'customer_reviews'     => get_field( 'customer_reviews' ,$product_id),
+    );
+
+    print_theme_template_part('product-new', 'woocommerce', $args);
+  }
+
+
+
+
+   public static function print_product_mobile_bar(){
+    if(!function_exists('get_field')){
+      echo 'Install ACF PLUGIN';
+      return;
+    }
+
+    global $product;
+
+    /** GET CONSTRUCTOR URL**/
+    $constructor_url = get_permalink(get_option('theme_page_constructor'));
+    $myaccount_page = get_option( 'woocommerce_myaccount_page_id' );
+    $myaccount_page_url = get_permalink( $myaccount_page );
+    $constructor_url = is_user_logged_in() ? $constructor_url.'?product_id='.$product_id.'?add_to_cart='.$product_id : $myaccount_page_url.'?product_id='.$product_id ;
+
+    $args = array(
+      'constructor_url'   => $constructor_url,
+      'faq'     => get_field( '_faq' ,$product_id),
+    );
+    print_theme_template_part('product-mobile-bar', 'woocommerce', $args);
+
+   }
 
   public static function print_product_contructor(){
     global $theme_init;

@@ -7,7 +7,7 @@
 " >
   <div class="container-fluid">
     <div class="row justify-content-between">
-      <div class="col-6 col-md-2 valign-center">
+      <div class="col-6 col-md-3 valign-center">
           <?php echo $logo ?>
       </div><!-- col-md-7 -->
 
@@ -16,7 +16,7 @@
           <?php echo $main_menu; ?>
       </div>
 
-      <div class="col-6 col-md-2 order-0 order-md-1 text-right valign-center">
+      <div class="col-6 col-md-3 order-0 order-md-1 text-right valign-center">
         <ul class="login-menu">
           <li>
             <svg class="icon svg-icon-dots-in-row"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-dots-in-row"></use> </svg>

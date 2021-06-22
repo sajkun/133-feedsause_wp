@@ -136,10 +136,28 @@ class theme_filter_class{
 
     add_filter('pre_get_posts', array($this, 'exlude_some_products'));
 
-
-
     add_filter( 'woocommerce_is_purchasable', array($this,'price_0_is_purchasable') , 10, 2 );
+
+
+    add_filter( 'nav_menu_item_args', array($this,'nav_menu_item_args') , 10, 3 );
   }
+
+  public static function nav_menu_item_args(   $args, $item, $depth ){
+
+    $image_id   = get_post_meta($item->ID, '_custom-image-url', true);
+    $image_data = wp_get_attachment_image_src($image_id, 'full', true);
+
+    if($image_id  && (int)$image_id != '-1' && !$args->theme_location){
+      $args->link_before  = sprintf('<i class="icon"><img src="%s" alt="icon"></i>', $image_data[0]);
+    }else{
+      $args->link_before  =  '';
+    }
+
+
+    return $args;
+  }
+
+
    /**
     * makes product with 0 price purchaseable
     *
@@ -525,6 +543,9 @@ class theme_filter_class{
     if(  is_account_page()   ){
      $classes .= " discard-column-inner ";
     }
+    if( is_product() || is_shop() || is_product_category() ){
+      $classes .= " dark-mode ";
+    }
 
     return $classes;
   }
@@ -827,6 +848,7 @@ class theme_filter_class{
       "yith_wcmbs_frontend_opensans",
       "yith_ywsbs_frontend",
       "ywccp-front-style",
+      "megamenu",
     );
 
     return $forbidden_names;

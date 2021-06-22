@@ -213,7 +213,6 @@ if(!function_exists('unregister_scripts_n_styles')){
 
     $scripts = apply_filters('allow_theme_scripts', wp_scripts()->queue);
 
-
     foreach ($styles  as $id => $_s) {
       wp_deregister_style($_s);
       wp_dequeue_style($_s);
@@ -1690,4 +1689,16 @@ if(!function_exists('exec_upload_file')){
 
     return $upload_exeptions;
   }
+}
+
+
+function get_term_tree($term, $array = array() ){
+  array_push($array, $term);
+
+  if($term->parent != 0){
+    $newterm = get_term($term->parent, $term->taxonomy);
+    $array = get_term_tree($newterm,  $array );
+  }
+
+  return array_reverse($array);
 }

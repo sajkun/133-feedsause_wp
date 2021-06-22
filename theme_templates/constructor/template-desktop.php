@@ -921,7 +921,7 @@
             <div class="shoot-steps">
               <div class="shoot-steps__header">
                 <h2 class="title">
-                   Blocks
+                   <?php echo $title; ?>
                    <svg class="icon svg-icon-dots"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-dots"></use> </svg>
                 </h2>
                 <span class="text">Recipe</span>

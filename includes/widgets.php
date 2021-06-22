@@ -57,7 +57,7 @@ class theme_product_widget extends WP_Widget {
             endforeach ?>
           </div><!-- row -->
           <?php if (isset($data['button']) && 'yes' === $data['button']): ?>
-           <div style="text-align: center">
+           <div <?php echo 'style="text-align: center"' ?>>
              <a href="<?php echo get_permalink( wc_get_page_id( 'shop' ) );?>" class="button button_lg">Browse All Recipes</a>
            </div>
            <div class="spacer-h-25"></div>
@@ -93,7 +93,7 @@ class theme_product_widget extends WP_Widget {
              ?>
           </div><!-- row -->
           <?php if (isset($data['button']) && 'yes' === $data['button']): ?>
-           <div style="text-align: center">
+           <div <?php echo 'style="text-align: center"' ?>>
              <a href="<?php echo get_permalink( wc_get_page_id( 'shop' ) );?>" class="button button_lg">Browse All Recipes</a>
            </div>
            <div class="spacer-h-25"></div>

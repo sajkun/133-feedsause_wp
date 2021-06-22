@@ -20,7 +20,13 @@ class theme_construct_page{
     add_action( 'woocommerce_account_my-gallery_endpoint', array('theme_content_output','print_gallery') );
 
     if(self::is_page_type( 'new-styles' )){
-      add_action('do_theme_header', array('theme_content_output','print_new_header'));
+
+      if(is_product() || is_shop() || is_product_category()){
+        add_action('do_theme_header', array('theme_content_output','print_new_header_dark'));
+        add_action('do_theme_footer', array('theme_content_output','print_footer_new_dark'));
+      }else{
+        add_action('do_theme_header', array('theme_content_output','print_new_header'));
+      }
       // add_action('do_theme_footer', array('theme_content_output','print_footer_new'));
     }else{
       add_filter('print_header_class', array(__CLASS__, 'detect_header_classes'));
@@ -36,13 +42,6 @@ class theme_construct_page{
       self::hook_frontend_page_functions();
     }
 
-    // elseif(self::is_page_type( 'constructor' )){
-    //   if(!isset($_GET['product_id'])){
-    //     wp_safe_redirect(get_permalink(woocommerce_get_page_id( 'shop' )) );
-    //   }
-
-    //    add_action('do_theme_content', array('theme_content_output','print_product_contructor'), 10);
-    // }
     elseif(self::is_page_type( 'blog' )){
 
       add_action('do_fly_basket', array('theme_content_output','print_fly_basket'), 10);
@@ -79,23 +78,14 @@ class theme_construct_page{
 
 
       if(self::is_page_type( 'woo-shop' ) || self::is_page_type( 'woo-shop-category' )){
-        self::hook_woo_shop_functions();
-
-        add_action('do_fly_basket', array('theme_content_output','print_fly_basket'), 10);
+        add_action('do_theme_content', array('theme_content_output','print_shop_content'), 10);
       }
 
       elseif( self::is_page_type( 'woo-product' )){
+        add_action('do_theme_content', array('theme_content_output','print_product_content_new'), 10);
+        add_action('do_theme_after_footer', array('theme_content_output','print_product_mobile_bar'), 10);
 
-        // add_action('do_theme_header', array('theme_content_output','print_product_notification'), 5);
-
-        add_action('do_theme_content', array('theme_content_output','print_product_content'), 10);
-
-      }elseif( self::is_page_type( 'woo-shop-category' )){
-        add_action('do_theme_after_content', array('theme_content_output','print_pre_footer_cta'), 90);
-        add_action('do_fly_basket', array('theme_content_output','print_fly_basket'), 10);
-      }
-
-      else if(self::is_page_type('woo-checkout')){
+      } else if(self::is_page_type('woo-checkout')){
         self::hook_woo_checkout();
 
       }
@@ -149,7 +139,7 @@ class theme_construct_page{
     $obj = get_queried_object();
     switch ($type){
       case 'new-styles':
-        return (function_exists('is_product') && is_product()) || ($obj->ID == (int)get_option('theme_page_constructor'))  || ( is_checkout() && !empty( is_wc_endpoint_url('order-received') ) || is_checkout() || (is_account_page() ));
+        return (function_exists('is_product') && is_product()) || ($obj->ID == (int)get_option('theme_page_constructor'))  || ( is_checkout() && !empty( is_wc_endpoint_url('order-received') ) || is_checkout() || is_shop() || is_product_category() || (is_account_page() ));
         break;
       case 'constructor':
       return $obj->ID == (int)get_option('theme_page_constructor');
@@ -282,7 +272,7 @@ class theme_construct_page{
       remove_action('woocommerce_after_edit_address_form_shipping', array( $manager , 'my_account_edit_address'));
 
       // billing fields
-      remove_filter( 'woocommerce_billing_fields', 'ywccp_load_custom_billing_fields', 50, 1 );
+      remove_filter( 'woocommerce_billing_fields', 'ywccp_load_custom_billing_fields', 50, 1);
     }
   }
 
@@ -358,20 +348,6 @@ class theme_construct_page{
     add_action('do_theme_content', array('theme_content_output','print_blog_post_content'), 10);
 
     add_action('do_theme_after_content', array('theme_content_output','print_blog_post_after'), 20);
-  }
-
-
-  /**
-  * adds hooks for woocommerce shop page
-  */
-  public static function hook_woo_shop_functions(){
-   /* common blocks of page template*/
-
-    add_action('do_theme_before_content', array('theme_content_output','print_woo_shop_header'), 10);
-
-    add_action('do_theme_before_content', array('theme_content_output','print_woo_shop_after_header'), 20);
-
-    add_action('do_theme_after_content', array('theme_content_output','print_pre_footer_cta'), 90);
   }
 
 

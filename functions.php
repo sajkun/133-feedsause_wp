@@ -27,8 +27,8 @@ class velesh_init_theme{
 
   public $main_script_slug = 'theme-main-script-dev11';
 
-  public $dt_ver_css = 11;
-  public $dt_ver_js = 12;
+  public $dt_ver_css = 18;
+  public $dt_ver_js = 16;
 
   public $mob_ver_js = 6;
   public $mob_ver_css = 7;
@@ -113,15 +113,9 @@ class velesh_init_theme{
     add_image_size('product_thumb_md_lazy_preview', 154, 104, true);
     add_image_size('product_thumb_sm', 596, 396, true);
     add_image_size('product_thumb_sm_lazy_preview', 99, 66, true);
-    add_image_size('blog_lg', 970, 420, true);
-    add_image_size('blog_lg_lazy_preview', 242, 105, true);
-    add_image_size('blog_feed', 470, 284, true);
-    add_image_size('blog_feed_lazy', 156, 94, true);
-    add_image_size('showcase_thumb', 596, 862, true);
-    add_image_size('gallery_1', 518, 688, true);
-    add_image_size('gallery_2', 518, 357, true);
     add_image_size('gallery_3', 518, 518, true);
     add_image_size('wfp_image_thumbnail_xl', 800, 800, true);
+    add_image_size('image_1920', 1920, 999999, false);
   }
 
 
@@ -146,7 +140,11 @@ class velesh_init_theme{
       wp_enqueue_script('datepicker', THEME_URL.'/assets/datepicker/daterangepicker.js', array('jquery'), THEME_VERSION, true);
 
       wp_enqueue_style('theme-fancybox', THEME_URL.'/assets/fancybox2/jquery.fancybox.css' );
+      wp_enqueue_style('owlcarousel', THEME_URL.'/assets/owlcarousel/css/owl.carousel.css' );
 
+      wp_enqueue_script('theme-script-lazy', THEME_URL.'/assets/lazy/lazy.js', array('jquery'), THEME_VERSION, true);
+
+      wp_enqueue_script('owlcarousel', THEME_URL.'/assets/owlcarousel/js/owl.carousel.min.js', array('jquery'), THEME_VERSION, true);
 
     if(theme_construct_page::is_page_type( 'new-styles' )){
 
@@ -161,7 +159,11 @@ class velesh_init_theme{
       wp_enqueue_script('theme-fancybox-thumbs', THEME_URL.'/assets/fancybox2/helpers/jquery.fancybox-thumbs.js', array('jquery'), THEME_VERSION, true);
 
       if(wp_is_mobile()){
-        wp_enqueue_style('theme-style-mobile', THEME_URL.'/css/mobile.main'.$this->mob_ver_css.'.min.css' );
+        if(is_product() || is_shop() || is_product_category() ){
+          wp_enqueue_style('theme-style-desktop', THEME_URL.'/css/desktop.main'.$this->dt_ver_css.'.min.css' );
+        }  else {
+          wp_enqueue_style('theme-style-mobile', THEME_URL.'/css/mobile.main'.$this->mob_ver_css.'.min.css' );
+        }
       }else{
         wp_enqueue_style('theme-style-desktop', THEME_URL.'/css/desktop.main'.$this->dt_ver_css.'.min.css' );
       }
@@ -172,7 +174,11 @@ class velesh_init_theme{
       wp_enqueue_script('vuejs', THEME_URL.'/assets/vuejs/prod.js', array(), THEME_VERSION, true);
 
       if(wp_is_mobile()){
-        wp_enqueue_script($this->main_script_slug, THEME_URL.'/script/new/mobile.main'.$this->mob_ver_js.'.min.js', array('jquery'), THEME_VERSION, true);
+        if(is_product() || is_shop() || is_product_category() ){
+          wp_enqueue_script($this->main_script_slug, THEME_URL.'/script/new/desktop.main'.$this->dt_ver_js.'.min.js', array('jquery'), THEME_VERSION, true);
+        }  else {
+          wp_enqueue_script($this->main_script_slug, THEME_URL.'/script/new/mobile.main'.$this->mob_ver_js.'.min.js', array('jquery'), THEME_VERSION, true);
+        }
       }else{
         wp_enqueue_script($this->main_script_slug, THEME_URL.'/script/new/desktop.main'.$this->dt_ver_js.'.min.js', array('jquery'), THEME_VERSION, true);
       }
@@ -191,7 +197,6 @@ class velesh_init_theme{
 
       wp_enqueue_script('theme-script-owl', THEME_URL.'/assets/owlcarousel/js/owl.carousel.min.js', array('jquery'), THEME_VERSION, true);
 
-      wp_enqueue_script('theme-script-lazy', THEME_URL.'/assets/lazy/lazy.js', array('jquery'), THEME_VERSION, true);
 
 
       wp_enqueue_script('select2-script', THEME_URL.'/assets/select2/select2.js' , array('jquery') );
@@ -302,8 +307,9 @@ class velesh_init_theme{
 
     if($pagenow == 'nav-menus.php'){
       include_once(THEME_PATH.'/includes/class-menu-edit.php');
-      $menu_image = new custom_edit_menu_image();
+      new custom_edit_menu_image();
     }
+
     include_php_from_dir(THEME_PATH.'/includes/');
     include_once(THEME_PATH.'/order_tracker/includes/tracker.php');
     include_php_from_dir(THEME_PATH.'/order_tracker/includes/');
@@ -438,8 +444,6 @@ class velesh_init_theme{
 
     wp_localize_script($this->main_script_slug,'WP_URLS', $wc_urls);
 
-    clog($wc_urls);
-
     $user_data = array(
       'user_id' => (get_current_user_id() > 0)? get_current_user_id() : 'visitor',
     );
@@ -479,9 +483,9 @@ class velesh_init_theme{
    */
   public function print_inline_data_body(){
     if(theme_construct_page::is_page_type( 'new-styles' )){
-      add_svg_sprite('theme_sprite_svg_133_10_new',THEME_URL.'/svg_sprite/new/symbol_sprite_3.html');
+      add_svg_sprite('theme_sprite_svg_133_11_new',THEME_URL.'/svg_sprite/new/symbol_sprite_3.html');
     }else{
-      add_svg_sprite('theme_sprite_svg_133_4',THEME_URL.'/svg_sprite/symbol_sprite.html');
+      add_svg_sprite('theme_sprite_svg_133_5',THEME_URL.'/svg_sprite/symbol_sprite.html');
     }
   }
 
@@ -555,6 +559,74 @@ class velesh_init_theme{
       'after_widget'  => '',
       'before_title'  => '<h3 class="menu-title">',
       'after_title'   => '</h3>',
+    ));
+
+
+    /***** new *****/
+
+    register_sidebar( array(
+      'name'          => __('Main menu create section', 'theme-translations'),
+      'id'            => 'main_menu_create2',
+      'before_widget' => '<div class="col-xxl-3">',
+      'after_widget'  => '</div>',
+      'before_title'  => '<h3 class="main-menu-new__dropdown-title">',
+      'after_title'   => '</h3>',
+    ));
+
+    register_sidebar( array(
+      'name'          => __('Main menu grow section', 'theme-translations'),
+      'id'            => 'main_menu_grow',
+      'before_widget' => '<div class="col-xxl-3">',
+      'after_widget'  => '</div>',
+      'before_title'  => '<h3 class="main-menu-new__dropdown-title">',
+      'after_title'   => '</h3>',
+    ));
+
+    register_sidebar( array(
+      'name'          => __('Main menu publish section', 'theme-translations'),
+      'id'            => 'main_menu_publish',
+      'before_widget' => '<div class="col-xxl-3">',
+      'after_widget'  => '</div>',
+      'before_title'  => '<h3 class="main-menu-new__dropdown-title">',
+      'after_title'   => '</h3>',
+    ));
+
+
+    register_sidebar( array(
+      'name'          => __('"DOTS" menu section', 'theme-translations'),
+      'id'            => 'dots_menu',
+      'before_widget' => '<div class="dots-item-container">',
+      'after_widget'  => '</div>',
+      'before_title'  => '<p class="my-menu__dropdown-title">',
+      'after_title'   => '</p>',
+    ));
+
+
+    register_sidebar( array(
+      'name'          => __('Footer widget column 1 new', 'theme-translations'),
+      'id'            => 'new_footer_1',
+      'before_widget' => '',
+      'after_widget'  => '',
+      'before_title'  => ' <h3 class="footer-title">',
+      'after_title'   => '<span class="footer-switcher"></span></h3>',
+    ));
+
+    register_sidebar( array(
+      'name'          => __('Footer widget column 2 new', 'theme-translations'),
+      'id'            => 'new_footer_2',
+      'before_widget' => '',
+      'after_widget'  => '',
+      'before_title'  => ' <h3 class="footer-title">',
+      'after_title'   => '<span class="footer-switcher"></span></h3>',
+    ));
+
+    register_sidebar( array(
+      'name'          => __('Footer widget column 3 new', 'theme-translations'),
+      'id'            => 'new_footer_3',
+      'before_widget' => '',
+      'after_widget'  => '',
+      'before_title'  => '<h3 class="footer-title">',
+      'after_title'   => '<span class="footer-switcher"></span></h3>',
     ));
 
   }
@@ -645,6 +717,7 @@ class velesh_init_theme{
 
     $locations = array(
       'main_menu'     => __('Menu in header', 'theme-translations'),
+      'main_menu_right'     => __('Menu in header on the right', 'theme-translations'),
       'main_menu_footer'     => __('Menu in footer', 'theme-translations'),
       'main_menu_mobile'     => __('Main menu for mobiles', 'theme-translations'),
     );

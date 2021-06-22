@@ -1131,14 +1131,6 @@ function product_valid_period_field($post){
        <input type="checkbox" name="_is_theme_featured" id="_is_theme_featured" <?php echo ($meta == 'yes')? 'checked="checked"' : '' ; ?> value="yes" placeholder="">
       &nbsp;
      </p>
-     <p class="form-field _show_zoom">
-      <label for="_is_free_sample">
-          Product is a Free Sample
-      </label>
-
-       <input type="checkbox" name="_is_free_sample" id="_is_free_sample" <?php echo ($meta2 == 'yes')? 'checked="checked"' : '' ; ?> value="yes" placeholder="">
-      &nbsp;
-     </p>
   </div>
   <?php
 }
