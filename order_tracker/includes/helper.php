@@ -322,12 +322,13 @@ if(!class_exists('map_orders_cb')){
 
       }
 
+      $_source_wfp_data = '';
+
       if($is_reshoot){
         $source_order_id = (int)$order_items[0]['extra_data']['buy_single_order_id']['value'];
         $source_image_id = (int)$order_items[0]['extra_data']['buy_single_image_id']['value'];
         $source_wfp_data = get_post_meta($source_order_id, '_wfp_image', true);
 
-        $_source_wfp_data = '';
 
 
         if($source_wfp_data){
@@ -357,8 +358,8 @@ if(!class_exists('map_orders_cb')){
         'data'     => array(
           'coupon_codes' => $order->get_coupon_codes(),
           'discount'     => $order->get_discount_total() ,
-          'return_price' => $return_price,
-          'fasttrack_price' => $fasttrack_price,
+          'return_price' =>  isset($return_price)?$return_price:0,
+          'fasttrack_price' =>  isset($fasttrack_price)?$fasttrack_price:0,
           'source_wfp_data' => $_source_wfp_data,
           'order_items_data' => $order_items[0],
           'extra_data'       => $extra_data ,

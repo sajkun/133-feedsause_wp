@@ -7,34 +7,37 @@
 <?php if (!isset($_GET['no_reload'])): ?>
 <div class="content-fullheight load-page">
   <div class="load-page__content">
-
     <div class="spacer-h-20"></div>
+
+    <div class="spacer-h-40"></div>
 
     <div class="clearfix text-center">
       <span class="logo">
           <img src="<?php echo THEME_URL; ?>/images/logo_contrast.png"  alt="">
       </span>
-
-      <div class="spacer-h-20"></div>
-
-      <h1 class="load-title">Shoot <span class="styled">Builder</span></h1>
     </div>
 
-    <div class="load-progress progress" id="progress_div">
+    <div class="load-progress progress hidden" id="progress_div">
       <div class="inner" id="bar1"></div>
     </div>
+
+    <div class="text-center">
+      <img src="<?php echo THEME_URL; ?>/images/svg/oval-progress.png" alt="" class="rotate-status">
+    </div>
+
+
     <input type="hidden" id="progress_width" value="0">
 
     <div class="load-statuses" id="load-statuses">
       <div class="load-statuses__inner">
         <span class="load-statuses__item">Loading styles…</span>
         <span class="load-statuses__item">Loading scripts…</span>
-        <span class="load-statuses__item">Fetching colour themes…</span>
+        <span class="load-statuses__item">Fetching color themes…</span>
         <span class="load-statuses__item">Preparing environment…</span>
       </div>
     </div>
 
-    <div class="spacer-h-20"></div>
+    <div class="spacer-h-30"></div>
 
     <img src="<?php echo THEME_URL; ?>/images/load.svg" class="load" alt="">
     <div class="spacer-h-60"></div>

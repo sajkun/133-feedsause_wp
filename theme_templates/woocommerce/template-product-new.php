@@ -3,8 +3,7 @@
   <div class="pagination">
     <ul class="pagination__list">
       <li><a href="<?php echo HOME_URL; ?>">Home</a></li>
-      <li><a href="#">Recipes</a></li>
-
+      <li><a href="<?php echo $shop_url; ?>">Recipes</a></li>
       <?php foreach ($term_tree as $key => $term): ?>
       <li>
         <?php echo ($key + 1 == count($term_tree))? sprintf('<span>%s</span>', $term->name) : sprintf('<a href="%s">%s</a>',get_term_link($term), $term->name); ?>
@@ -366,7 +365,7 @@
       <?php echo $rating ?> <span class="text"><?php echo $rating_text ?></span>
     </span>
 
-    <img src="assets/images/trust_logo.png" class="trust-logo" alt="">
+    <img src="<?php echo THEME_URL;?>/images/trust_logo.png" class="trust-logo" alt="">
   </div>
 
   <h3 class="product-testi-holder__item-title"><?php echo $title; ?></h3>

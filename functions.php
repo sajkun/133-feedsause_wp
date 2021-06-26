@@ -27,11 +27,11 @@ class velesh_init_theme{
 
   public $main_script_slug = 'theme-main-script-dev11';
 
-  public $dt_ver_css = 18;
-  public $dt_ver_js = 16;
+  public $dt_ver_css = 21;
+  public $dt_ver_js = 17;
 
   public $mob_ver_js = 6;
-  public $mob_ver_css = 7;
+  public $mob_ver_css = 8;
 
 
   /**
@@ -162,6 +162,7 @@ class velesh_init_theme{
         if(is_product() || is_shop() || is_product_category() ){
           wp_enqueue_style('theme-style-desktop', THEME_URL.'/css/desktop.main'.$this->dt_ver_css.'.min.css' );
         }  else {
+          // wp_enqueue_style('theme-style-desktop', THEME_URL.'/css/desktop.main'.$this->dt_ver_css.'.min.css' );
           wp_enqueue_style('theme-style-mobile', THEME_URL.'/css/mobile.main'.$this->mob_ver_css.'.min.css' );
         }
       }else{
@@ -177,7 +178,8 @@ class velesh_init_theme{
         if(is_product() || is_shop() || is_product_category() ){
           wp_enqueue_script($this->main_script_slug, THEME_URL.'/script/new/desktop.main'.$this->dt_ver_js.'.min.js', array('jquery'), THEME_VERSION, true);
         }  else {
-          wp_enqueue_script($this->main_script_slug, THEME_URL.'/script/new/mobile.main'.$this->mob_ver_js.'.min.js', array('jquery'), THEME_VERSION, true);
+          wp_enqueue_script($this->main_script_slug, THEME_URL.'/script/new/desktop.main'.$this->dt_ver_js.'.min.js', array('jquery'), THEME_VERSION, true);
+          // wp_enqueue_script($this->main_script_slug, THEME_URL.'/script/new/mobile.main'.$this->mob_ver_js.'.min.js', array('jquery'), THEME_VERSION, true);
         }
       }else{
         wp_enqueue_script($this->main_script_slug, THEME_URL.'/script/new/desktop.main'.$this->dt_ver_js.'.min.js', array('jquery'), THEME_VERSION, true);
@@ -437,9 +439,9 @@ class velesh_init_theme{
 
     if(get_option('woocommerce_default_country')){
 
-      wp_localize_script($this->main_script_slug,'theme_default_country', get_option('woocommerce_default_country'));
+      wp_add_inline_script($this->main_script_slug, 'var theme_default_country ='. get_option('woocommerce_default_country'), 'before');
     }else{
-      wp_localize_script($this->main_script_slug,'theme_default_country', -1);
+      wp_add_inline_script($this->main_script_slug,'var theme_default_country =-1', 'before');
     }
 
     wp_localize_script($this->main_script_slug,'WP_URLS', $wc_urls);
@@ -603,6 +605,15 @@ class velesh_init_theme{
 
 
     register_sidebar( array(
+      'name'          => __('Shop Navigation Sidebar', 'theme-translations'),
+      'id'            => 'shop_sidebar',
+      'before_widget' => '<nav class="category-menu">',
+      'after_widget'  => '<div class="spacer-h-30"></div></nav>',
+      'before_title'  => '<h2 class="category-menu-title">',
+      'after_title'   => '</h2>',
+    ));
+
+    register_sidebar( array(
       'name'          => __('Footer widget column 1 new', 'theme-translations'),
       'id'            => 'new_footer_1',
       'before_widget' => '',
@@ -716,9 +727,10 @@ class velesh_init_theme{
     /*Menu registrations*/
 
     $locations = array(
-      'main_menu'     => __('Menu in header', 'theme-translations'),
-      'main_menu_right'     => __('Menu in header on the right', 'theme-translations'),
-      'main_menu_footer'     => __('Menu in footer', 'theme-translations'),
+      'main_menu'     => __('Main menu in header', 'theme-translations'),
+      'menu_login'     => __('Located in footer on Sign in pages', 'theme-translations'),
+      'main_menu_right'     => __('Located in header on the right side', 'theme-translations'),
+      'main_menu_footer'     => __('Located in footer', 'theme-translations'),
       'main_menu_mobile'     => __('Main menu for mobiles', 'theme-translations'),
     );
 

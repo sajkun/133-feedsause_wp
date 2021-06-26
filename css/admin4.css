@@ -826,6 +826,16 @@ border: 1px solid  #000;
   cursor: move;
 }
 
+
+#products_category:checked ~ .duh-tabs [for="products_category"]{
+  background: #fff;
+  border-bottom-color:#fff;
+}
+
+#products_category:checked ~ .products_category{
+  display: block;
+}
+
 #general:checked ~ .duh-tabs [for="general"]{
   background: #fff;
   border-bottom-color:#fff;

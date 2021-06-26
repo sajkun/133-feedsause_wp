@@ -4,7 +4,6 @@
   }
 </style>
 
-
 <?php if (!isset($_GET['no_reload'])): ?>
 <div class="content-fullheight load-page">
   <div class="load-page__content">
@@ -16,22 +15,24 @@
       <span class="logo">
           <img src="<?php echo THEME_URL; ?>/images/logo_contrast.png"  alt="">
       </span>
-
-      <div class="spacer-h-40"></div>
-
-      <h1 class="load-title">Shoot <span class="styled">Builder</span></h1>
     </div>
 
-    <div class="load-progress progress" id="progress_div">
+    <div class="load-progress progress hidden" id="progress_div">
       <div class="inner" id="bar1"></div>
     </div>
+
+    <div class="text-center">
+      <img src="<?php echo THEME_URL; ?>/images/svg/oval-progress.png" alt="" class="rotate-status">
+    </div>
+
+
     <input type="hidden" id="progress_width" value="0">
 
     <div class="load-statuses" id="load-statuses">
       <div class="load-statuses__inner">
         <span class="load-statuses__item">Loading styles…</span>
         <span class="load-statuses__item">Loading scripts…</span>
-        <span class="load-statuses__item">Fetching colour themes…</span>
+        <span class="load-statuses__item">Fetching color themes…</span>
         <span class="load-statuses__item">Preparing environment…</span>
       </div>
     </div>
@@ -50,7 +51,7 @@
 
 <div class="visuallyhidden" id="studio-content">
   <div class="container-lg">
-
+    <div class="spacer-h-60"></div>
   <div class="row">
     <div class="col-md-7">
       <div class="step-markers">
@@ -72,77 +73,78 @@
         <!-- **************
                STEP 1
           *****************-->
-              <div class="studio-content__page" v-show="step == 1" :key="'step-1'">
-                <div class="step-label">
-                  <svg class="icon svg-icon-product">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-product"></use>
-                    <span class="step-label__text">Products</span>
-                  </svg>
+            <div class="studio-content__page" v-show="step == 1" :key="'step-1'">
+              <div class="step-label">
+                <svg class="icon svg-icon-product">
+                  <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-product"></use>
+                </svg>
+                <span class="step-label__text">Products</span>
+              </div>
+              <div class="spacer-h-25"></div>
+              <h2 class="studio-title"><span class="text">Start by adding
+                                your </span><span class="marked product">products</span></h2>
+              <div class="spacer-h-10"></div>
+              <p class="regular-text">So, which products would you like to include in this shoot?</p>
+
+              <div class="spacer-h-25"></div>
+
+                <?php if ($product_guid_url): ?>
+                <div class="notification">
+                  <div class="notification__icon">
+                    <img src="<?php echo THEME_URL; ?>/images/hand.png" alt="">
+                  </div>
+                  <p class="notification__text">
+                    <b>Product Guidelines.</b> Please ensure your order meets <br> our <a href="<?php echo $product_guid_url ?>">Product Guidelines</a> to avoid any delays.
+                  </p>
                 </div>
-                <div class="spacer-h-25"></div>
-                <h2 class="block-title">Start by adding your <span class="styled">products</span></h2>
+                      <div class="spacer-h-30"></div>
+                <?php endif ?>
+
+              <div class="studio-content__body">
+                <label class="studio-content__label">
+                  Add your products
+                </label>
+
+                <transition-group
+                  name="product-name"
+                  tag="div"
+                  v-bind:css="false"
+                  v-on:before-enter="beforeEnter"
+                  v-on:enter="enter"
+                  v-on:leave="leave"
+                  v-on:after-enter="enterAfter"
+                  v-on:after-leave="leaveAfter"
+                >
+                  <div v-for="product, key in products" :key="'product-name'+key" class="product-name-holder">
+                    <input type="text" class="input-field" placeholder="Your product name"
+                     v-on:change="check_product_name(key, product.title)"
+                     v-on:input="check_product_name(key, product.title)"
+                     v-model="product.title" :ref="'product-name'">
+                     <a href="#" class="remove" v-if="key > 0" v-on:click="remove_product(key)">×</a>
+                    <div class="spacer-h-15"></div>
+                    <select-imitation-type
+                      :class="'fullwidth'"
+                      :_selected = "'Type of product'"
+                      :_options = 'product_types'
+                      :_select_name = "'product_type'"
+                      @update_list = 'change_product_type($event, key)'
+                      :ref="'product_type'"
+                    ></select-imitation-type>
+                      <div class="spacer-h-20"></div>
+                  </div>
+                </transition-group>
                 <div class="spacer-h-10"></div>
-                <p class="regular-text">So, which products would you like to include in this shoot?</p>
+                <div class="text-left">
+                  <span class="studio-content__add" v-on:click.prevent="add_product_name()">Add another product</span>
+                  <span class="price-marker">+ {{currency_symbol}}{{Math.round(prices.name * currency_index) }}</span>
+                </div>
 
-                <div class="spacer-h-25"></div>
-
-                  <?php if ($product_guid_url): ?>
-                  <div class="notification">
-                    <div class="notification__icon">
-                      <img src="<?php echo THEME_URL; ?>/images/hand.png" alt="">
-                    </div>
-                    <p class="notification__text">
-                      <b>Product Guidelines.</b> Please ensure your order meets <br> our <a href="<?php echo $product_guid_url ?>">Product Guidelines</a> to avoid any delays.
-                    </p>
-                  </div>
-                        <div class="spacer-h-30"></div>
-                  <?php endif ?>
-
-                <div class="studio-content__body">
-                  <label class="studio-content__label">
-                    Add your products
-                  </label>
-
-                  <transition-group
-                    name="product-name"
-                    tag="div"
-                    v-bind:css="false"
-                    v-on:before-enter="beforeEnter"
-                    v-on:enter="enter"
-                    v-on:leave="leave"
-                    v-on:after-enter="enterAfter"
-                    v-on:after-leave="leaveAfter"
-                  >
-                    <div v-for="product, key in products" :key="'product-name'+key" class="product-name-holder">
-                      <input type="text" class="input-field" placeholder="Your product name"
-                       v-on:change="check_product_name(key, product.title)"
-                       v-on:input="check_product_name(key, product.title)"
-                       v-model="product.title" :ref="'product-name'">
-                       <a href="#" class="remove" v-if="key > 0" v-on:click="remove_product(key)">×</a>
-                      <div class="spacer-h-15"></div>
-                      <select-imitation-type
-                        :class="'fullwidth'"
-                        :_selected = "'Type of product'"
-                        :_options = 'product_types'
-                        :_select_name = "'product_type'"
-                        @update_list = 'change_product_type($event, key)'
-                        :ref="'product_type'"
-                      ></select-imitation-type>
-                        <div class="spacer-h-20"></div>
-                    </div>
-                  </transition-group>
-                  <div class="spacer-h-10"></div>
-                  <div class="text-left">
-                    <span class="studio-content__add" v-on:click.prevent="add_product_name()">Add another product</span>
-                    <span class="price-marker">+ £{{prices.name}}</span>
-                  </div>
-
-                  <div class="spacer-h-30"></div>
-                  <div class="warning">
-                    One item counts as one product. For example, if you sell a gift box or hamper and would like all the contents inside to be shot, you would need to add each item as a product.
-                  </div>
-                </div><!-- studio-content__page -->
+                <div class="spacer-h-30"></div>
+                <div class="warning">
+                  One item counts as one product. For example, if you sell a gift box or hamper and would like all the contents inside to be shot, you would need to add each item as a product.
+                </div>
               </div><!-- studio-content__page -->
+            </div><!-- studio-content__page -->
 
         <!-- **************
              STEP 1 END
@@ -157,7 +159,8 @@
             <div class="step-label"><svg class="icon svg-icon-number"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href=" #svg-icon-number"></use></svg> <span class="step-label__text">Photos</span></div>
 
             <div class="spacer-h-20"></div>
-            <h2 class="block-title">How many <span class="styled">photos</span> <br> would you like?</h2>
+            <h2 class="studio-title"><span class="text">How many </span><span class="styled photos">photos</span>
+             <span class="text">would you like?</span></h2>
               <div class="spacer-h-20"></div>
             <p class="regular-text">Choose how many photos you would like in total, with a minimum order of 3 photos. </p>
             <div class="spacer-h-30"></div>
@@ -165,7 +168,7 @@
             <div class="studio-content__body">
               <label class="studio-content__label">
                 Select number of photos
-                <span class="price-marker">£30 /photo</span>
+                <span class="price-marker">{{currency_symbol}}{{Math.round(prices.image * currency_index)}} /photo</span>
               </label>
 
               <div class="spacer-h-20"></div>
@@ -207,7 +210,8 @@
         *****************-->
           <div class="studio-content__page" v-show="step == 3"  :key="'step-3'">
             <div class="spacer-h-20"></div>
-            <h2 class="block-title"><span class="styled">Customise</span> your <br> product shoot</h2>
+            <h2 class="studio-title"> <span class="text">Customise your</span> <br>
+                        <span class="styled product">product</span> shoot</span></h2>
             <div class="spacer-h-20"></div>
 
             <div class="studio-content__tabs">
@@ -305,7 +309,7 @@
               <div :key="'tab-4'" class="studio-content__body"  v-show="customize_step == 4">
                 <label class="studio-content__label">
                   Additional photo sizes
-                  <span class="price-marker">£2/size</span>
+                  <span class="price-marker">{{currency_symbol}}{{Math.round(currency_index * prices.sizes)}}/size</span>
                 </label>
                 <p class="regular-text">Default square size is free and included in your recipe.</p>
 
@@ -361,7 +365,7 @@
               <div :key="'tab-1'" class="studio-content__body" v-show="customize_step == 1">
                 <label class="studio-content__label">
                   Backdrops & Elements
-                  <span class="price-marker">+£5 / theme</span>
+                  <span class="price-marker">+{{currency_symbol}}{{Math.round(currency_index * prices.color)}} / theme</span>
                 </label>
                 <p class="regular-text">You can choose one theme for <span class="marked">free</span>. If you select additional themes and want them to be used with specific products, please specify in the next step, Studio Notes.</p>
 
@@ -470,7 +474,7 @@
               </svg>
             </div>
             <div class="spacer-h-20"></div>
-            <h2 class="block-title">Studio <span class="styled">Notes</span></h2>
+            <h2 class="studio-title"><span class="text">Studio</span> <span class="styled notes">Notes</span></h2>
             <div class="spacer-h-20"></div>
 
              <p class="regular-text">Notes are a great way to communicate your vision with the photographer.</p>
@@ -507,7 +511,7 @@
                     <b>Custom Shot List</b> Specify which products should be shot together and how.
                   </span>
                   <span class="radio-imitation__icon valign-center">
-                    <span class="price-marker">+ £9 /photo</span>
+                    <span class="price-marker">+ {{currency_symbol}}{{Math.round(currency_index * prices.shoot)}} /photo</span>
                   </span>
                 </span>
               </label>
@@ -528,7 +532,7 @@
             </svg>
           </div>
           <div class="spacer-h-20"></div>
-          <h2 class="block-title">Custom <span class="styled">Shot</span> List</h2>
+          <h2 class="studio-title"><span class="text">Custom</span> <span class="styled shoot">Shot</span> <span class="text">List</span></h2>
           <div class="spacer-h-20"></div>
 
            <p class="regular-text">You can personalise your requirements for each shot.</p>
@@ -570,7 +574,7 @@
             <div class="spacer-h-20"></div>
             <div class="text-left" v-if="notes.data.length < image_count">
               <span class="studio-content__add" v-on:click.prevent="add_note_custom" >Add another shot</span>
-              <span class="price-marker">+ £9</span>
+              <span class="price-marker">+ {{currency_symbol}}{{Math.round(currency_index * prices.shoot)}}</span>
             </div>
 
             <div class="spacer-h-20"></div>
@@ -596,7 +600,7 @@
               </svg>
             </div>
             <div class="spacer-h-20"></div>
-            <h2 class="block-title">Turnaround <span class="styled">time</span></h2>
+            <h2 class="studio-title"><span class="text">Turnaround</span> <span class="styled time">time</span></h2>
             <div class="spacer-h-20"></div>
             <p class="regular-text">Use our standard turnaround or upgrsde for a faster delivery of your photos.</p>
             <div class="spacer-h-20"></div>
@@ -633,7 +637,7 @@
                     <b>3 Business Days</b>From when we receive your products
                   </span>
                   <span class="radio-imitation__icon valign-center">
-                    <span class="price-marker">+ £{{prices.fasttrack}}</span>
+                    <span class="price-marker">+ {{currency_symbol}}{{Math.round(prices.fasttrack * currency_index)}}</span>
                   </span>
                 </span>
               </label>
@@ -654,7 +658,7 @@
               </svg>
             </div>
             <div class="spacer-h-20"></div>
-            <h2 class="block-title">Finalise your shoot</h2>
+            <h2 class="studio-title"><span class="marked final">Finalise</span> <span class="text">your shoot</span></h2>
             <div class="spacer-h-20"></div>
             <label class="studio-content__label">
                 How should we handle your product?
@@ -685,7 +689,7 @@
                     <b>Return Products</b> Once shoot is completeducts
                   </span>
                   <span class="radio-imitation__icon valign-center">
-                    <span class="price-marker">+ £{{prices.handle}}</span>
+                    <span class="price-marker">+ {{currency_symbol}}{{Math.round(prices.handle * currency_index)}}</span>
                   </span>
                 </span>
               </label>
@@ -773,7 +777,7 @@
         <div class="studio-content__page" :key="'step-8'"  v-show="step==8">
           <div class="secure-checkout"><svg class="icon svg-icon-lock"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-lock"></use> </svg> Secure Checkout</div>
           <div class="spacer-h-20"></div>
-          <h2 class="block-title">Review & pay</h2>
+          <h2 class="studio-title"><span class="marked review">Review</span><span class="text"> & pay</span></h2>
           <div class="spacer-h-20"></div>
           <p class="regular-text">Everything looks good! Check your Shoot Summary and place your order below.</p>
           <div class="spacer-h-30"></div>
@@ -897,7 +901,7 @@
           v-on:after-enter="enterAfter"
           v-on:after-leave="leaveAfter"
         >
-        <a href="javascript:void(0)" class="studio-content__button green" v-if="step == 8 && order_placed"  v-on:click.prevent="place_order_trigger">£{{order_total.total}} &nbsp;&nbsp;&nbsp; Place Order
+        <a href="javascript:void(0)" class="studio-content__button green" v-if="step == 8 && order_placed"  v-on:click.prevent="place_order_trigger">{{currency_symbol}}{{order_total.total}} &nbsp;&nbsp;&nbsp; Place Order
           <span class="spacer"></span>
           <span class="arrow"></span>
         </a>
@@ -919,21 +923,29 @@
 
           <div class="col-md-5 col-lg-5 clearfix">
             <div class="shoot-steps">
+              <div class="shoot-steps__tabs">
+                <div class="row">
+                  <div class="col-6">
+                    <ul class="shoot-steps__tabs-list">
+                      <li class="shoot-steps__tabs-item active"><span>Build Shoot</span></li>
+                    </ul>
+                  </div>
+                  <div class="col-6 text-right valign-center">
+                    <currency-swithcer
+                      v-on:change_currency = "change_currency_cb"
+                    ></currency-swithcer>
+                  </div>
+                </div>
+              </div>
               <div class="shoot-steps__header">
                 <h2 class="title">
                    <?php echo $title; ?>
-                   <svg class="icon svg-icon-dots"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-dots"></use> </svg>
                 </h2>
-                <span class="text">Recipe</span>
-                <i class="icon-star"></i>
-                <span class="rating"> <span class="value">4.5</span> Excellent</span>
+                <p class="text-comment">Select an element below to make changes</p>
               </div><!-- shoot-steps__header -->
 
               <div class="summary">
                 <div class="summary__body">
-                  <h3 class="summary__title">Shoot Summary</h3>
-                  <p class="summary__text">Select an element below to make changes</p>
-                  <div class="spacer-h-10"></div>
                   <table class="summary__content">
                     <tbody>
                       <tr :class="{active: (max_step => 1)}" v-on:click="change_step(1)">
@@ -1055,19 +1067,19 @@
                       </tr>
                       <tr>
                         <td colspan="2">Subtotal</td>
-                        <td colspan="2">£{{order_total.subtotal}}</td>
+                        <td colspan="2">{{currency_symbol}}{{order_total.subtotal}}</td>
                       </tr>
                       <tr>
                         <td colspan="2">Add-Ons</td>
-                        <td colspan="2">£{{order_total.addons}}</td>
+                        <td colspan="2">{{currency_symbol}}{{order_total.addons}}</td>
                       </tr>
                       <tr>
                         <td colspan="2">Discount <span class="coupon_code" v-show="applied_coupon">{{applied_coupon}}</span></td>
-                        <td colspan="2">£{{order_total_discount}}</td>
+                        <td colspan="2">{{currency_symbol}}{{order_total_discount}}</td>
                       </tr>
                       <tr>
                         <td colspan="2"></td>
-                        <td colspan="2"><span class="summary__total">£{{order_total.total}}</span></td>
+                        <td colspan="2"><span class="summary__total">{{currency_symbol}}{{order_total.total}}</span></td>
                       </tr>
 
                     </tfoot>

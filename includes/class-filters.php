@@ -21,13 +21,11 @@ class theme_filter_class{
     add_filter('loop_shop_columns', '__return_false');
 
 
-
     /*sets product thumbnail sizes for gallery in product loop*/
-    add_filter('single_product_archive_thumbnail_size', array($this, 'single_product_archive_thumbnail_size'));
-
+    // add_filter('single_product_archive_thumbnail_size', array($this, 'single_product_archive_thumbnail_size'));
 
     /*sets product thumbnail sizes*/
-    add_filter('woocommerce_gallery_thumbnail_size', array($this, 'woocommerce_gallery_thumbnail_size'));
+    // add_filter('woocommerce_gallery_thumbnail_size', array($this, 'woocommerce_gallery_thumbnail_size'));
 
 
     /*changes related products' params */
@@ -140,6 +138,19 @@ class theme_filter_class{
 
 
     add_filter( 'nav_menu_item_args', array($this,'nav_menu_item_args') , 10, 3 );
+
+    /*checks if a stay a week chekbox is turned on and return cookie expire value*/
+    add_filter( 'auth_cookie_expiration', array($this,'auth_cookie_expiration') , 10);
+  }
+
+  /*checks if a stay a week chekbox is turned on and return cookie expire value*/
+  public static function auth_cookie_expiration($value){
+
+    if(isset($_POST['_stay_signed_week']) && 'yes' == $_POST['_stay_signed_week']){
+     print_theme_log('wow');
+      return 604800;// week in seconds
+    }
+    return $value;
   }
 
   public static function nav_menu_item_args(   $args, $item, $depth ){
@@ -540,6 +551,10 @@ class theme_filter_class{
      $classes .= " contrast ";
     }
 
+    if(is_checkout()){
+     $classes .= " checkout-bg ";
+    }
+
     if(  is_account_page()   ){
      $classes .= " discard-column-inner ";
     }
@@ -889,17 +904,17 @@ class theme_filter_class{
   }
 
 
-  /**
-  * sets image size for a product in a loop
-  *
-  * @appliedto single_product_archive_thumbnail_size - 10
-  *
-  * @return string 'product_thumb_md' or 'product_thumb_sm'
-  */
-  public static function single_product_archive_thumbnail_size(){
-    global $theme_product_widget_size;
-    return ($theme_product_widget_size === 'large')? 'product_thumb_md': 'product_thumb_sm';
-  }
+  // /**
+  // * sets image size for a product in a loop
+  // *
+  // * @appliedto single_product_archive_thumbnail_size - 10
+  // *
+  // * @return string 'product_thumb_md' or 'product_thumb_sm'
+  // */
+  // public static function single_product_archive_thumbnail_size(){
+  //   global $theme_product_widget_size;
+  //   return ($theme_product_widget_size === 'large')? 'product_thumb_md': 'product_thumb_sm';
+  // }
 
 
   /**

@@ -19,28 +19,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$options = get_theme_checkout_content();
-
-add_action('woocommerce_before_checkout_form', 'fix_fasstrack_product');
-
-switch ($options['type']) {
-	case 'premium':
-		remove_action('woocommerce_before_checkout_form','woocommerce_checkout_coupon_form');
-		remove_action('woocommerce_checkout_order_review','woocommerce_order_review');
-		break;
-
-	case 'regular' :
-		remove_action('woocommerce_before_checkout_form','woocommerce_checkout_coupon_form');
-	  break;
-}
-
-  global $continued_checkout;
-  $continued_checkout = false;
-
-	do_action( 'woocommerce_before_checkout_form', $checkout );
 
 	do_action('print_constructor');
+
 	return;
+  $options = get_theme_checkout_content();
+  global $continued_checkout;
+  $continued_checkout = false;
 ?>
 <div class="checkout">
 	<div class="container container_sm">

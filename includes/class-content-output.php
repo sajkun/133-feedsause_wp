@@ -306,12 +306,16 @@ class theme_content_output{
 
       $header_class = is_checkout() && !empty( is_wc_endpoint_url('order-received') ) ? ' contrast ' : '';
 
-      $header_class .=  is_account_page()?  ' underline ' : '';
+      $header_class .=  is_account_page() || is_checkout()?  ' underline ' : '';
+
+      $main_menu = is_checkout()? '<nav class="main-menu"><ul class="menu"><li class="menu-item active"><a href="#">Create</a></li></ul></nav>' : $main_menu ;
+      $shop_url = function_exists('woocommerce_get_page_id')? get_permalink( woocommerce_get_page_id( 'shop' ) ) : false;
 
       $args = array(
         'logo'           => $logo,
+        'shop_url'   => $shop_url,
         'header_class'   => $header_class,
-        'main_menu'      => is_checkout()? '' : $main_menu,
+        'main_menu'      => $main_menu,
         'user_id'        => $user_id,
         'user_name'      => $user_name,
         'avatar_url'     => $user_id >0 ? get_avatar_url($user_id) : '',
@@ -426,12 +430,6 @@ class theme_content_output{
       'copyrights'      => $copyrights,
     );
     print_theme_template_part('footer-new', 'globals', $args);
-  }
-
-
-  public static function print_shop_content(){
-    $args = array();
-    print_theme_template_part('shop-new', 'woocommerce', $args);
   }
 
 
@@ -564,7 +562,7 @@ class theme_content_output{
         }
 
         if(!is_home() && !is_front_page() && !theme_construct_page::is_page_type('woo-my-account') && !theme_construct_page::is_page_type('showcase') && !theme_construct_page::is_page_type('customer')  && ! ( is_checkout() && !empty( is_wc_endpoint_url('order-received') ) )){
-            echo '<div class="spacer-h-50"></div>';
+            // echo '<div class="spacer-h-50"></div>';
         }
         break;
     }
@@ -1676,7 +1674,6 @@ class theme_content_output{
 
   /**
   * prints opening tag for image link in a products' loop
-  */
   public static function print_product_open_link(){
     global $product;
 
@@ -1687,16 +1684,17 @@ class theme_content_output{
 
     echo '<a href="' . esc_url( $link ) . '" class="product__image-link">';
   }
+  */
 
 
   /**
   * prints opening tag for product info row in a products' loop
-  */
   public static function print_product_loop_open_row(){
 
     echo '<div class="product__row">';
   }
 
+  */
 
   /**
   * prints opening tag for image block info row in a products' loop
@@ -1717,7 +1715,6 @@ class theme_content_output{
 
   /**
   * prints product's premium/regular tag in a loop for large product preview
-  */
   public static function theme_print_product_loop_tag_ing_thumb(){
     global $product;
 
@@ -1736,11 +1733,11 @@ class theme_content_output{
     </span>
     <?php endif;
   }
+  */
 
 
   /**
   * prints product premium/regular tag in a loop for small product preview
-  */
   public static function theme_print_product_loop_tag(){
     global $product;
 
@@ -1762,11 +1759,11 @@ class theme_content_output{
         </div>
       <?php
   }
+  */
 
 
   /**
   * prints product's title in a loop
-  */
   public static function theme_print_product_loop_title(){
     global $product;
 
@@ -1778,11 +1775,11 @@ class theme_content_output{
 
     echo '<a href="'.esc_url($link).'" class="product__title">' . $product->get_title() . '</a>';
   }
+  */
 
 
   /**
   * prints product's short description in a loop
-  */
   public static function theme_print_product_loop_description(){
     global $product;
 
@@ -1796,11 +1793,11 @@ class theme_content_output{
 
     printf('<span class="product__description" title="" >%s</span>', $description );
   }
+  */
 
 
   /**
   * prints product's gallery in a loop for small product
-  */
   public static function theme_print_product_loop_gallery(){
     global $product;
 
@@ -1828,11 +1825,11 @@ class theme_content_output{
       </div><!-- product__gallery -->
     <?php endif;
   }
+  */
 
 
   /**
   * prints product's gallery in a loop in an image thumb
-  */
   public static function theme_print_product_loop_gallery_abs(){
     global $product;
 
@@ -1860,11 +1857,11 @@ class theme_content_output{
       </div><!-- product__gallery -->
     <?php endif;
   }
+  */
 
 
   /**
   * prints product's category in a loop
-  */
   public static function theme_print_product_loop_category(){
     global $product;
 
@@ -1884,6 +1881,7 @@ class theme_content_output{
     <?php
     endif;
   }
+  */
 
 
   /**
@@ -3656,10 +3654,11 @@ class theme_content_output{
     $term_tree = get_term_tree($term);
 
     /** get gallery urls*/
+
     $gallery_ids = $product->get_gallery_image_ids();
 
     foreach ($gallery_ids as $id) {
-      $size = 'large';
+      $size = 'gallery_3';
       $gallery[] = wp_get_attachment_image_url($id, $size);
     }
 
@@ -3698,6 +3697,7 @@ class theme_content_output{
       ),
       'what_to_expect'     => get_field( 'what_to_expect' ,$product_id),
       'faq'     => get_field( '_faq' ,$product_id),
+      'shop_url' => function_exists('woocommerce_get_page_id')? get_permalink( woocommerce_get_page_id( 'shop' ) ) : false,
       'customer_reviews'     => get_field( 'customer_reviews' ,$product_id),
     );
 
@@ -3732,6 +3732,7 @@ class theme_content_output{
   public static function print_product_contructor(){
     global $theme_init;
     $product_id = (int)$_GET['product_id'];
+
     wp_localize_script($theme_init->main_script_slug, 'product_id', array($product_id));
 
     $product = wc_get_product($product_id);

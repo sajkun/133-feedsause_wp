@@ -776,6 +776,11 @@ class velesh_theme_meta{
     $slug="product_global_blocks";
     if(isset($_POST['do_save'])){
       update_option($slug, $_POST[$slug]);
+
+      if(isset($_POST['shop_categories'])){
+        update_option('shop_categories', $_POST['shop_categories']);
+      }
+
     }
     $option = get_option($slug);
 
@@ -783,16 +788,49 @@ class velesh_theme_meta{
 
     <form action="<?php echo admin_url('edit.php?post_type=product&page=product_global_features')?>" method="POST">
 
-      <input type="radio" id="customize_and_create" name="option" checked class="duh-hide-check">
+      <input type="radio" id="customize_and_create" name="option"  class="duh-hide-check">
       <input type="radio" id="good_2_know" name="option" class="duh-hide-check">
       <input type="radio" id="show_bespoke" name="option" class="duh-hide-check">
+      <input type="radio" id="products_category" name="option" checked class="duh-hide-check">
 
       <ul class="duh-tabs">
+        <li> <label for="products_category">Categories' settings (Shop)</label></li>
         <li>
         <label for="customize_and_create">Customize and Create</label></li>
         <li> <label for="good_2_know">Good to Know</label></li>
          <li><label for="show_bespoke">100% BESPOKE</label></li>
       </ul>
+
+      <div class="duh-page-settings-content products_category">
+        <?php
+          $slugs = array(
+            'first',
+            'second',
+            'third',
+          );
+          $shop_categories = get_option('shop_categories');
+
+          $terms = get_terms(array(
+            'taxonomy' => 'product_cat',
+            'hide_empty' => false,
+         ));
+        ?>
+        <?php foreach ($slugs as $key => $s): ?>
+          <h3>Category # <?php echo $key + 1; ?></h3>
+          <select name="shop_categories[<?php echo $s; ?>]">
+            <option value="-1">---</option>',
+            <?php foreach ($terms as  $term):
+              $selected = $term->term_id == $shop_categories[$s]? 'selected="selected"' : '';
+              printf('<option value="%s" %s>%s</option>',
+                $term->term_id,
+                $selected,
+                $term->name
+              );
+            endforeach; ?>
+          </select>
+        <?php endforeach ?>
+
+      </div>
 
       <div class="duh-page-settings-content customize_and_create">
         <h3>Customize and Create items</h3>
