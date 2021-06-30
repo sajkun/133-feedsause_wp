@@ -555,10 +555,11 @@ class theme_filter_class{
      $classes .= " checkout-bg ";
     }
 
+
     if(  is_account_page()   ){
      $classes .= " discard-column-inner ";
     }
-    if( is_product() || is_shop() || is_product_category() ){
+    if( is_product() || is_shop() || is_product_category() || (is_checkout() && !empty( is_wc_endpoint_url('order-received') )) ){
       $classes .= " dark-mode ";
     }
 
@@ -1128,6 +1129,25 @@ class theme_filter_class{
 
 new theme_filter_class();
 
+add_filter('woocommerce_checkout_create_order_line_item_object', 'test_line_item_object', 10, 4);
+
+function test_line_item_object($obj, $key, $values, $order){
+  // print_theme_log($values);
+
+  if(isset($values['apply_currency_index']) && 'yes' == $values['apply_currency_index']){
+    $currency_code  = strtolower($values['currency_code']);
+    $currency_index = isset($currency_settings[$currency_code])? (float)$currency_settings[$currency_code] :  1;
+
+    $subtotal = round($values['line_subtotal'] * $currency_index);
+    $obj->set_subtotal( $subtotal );
+
+    $total = round($values['line_total'] * $currency_index);
+    $obj->set_total( $total );
+  }
+  return $obj;
+}
+
+
 
 add_action('woocommerce_checkout_create_order_line_item', 'theme_save_additional_item_data', 10, 4);
 
@@ -1135,10 +1155,14 @@ function theme_save_additional_item_data($item, $cart_item_key, $values, $order 
 
   $order_id = $order->get_id();
 
+  $currency_settings = get_option('theme_currency_settings');
+  if(isset($values['currency_code']) && $values['currency_code'] != "GBP"){
+    $order->set_currency($values['currency_code']);
+  }
+
   if(isset($values['custom_price'])){
     $item->set_subtotal((int)$values['custom_price']);
-
-    // $item->set_total((int)$values['custom_price']);
+    $item->set_total((int)$values['custom_price']);
   }
 
   if(isset($values['theme_prices'])){
@@ -1165,23 +1189,11 @@ function theme_save_additional_item_data($item, $cart_item_key, $values, $order 
     }
   }
 
-  // $handle_id       = (int)get_option('wfp_return_product_id');
-  // $product_fast_id = (int)get_option('wfp_priority_delivery_product_id');
-
-  // if($product_fast_id == $item->get_product_id()){
-  //   $product = $item->get_product();
-
-  //   if(!update_post_meta( $order_id , '_fasttrack', array($product->get_price()) )){
-  //     add_post_meta( $order_id, '_fasttrack', array($product->get_price()), true );
-  //   }
-  // }
-
-  // if($handle_id == $item->get_product_id()){
-  //   $product = $item->get_product();
-  //   if( !update_post_meta($order->get_id() , '_handle_return', array( $product->get_price() ) ) ){
-  //     add_post_meta($order->get_id() , '_handle_return', array($product->get_price()) , true );
-  //   }
-  // }
+  if(isset($_POST['contact'])){
+    if(!update_post_meta($order_id , '_contact_number', $_POST['contact'] )){
+      add_post_meta($order_id , '_contact_number', $_POST['contact'], true );
+    }
+  }
 }
 
 add_action('woocommerce_order_item_line_item_html', 'print_additional_data_line', 10, 3);
@@ -1189,8 +1201,6 @@ add_action('woocommerce_order_item_line_item_html', 'print_additional_data_line'
 function print_additional_data_line( $item_id, $item, $order ){
   $meta = $item->get_meta('extra_data');
   $meta2 = $item->get_meta('fast_order_id');
-
-  clog($meta);
 
   if($meta2){
     ?>

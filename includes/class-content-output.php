@@ -313,7 +313,7 @@ class theme_content_output{
 
       $args = array(
         'logo'           => $logo,
-        'shop_url'   => $shop_url,
+        'shop_url'       => $shop_url,
         'header_class'   => $header_class,
         'main_menu'      => $main_menu,
         'user_id'        => $user_id,
@@ -3562,6 +3562,7 @@ class theme_content_output{
     }
 
     $product_id = $product->get_id();
+
     wc()->cart->empty_cart();
     wc()->cart->add_to_cart((int)$product_id , 1, (int)$product_id);
 
@@ -3668,14 +3669,22 @@ class theme_content_output{
     $product_id = $product->get_id();
 
     wc()->cart->empty_cart();
-    wc()->cart->add_to_cart((int)$product_id , 1, (int)$product_id);
+
+    if($product->get_type() == 'variable'){
+      $variations = $product->get_available_variations();
+      $variation_id = $variations[0]['variation_id'];
+    }else{
+      $variation_id = 0;
+    }
+
+    wc()->cart->add_to_cart((int)$product_id , 1, $variation_id);
 
 
     /** GET CONSTRUCTOR URL**/
     $constructor_url = get_permalink(get_option('theme_page_constructor'));
     $myaccount_page = get_option( 'woocommerce_myaccount_page_id' );
     $myaccount_page_url = get_permalink( $myaccount_page );
-    $constructor_url = is_user_logged_in() ? $constructor_url.'?product_id='.$product_id.'?add_to_cart='.$product_id : $myaccount_page_url.'?product_id='.$product_id ;
+    $constructor_url = is_user_logged_in() ? $constructor_url.'?product_id='.$product_id: $myaccount_page_url.'?product_id='.$product_id ;
 
     /**bottom image data**/
 
@@ -3739,6 +3748,10 @@ class theme_content_output{
 
     $fattrack = wc_get_product(get_option('wfp_priority_delivery_product_id'));
     $handle   = wc_get_product(get_option('wfp_return_product_id'));
+
+    $currency_settings = get_option('theme_currency_settings');
+
+    wp_localize_script($theme_init->main_script_slug, 'currency_settings', $currency_settings);
 
     $options = get_option('theme_settings');
 
@@ -4011,6 +4024,3 @@ class theme_content_output{
     }
   }
 }
-
-
-

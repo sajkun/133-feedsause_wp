@@ -47,7 +47,7 @@ var auth2; // The Sign-In object.
    </div>
  <?php endif ?>
 </body>
-<?php if (get_queried_object_id() == (int)get_option('theme_page_constructor') && !isset($_GET['no_reload'])):?>
+<?php if (get_queried_object_id() == (int)get_option('theme_page_constructor') && !isset($_GET['no_reload']) && is_checkout() && empty( is_wc_endpoint_url('order-received') ) ):?>
 <script>
 document.onreadystatechange = function(e) {
   if(document.readyState=="interactive")

@@ -9,6 +9,24 @@
     </div>
 
     <div class="spacer-h-20"></div>
+    <div class="clearfix">
+      <p class="popup-inner__comment">Collection address</p>
+    </div>
+    <div class="spacer-h-20"></div>
+
+    <div class="clearfix">
+      <div class="row gutters-5">
+        <div class="col-md-6">
+          <input type="text" class="popup-inner__field" placeholder="First Name" v-model="first_name" ref="first_name">
+          <div class="spacer-h-20"></div>
+        </div>
+        <div class="col-md-6">
+          <input type="text" class="popup-inner__field" placeholder="Last Name" v-model="last_name" ref="last_name">
+          <div class="spacer-h-20"></div>
+        </div>
+      </div>
+    </div>
+
 <?php /*
 
     <div class="clearfix" v-if="!country">
@@ -37,15 +55,17 @@
     <div class="spacer-h-20"></div>
 
     <div class="clearfix">
-      <input type="text" class="popup-inner__field" placeholder="Town or City" v-model="city" ref="city">
+      <div class="row gutters-5">
+        <div class="col-md-6">
+          <input type="text" class="popup-inner__field" placeholder="Town or City" v-model="city" ref="city">
+          <div class="spacer-h-20"></div>
+        </div>
+        <div class="col-md-6">
+          <input type="text" class="popup-inner__field" placeholder="Postal code" v-model="zip" ref="zip">
+          <div class="spacer-h-20"></div>
+        </div>
+      </div>
     </div>
-    <div class="spacer-h-20"></div>
-
-    <div class="clearfix">
-      <input type="text" class="popup-inner__field" placeholder="Postal code" v-model="zip" ref="zip">
-    </div>
-    <div class="spacer-h-20"></div>
-
 
     <div class="clearfix">
       <a href="#" v-on:click.prevent="submit" class="popup-inner__submit">Add address</a>

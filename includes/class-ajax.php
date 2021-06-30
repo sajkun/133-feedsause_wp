@@ -431,15 +431,20 @@
 
     $titles = array_map(function($el){return $el['title'] . ' - ' . $el['type'];}, $_POST['products']);
 
+    $currency_code     = $_POST['currency_code'];
+    $currency_settings = get_option('theme_currency_settings');
+    $currency_index    =  isset($currency_settings[strtolower($currency_code)])? (float)$currency_settings[strtolower($currency_code)] :  1;
 
     $prices   = get_option('theme_settings');
     $prices   = array_map(function($el){return (int)$el;}, $prices);
 
-    $total = $prices['single_product_price'] * (int)$_POST['image_count'] + $prices['name'] * (count($_POST['products']) - 1) + $prices['sizes'] * (count($_POST['customize']['sizes']) - 1);
+    $total =    round($prices['single_product_price'] * $currency_index )  * (int)$_POST['image_count'] +
+                round($prices['name'] * $currency_index  ) * (count($_POST['products']) - 1) +
+                round( $prices['sizes'] * $currency_index ) * (count($_POST['customize']['sizes']) - 1);
 
-      $total += isset($_POST['customize']['color_pref'])? $prices['color'] * count($_POST['customize']['color_pref'])  : 0;
+    $total += isset($_POST['customize']['color_pref'])? round($prices['color'] * $currency_index ) * count($_POST['customize']['color_pref'])  : 0;
 
-      $total += is_array($_POST['notes']['data'] )? count($_POST['notes']['data'] ) * $prices['shoot'] : 0;
+    $total += is_array($_POST['notes']['data'] )? count($_POST['notes']['data'] ) * round($prices['shoot'] * $currency_index ) : 0;
 
     $cart_item_data = array(
 
@@ -512,35 +517,60 @@
       'theme_prices' =>  get_option('theme_settings'),
       'shoot_data'   =>  $_POST,
       'name_array'   =>  $titles,
+      'currency_code'    =>  $currency_code,
       'custom_price'      => $total,
       'subtotal'          => $total,
     );
 
     wc()->cart->empty_cart();
-    wc()->cart->add_to_cart((int)$_POST['product_id'], 1, (int)$_POST['product_id'], array(),$additional_data);
+
+
+    $product = wc_get_product((int)$_POST['product_id']);
+    if($product->get_type() == 'variable'){
+      $variations = $product->get_available_variations();
+      $variation_id = $variations[0]['variation_id'];
+    }else{
+      $variation_id = (int)$product_id;
+    }
+
+    wc()->cart->add_to_cart((int)$_POST['product_id'], 1, $variation_id , array(),$additional_data);
 
     $fattrack = (int)get_option('wfp_priority_delivery_product_id');
     $handle   = (int)get_option('wfp_return_product_id');
 
-    if($_POST['handling']['handle'] == 'return'){
-      wc()->cart->add_to_cart((int)$handle, 1, (int)$handle);
+    /**
+    * add return product option to a cart
+    */
+    $_product = wc_get_product($handle);
+    if($_POST['handling']['handle'] == 'return' &&  $_product){
+
+      $additional_data = array(
+        'custom_price'         => round($currency_index * $_product->get_price()),
+      );
+      wc()->cart->add_to_cart((int)$handle, 1, 0, array(), $additional_data);
     }
 
-    if($_POST['turnaround'] == 'fasttrack'){
-      wc()->cart->add_to_cart((int)$fattrack, 1, (int)$fattrack);
+    /**
+    * add fasttrack product option to a cart
+    */
+    $_product = wc_get_product($fattrack);
+    if($_POST['turnaround'] == 'fasttrack' && $_product ){
+      $additional_data = array(
+        'custom_price'        => round($currency_index * $_product->get_price()),
+      );
+      wc()->cart->add_to_cart((int)$fattrack, 1, 0, array(), $additional_data);
     }
 
     wp_send_json(array(
-      'total'=> wc()->cart->get_total(),
-      'titles'=>implode(PHP_EOL, $titles),
-      'post'=>$_POST,
-      'items'=> wc()->cart->get_cart(),
+      'currency_code' => $currency_code,
+      'items'          => wc()->cart->get_cart(),
       'needs_shipping' => WC()->cart->needs_shipping(),
-      'needs_payment' => WC()->cart->needs_payment(),
+      'needs_payment'  => WC()->cart->needs_payment(),
+      'post'           => $_POST,
+      'total'          => wc()->cart->get_total(),
+      'titles'         => implode(PHP_EOL, $titles),
     ));
   }
-
-
 
   public static function get_coupons_cb(){
     $args = array(

@@ -27,6 +27,10 @@ class theme_construct_page{
       }else{
         add_action('do_theme_header', array('theme_content_output','print_new_header'));
       }
+
+      if(is_checkout() && !empty( is_wc_endpoint_url('order-received') )){
+        add_action('do_theme_footer', array('theme_content_output','print_footer_new_dark'));
+      }
       // add_action('do_theme_footer', array('theme_content_output','print_footer_new'));
     }else{
       add_filter('print_header_class', array(__CLASS__, 'detect_header_classes'));

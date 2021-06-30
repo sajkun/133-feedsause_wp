@@ -492,6 +492,13 @@ class velesh_theme_meta{
         delete_option($slug_opt);
       }
 
+      $slug_opt = 'theme_currency_settings';
+      if(isset($_POST[$slug_opt])){
+        $test = update_option($slug_opt, ($_POST[$slug_opt]) );
+      }else{
+        delete_option($slug_opt);
+      }
+
 
      echo '<div id="setting-error-settings_updated" class="updated settings-error notice is-dismissible">
       <p><strong>Settings saved.</strong></p><button type="button" class="notice-dismiss"><span class="screen-reader-text">Dismiss this notice.</span></button></div>';
@@ -506,12 +513,12 @@ class velesh_theme_meta{
         <div class="spacer-h-10"></div>
         <input type="radio" id="prices" checked="checked" name="options" class="duh-hide-check">
         <input type="radio" id="product_types" name="options" class="duh-hide-check">
+        <input type="radio" id="currency_settings" name="options" class="duh-hide-check">
 
         <ul class="duh-tabs clearfix">
           <li><label for="prices">Prices</label></li>
+          <li><label for="currency_settings">Currency Settings</label></li>
           <li><label for="product_types">Product</label></li>
-          <li>
-          </li>
         </ul>
 
         <div class="product_types duh-page-settings-content">
@@ -683,6 +690,15 @@ class velesh_theme_meta{
               </tr>
             </tbody>
           </table>
+        </div>
+
+        <div class="currency_settings duh-page-settings-content">
+          <?php $o = get_option('theme_currency_settings'); ?>
+          <h4>Pound to US Dollar (£/$)</h4>
+          <input type="text" name="theme_currency_settings[usd]" class="small-text" value="<?php echo isset($o['usd'])?$o['usd']: '' ;?>">
+
+          <h4>Pound to Euro (£/€)</h4>
+          <input type="text" name="theme_currency_settings[eur]" class="small-text" value="<?php echo isset($o['eur'])? $o['eur']: '';?>">
         </div>
         <input type="hidden" name="do-save" value="yes">
        </form>

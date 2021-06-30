@@ -196,10 +196,11 @@
                    <input type="text"  ref="image_count_input" value="-"
                      v-on:blur="handle_image_count"
                      v-on:input="handle_image_count"
+                     v-on:click="handle_image_count_click"
                     >
                   </div>
               </div>
-            </div><!-- studio-content__page -->
+            </div><!-- studio-content__body -->
           </div><!-- studio-content__page -->
         <!-- **************
              STEP 2 END
@@ -210,8 +211,8 @@
         *****************-->
           <div class="studio-content__page" v-show="step == 3"  :key="'step-3'">
             <div class="spacer-h-20"></div>
-            <h2 class="studio-title"> <span class="text">Customise your</span> <br>
-                        <span class="styled product">product</span> shoot</span></h2>
+            <h2 class="studio-title"> <span class="styled custom">Customise</span> <span class="text">your
+                        product shoot</span></h2>
             <div class="spacer-h-20"></div>
 
             <div class="studio-content__tabs">
@@ -248,8 +249,6 @@
                 <span>Sizes</span>
               </span>
             </div>
-
-            <div class="spacer-h-30"></div>
             <div class="line-fw"></div>
             <div class="spacer-h-30"></div>
 
@@ -367,8 +366,7 @@
                   Backdrops & Elements
                   <span class="price-marker">+{{currency_symbol}}{{Math.round(currency_index * prices.color)}} / theme</span>
                 </label>
-                <p class="regular-text">You can choose one theme for <span class="marked">free</span>. If you select additional themes and want them to be used with specific products, please specify in the next step, Studio Notes.</p>
-
+                <p class="regular-text">If you want specific colors to be used with specific products, please specify in the next step.</p>
                 <div class="spacer-h-20"></div>
 
                 <div class="horisontal-slider2">
@@ -378,29 +376,37 @@
                   </div>
                   <div class="color-switcher scroll" ref="scroll_container">
                     <div class="color-switcher__scroll" ref="scroll_image">
-                      <label class="color-item">
+                      <label class="color-item ver2">
                          <input type="radio" name="discard_colors"
                             checked="checked"
                             ref="discard_colors"
                             v-on:click="toggle_color_pref('discard')"
                           >
-                        <span class="color-item__border">
-                          <span class="color-item__color">
-                             <svg class="icon svg-icon-mind"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-mind">
+                        <span class="color-item__border2">
+                          <span class="color-item__color ver2 dont-mind" >
                           </span>
-                          <span class="color-item__title">I Don’t Mind</span>
+                          <span class="color-item__text">
+                            <span class="color-item__title2">I Don’t Mind</span>
+                            <span class="color-item__price">Free</span>
+                          </span>
+
+                          <img src="<?php echo THEME_URL?>/images/svg/mark-circle.svg" class="color-item__mark" alt="">
                         </span>
                       </label><!-- color-item -->
 
-                      <label class="color-item" v-for="color, key in colors" :key="'color-'+key">
+                      <label class="color-item ver2" v-for="color, key in colors" :key="'color-'+key">
                         <input type="checkbox" name="color"
                          :value="color.name"
                          v-model="customize.color_pref"
                          >
-                        <span class="color-item__border">
-                          <span class="color-item__color" :style="'background:'+ color.bg">
+                        <span class="color-item__border2">
+                          <span class="color-item__color ver2" :style="'background:'+ color.bg">
                           </span>
-                          <span class="color-item__title">{{color.name}}</span>
+                          <span class="color-item__text">
+                            <span class="color-item__title2">{{color.name}} <img v-if="color.marked_item" src="<?php echo THEME_URL?>/images/svg/burn.svg" class="color-item__burn" alt=""></span>
+                            <span class="color-item__price">{{currency_symbol}}{{Math.round(currency_index * prices.color)}}</span>
+                          </span>
+                          <img src="<?php echo THEME_URL?>/images/svg/mark-circle.svg" class="color-item__mark" alt=""  >
                         </span>
                       </label><!-- color-item -->
                     </div>
@@ -475,8 +481,6 @@
             </div>
             <div class="spacer-h-20"></div>
             <h2 class="studio-title"><span class="text">Studio</span> <span class="styled notes">Notes</span></h2>
-            <div class="spacer-h-20"></div>
-
              <p class="regular-text">Notes are a great way to communicate your vision with the photographer.</p>
             <div class="spacer-h-30"></div>
 
@@ -532,10 +536,10 @@
             </svg>
           </div>
           <div class="spacer-h-20"></div>
-          <h2 class="studio-title"><span class="text">Custom</span> <span class="styled shoot">Shot</span> <span class="text">List</span></h2>
-          <div class="spacer-h-20"></div>
 
-           <p class="regular-text">You can personalise your requirements for each shot.</p>
+          <h2 class="studio-title"><span class="text">Custom</span> <span class="styled shoot">Shot</span> <span class="text">List</span></h2>
+
+          <p class="regular-text">You can personalise your requirements for each shot.</p>
 
           <div class="studio-content__body">
 
@@ -550,7 +554,7 @@
             v-on:after-leave="leaveAfter"
           >
 
-            <div class="clearfix width420" v-for="notes, key in notes.data" :key="'note-blok'+key">
+            <div class="clearfix  width420" v-for="notes, key in notes.data" :key="'note-blok'+key">
               <div class="spacer-h-30"></div>
               <label class="studio-content__label">
                 <svg class="icon svg-icon-notes"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-notes"></use> </svg> Shot {{key + 1}}
@@ -571,13 +575,13 @@
             </div><!-- clearfix -->
           </transition-group>
 
-            <div class="spacer-h-20"></div>
+            <div class="spacer-h-40"></div>
             <div class="text-left" v-if="notes.data.length < image_count">
               <span class="studio-content__add" v-on:click.prevent="add_note_custom" >Add another shot</span>
               <span class="price-marker">+ {{currency_symbol}}{{Math.round(currency_index * prices.shoot)}}</span>
             </div>
 
-            <div class="spacer-h-20"></div>
+            <div class="spacer-h-40"></div>
             <div class="warning">
               You have personalised {{notes.data.length}} of {{total_images}} photos. <span v-if="total_images > notes.data.length">The remaining {{total_images - notes.data.length}} photos will be left to the photographer’s creativity.</span>
             </div>
@@ -601,9 +605,8 @@
             </div>
             <div class="spacer-h-20"></div>
             <h2 class="studio-title"><span class="text">Turnaround</span> <span class="styled time">time</span></h2>
-            <div class="spacer-h-20"></div>
-            <p class="regular-text">Use our standard turnaround or upgrsde for a faster delivery of your photos.</p>
-            <div class="spacer-h-20"></div>
+            <p class="regular-text">Use our standard turnaround or upgrade for a faster delivery of your photos.</p>
+            <div class="spacer-h-30"></div>
             <label class="studio-content__label">
               How soon do you want your photos?
             </label>
@@ -659,44 +662,9 @@
             </div>
             <div class="spacer-h-20"></div>
             <h2 class="studio-title"><span class="marked final">Finalise</span> <span class="text">your shoot</span></h2>
-            <div class="spacer-h-20"></div>
-            <label class="studio-content__label">
-                How should we handle your product?
-            </label>
-            <div class="spacer-h-10"></div>
+            <p class="regular-text">Just some final details and you're all good to go.</p>
 
-            <div class="studio-content__body">
-              <label class="radio-imitation props-options">
-                <input type="radio" name="handling"  value="discard" v-model="handling.handle">
-                <span class="radio-imitation__view flex text-left">
-
-                  <span class="radio-imitation__longtext valign-center">
-                    <b>Discard Products </b>Once shoot is completeds
-                  </span>
-
-                  <span class="radio-imitation__icon valign-center">
-                    <span class="price-marker">Free</span>
-                  </span>
-                </span>
-              </label>
-
-              <div class="spacer-h-20"></div>
-
-              <label class="radio-imitation props-options">
-                <input type="radio" name="handling" value="return" v-model="handling.handle">
-                <span class="radio-imitation__view flex text-left">
-                  <span class="radio-imitation__longtext valign-center">
-                    <b>Return Products</b> Once shoot is completeducts
-                  </span>
-                  <span class="radio-imitation__icon valign-center">
-                    <span class="price-marker">+ {{currency_symbol}}{{Math.round(prices.handle * currency_index)}}</span>
-                  </span>
-                </span>
-              </label>
-            </div><!-- studio-content__body -->
-
-            <div class="spacer-h-20"></div>
-            <div class="spacer-h-10"></div>
+            <div class="spacer-h-30"></div>
 
             <label class="studio-content__label">
               How would you like to send your products to Feedsauce?
@@ -707,7 +675,7 @@
                 <input type="radio" name="sendvia" value="self" v-model="handling.send">
                 <span class="radio-imitation__view flex text-center">
                   <span class="radio-imitation__longtext">
-                    <b>Self Ship</b>WorldWide
+                    <b>Ship Yourself</b>WorldWide
                   </span>
                 </span>
               </label>
@@ -748,23 +716,68 @@
                   <div class="spacer-h-20"></div>
 
                   <div class="address-wrapper"
-                  :class="{'not-active': !selected_country}"
+                  :class="{'not-active': !selected_country, 'expanded': show_addresses_drop}"
                   v-on:click.prevent.stop = "show_drop_address">
                     <div class="spacer-h-20"></div>
                     <span class="address-wrapper__title">Collection Address </span>
                     <span class="address-wrapper__value">{{_collection_address}}</span>
+                    <span class="address-wrapper__arrow"><svg class="icon svg-icon-bracket"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-bracket"></use></svg></span>
                     <div class="address-wrapper__dropdown" v-show="show_addresses_drop">
                       <ul class="address-wrapper__list">
                         <li v-on:click.prevent="show_popup_address">+ Add new address</li>
-                        <li v-for="addr, key in addresses" v-bind:key="'addr_'+key" v-on:click.prevent.stop="collection_address = addr">{{addr}}</li>
+                        <li v-for="addr, key in addresses"
+                        :class="{'active': (addr == collection_address)}"
+                         v-bind:key="'addr_'+key"
+                         v-on:click.prevent.stop="apply_address(addr)">{{parse_address(addr)}}</li>
                       </ul>
                     </div>
                   </div>
                 </div>
               </transition>
             </div>
-              <div class="spacer-h-30"></div>
-              <div class="warning">Free Collection requires access to a printer so you can download and print the postage label we send you.</div>
+
+
+            <div class="spacer-h-20"></div>
+            <div class="spacer-h-10"></div>
+
+            <label class="studio-content__label">
+                How should we handle your product?
+            </label>
+            <div class="spacer-h-10"></div>
+
+            <div class="studio-content__body">
+              <label class="radio-imitation props-options">
+                <input type="radio" name="handling"  value="discard" v-model="handling.handle">
+                <span class="radio-imitation__view flex text-left">
+
+                  <span class="radio-imitation__longtext valign-center">
+                    <b>Discard Products </b>Once shoot is completeds
+                  </span>
+
+                  <span class="radio-imitation__icon valign-center">
+                    <span class="price-marker">Free</span>
+                  </span>
+                </span>
+              </label>
+
+              <div class="spacer-h-20"></div>
+
+              <label class="radio-imitation props-options">
+                <input type="radio" name="handling" value="return" v-model="handling.handle">
+                <span class="radio-imitation__view flex text-left">
+                  <span class="radio-imitation__longtext valign-center">
+                    <b>Return Products</b> Once shoot is completeducts
+                  </span>
+                  <span class="radio-imitation__icon valign-center">
+                    <span class="price-marker">+ {{currency_symbol}}{{Math.round(prices.handle * currency_index)}}</span>
+                  </span>
+                </span>
+              </label>
+            </div><!-- studio-content__body -->
+
+            <div class="spacer-h-30 hidden"></div>
+            <div class="warning hidden">Free Collection requires access to a printer so you can download and print the postage label we send you.</div>
+
           </div><!-- studio-content__page -->
         <!-- **************
              STEP 6 END
@@ -778,9 +791,8 @@
           <div class="secure-checkout"><svg class="icon svg-icon-lock"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-lock"></use> </svg> Secure Checkout</div>
           <div class="spacer-h-20"></div>
           <h2 class="studio-title"><span class="marked review">Review</span><span class="text"> & pay</span></h2>
-          <div class="spacer-h-20"></div>
           <p class="regular-text">Everything looks good! Check your Shoot Summary and place your order below.</p>
-          <div class="spacer-h-30"></div>
+          <div class="spacer-h-20"></div>
 
           <?php /*
           <div class="card-selector">
@@ -795,13 +807,6 @@
           </div><!-- card-selector -->
         */?>
           <div class="div width420">
-            <label class="studio-content__label">
-              <svg class="icon svg-icon-card">
-                <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-card"></use>
-              </svg>
-              Pay via Card
-              <img src="<?php echo THEME_URL?>/images/card.png" class=card-img alt="">
-            </label>
             <form action="#" v-on:submit.prevent="apply_coupon" class="coupon_form">
               <div class="coupon-wrapper">
                 <input type="text" class="input-field" ref="may_be_coupon" placeholder="Coupon Code" name="coupon" v-model="may_be_coupon">
@@ -816,8 +821,16 @@
               <div class="spacer-h-15"></div>
              <form enctype="multipart/form-data" action="<?php echo esc_url( wc_get_checkout_url() ); ?>" method="POST" id="checkout_form"  name="checkout" method="post" class="checkout woocommerce-checkout" >
 
-              <input type="text" class="input-field" placeholder="Contact Number" name="contact">
-              <div class="spacer-h-15"></div>
+              <input type="text" class="input-field" v-model="contact_number" ref="contact_number" placeholder="Contact Number" name="contact">
+              <div class="spacer-h-25"></div>
+
+              <label class="studio-content__label">
+                <svg class="icon svg-icon-card">
+                  <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-card"></use>
+                </svg>
+                Pay via Card
+                <img src="<?php echo THEME_URL?>/images/card.png" class=card-img alt="">
+              </label>
 
               <ul class="wc_payment_methods payment_methods methods unstyled-list">
               <?php
@@ -921,8 +934,8 @@
       <div class="spacer-h-150"></div>
     </div><!-- col-md-7 valign-center -->
 
-          <div class="col-md-5 col-lg-5 clearfix">
-            <div class="shoot-steps">
+          <div class="col-md-5 col-lg-5 clearfix shoot-steps-holder">
+            <div class="shoot-steps fixed">
               <div class="shoot-steps__tabs">
                 <div class="row">
                   <div class="col-6">
@@ -960,13 +973,43 @@
                         <td>
                           <p class="summary__content-text">{{names_str.name}} <span v-if="names_str.addon" class="addon">+{{names_str.addon}}</span></p>
                         </td>
-                        <td>
+                        <td class="">
+                          <span class="expand-key"
+                             :class="{'expanded': expanded.products}"
+                             v-on:click.stop.prevent = "expanded.products = !expanded.products"
+                            >
+                            [<span class="expand-key__trigger" ></span>]
+                          </span>
                         </td>
                         <td>
                            <p class="summary__content-price">{{order_total.product_names}}</p>
                         </td>
                       </tr>
-
+                      <tr class="resert-cells">
+                        <td colspan="4" class="text-left">
+                          <transition
+                            v-bind:css="false"
+                            v-on:before-enter="beforeEnter"
+                            v-on:enter="enter"
+                            v-on:leave="leave"
+                            v-on:after-enter="enterAfter"
+                            v-on:after-leave="leaveAfter"
+                          >
+                          <div class="details visible"  v-if="expanded.products">
+                            <table>
+                              <tbody>
+                                <tr v-for = "prod, key in products" :key ="'product'+key">
+                                  <td class="limit-width">
+                                    <svg class="icon svg-icon-product"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-product"></use></svg>
+                                    <span class="item-title">{{prod.type}}</span></td>
+                                    <td><span class="item-details">{{prod.title}}</span></td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </div>
+                            </transition>
+                          </td>
+                      </tr>
                       <tr  :class="{active: (max_step >= 2)}"  v-on:click="change_step(2)">
                         <td>
                           <div class="step-label"   :class="{active: (step == 2)}">
@@ -1001,11 +1044,73 @@
                           <p class="summary__content-text">{{customize_text}}</p>
                         </td>
                         <td>
+                          <span class="expand-key"
+                             :class="{'expanded': expanded.custom}"
+                             v-on:click.stop.prevent = "expanded.custom = !expanded.custom"
+                            >
+                            [<span class="expand-key__trigger" ></span>]
+                          </span>
                         </td>
                         <td>
                            <p class="summary__content-price">{{order_total.customize}}</p>
                         </td>
                       </tr>
+
+                      <tr class="resert-cells">
+                        <td colspan="4" class="text-left">
+                          <transition
+                            v-bind:css="false"
+                            v-on:before-enter="beforeEnter"
+                            v-on:enter="enter"
+                            v-on:leave="leave"
+                            v-on:after-enter="enterAfter"
+                            v-on:after-leave="leaveAfter"
+                          >
+                          <div class="details visible"  v-if="expanded.custom">
+                          <table>
+                            <tbody><tr>
+                              <td class="limit-width"><svg class="icon svg-icon-custom">
+                                  <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-custom"></use>
+                                  </svg><span class="item-title">Theme</span></td>
+                              <td>
+                                <span v-if="customize.color_pref.length == 0" class="item-details">Don't care</span>
+                                <span v-if="customize.color_pref.length != 0" class="item-details">{{customize.color_pref.join(', ')}}</span>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td class="limit-width"><svg class="icon svg-icon-position">
+                                  <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-position"></use>
+                                  </svg><span class="item-title">Position</span></td>
+                              <td>
+                                <span class="item-details" v-if="customize.position == 'none'" >Don't care</span>
+                                <span class="item-details" v-if="customize.position !== 'none'" >{{customize.position}}</span>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td class="limit-width"><svg class="icon svg-icon-glasess">
+                                  <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-glasess"></use>
+                                  </svg><span class="item-title">Props</span></td>
+                              <td>
+                                <span class="item-details" v-if="customize.props == 'none'" >Don't care</span>
+                                <span class="item-details" v-if="customize.props !== 'none'" >{{customize.props}}</span>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td class="limit-width"><svg class="icon svg-icon-resize">
+                                  <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-resize"></use>
+                                  </svg><span class="item-title">Sizes</span></td>
+                              <td>
+                                <span v-if="!customize.sizes" class="item-details">Don't care</span>
+                                <span v-if="customize.sizes" class="item-details">{{customize.sizes.join(', ')}}</span>
+                              </td>
+                            </tr>
+                          </tbody></table>
+                          </div>
+                          </transition>
+                        </td>
+                      </tr>
+
+
                       <tr  :class="{active: (max_step >= 4  )}"   v-on:click="change_step(4)">
                         <td>
                           <div class="step-label"   :class="{active: (step == 4|| step == 5)}">
@@ -1016,12 +1121,60 @@
                           </div>
                         </td>
                         <td>
-                          <p class="summary__content-text">{{this.notes.title || '-'}}</p>
+                          <p class="summary__content-text">{{notes.title || '-'}}</p>
                         </td>
                         <td>
+                          <span class="expand-key"
+                             :class="{'expanded': expanded.notes}"
+                             v-on:click.stop.prevent = "expanded.notes = !expanded.notes"
+                            >
+                            [<span class="expand-key__trigger" ></span>]
+                          </span>
                         </td>
                         <td>
                            <p class="summary__content-price">{{order_total.shoots}}</p>
+                        </td>
+
+                      </tr>
+                      <tr class="resert-cells">
+                        <td colspan="4" class="text-left">
+                          <transition
+                            v-bind:css="false"
+                            v-on:before-enter="beforeEnter"
+                            v-on:enter="enter"
+                            v-on:leave="leave"
+                            v-on:after-enter="enterAfter"
+                            v-on:after-leave="leaveAfter"
+                          >
+                          <div class="details visible"  v-if="expanded.notes">
+                          <table v-if="notes.type=='simple'">
+                            <tbody><tr>
+                              <td class="limit-width"><svg class="icon svg-icon-notes">
+                                  <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-notes"></use>
+                                  </svg>
+                                  <span class="item-details">{{notes.data}}</span>
+                              </td>
+                            </tr>
+                          </tbody></table>
+                          <table v-if="notes.type=='custom'">
+                            <tbody>
+                              <tr v-for="note, key in notes.data"><td class="limit-width" v-if="note.show == 1">
+                                  <div class="clearfix">
+                                    <svg class="icon svg-icon-notes">
+                                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-notes"></use>
+                                      </svg>
+                                      <span class="item-details">{{note.product}}</span>
+                                  </div>
+                                  <div class="spacer-h-8"></div>
+                                  <div class="clearfix">
+                                    <span class="item-details">{{note.text}}</span>
+                                  </div>
+                                  <div class="spacer-h-8"></div>
+                              </td>
+                            </tr>
+                          </tbody></table>
+                          </div>
+                          </transition>
                         </td>
                       </tr>
                       <tr  :class="{active: (max_step >= 6)}"   v-on:click="change_step(6)">

@@ -827,6 +827,15 @@ border: 1px solid  #000;
 }
 
 
+#currency_settings:checked ~ .duh-tabs [for="currency_settings"]{
+  background: #fff;
+  border-bottom-color:#fff;
+}
+
+#currency_settings:checked ~ .currency_settings{
+  display: block;
+}
+
 #products_category:checked ~ .duh-tabs [for="products_category"]{
   background: #fff;
   border-bottom-color:#fff;
