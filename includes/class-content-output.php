@@ -3720,6 +3720,7 @@ class theme_content_output{
     }
 
     global $product;
+    $product_id = $product->get_id();
 
     /** GET CONSTRUCTOR URL**/
     $constructor_url = get_permalink(get_option('theme_page_constructor'));
