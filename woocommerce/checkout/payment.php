@@ -75,8 +75,6 @@ $options = get_theme_checkout_content();
 		</noscript>
 
 
-    <?php theme_content_output::print_coupon_form_in_checkout(); ?>
-
 		<?php wc_get_template( 'checkout/terms.php' ); ?>
 
 		<?php do_action( 'woocommerce_review_order_before_submit' ); ?>

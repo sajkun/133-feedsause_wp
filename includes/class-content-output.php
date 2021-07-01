@@ -1918,7 +1918,7 @@ class theme_content_output{
   /**
   * prints section with unlocking premium button on a single product's page
   */
-  public static function print_woo_single_product_unlock_premium(){
+ /* public static function print_woo_single_product_unlock_premium(){
     global $product;
 
     if ( ! $product ) {
@@ -1953,7 +1953,7 @@ class theme_content_output{
        ?>
     </div>
     <?php
-  }
+  }*/
 
 
   /**
@@ -2078,7 +2078,7 @@ class theme_content_output{
     <?php
   }
 
-    public static function print_checkout_totals(){
+  public static function print_checkout_totals(){
       $helper = new theme_formatted_cart();
       ?>
         <div class="checkout__aside-block">
@@ -2104,79 +2104,79 @@ class theme_content_output{
           </table>
         </div>
       <?php
-    }
+  }
   /**
   * prints estimates on checkout page
   *
   * @hooked to print_thank_you_estimates - 10
   * @hooked to woocommerce_checkout_order_review - 10
   */
-  public static function print_checkout_estimates($order = false){
+    public static function print_checkout_estimates($order = false){
 
 
-    $options         = get_theme_checkout_content();
-    $helper          = new theme_formatted_cart();
+      $options         = get_theme_checkout_content();
+      $helper          = new theme_formatted_cart();
 
-    $has_prem = count($helper->get_addons()['delivery']) > 0 ? true : false;
+      $has_prem = count($helper->get_addons()['delivery']) > 0 ? true : false;
 
-    $priority_delivery_product_id = (int)get_option('wfp_priority_delivery_product_id');
+      $priority_delivery_product_id = (int)get_option('wfp_priority_delivery_product_id');
 
-    $priority_delivery_product = wc_get_product($priority_delivery_product_id);
+      $priority_delivery_product = wc_get_product($priority_delivery_product_id);
 
-    $days_offset     = ($has_prem)? get_ready_date_offset(true) : get_ready_date_offset(false) ;
+      $days_offset     = ($has_prem)? get_ready_date_offset(true) : get_ready_date_offset(false) ;
 
-    $days_offset_js  = ($has_prem)? get_ready_date_offset(true, 'js') :  get_ready_date_offset(false, 'js');
+      $days_offset_js  = ($has_prem)? get_ready_date_offset(true, 'js') :  get_ready_date_offset(false, 'js');
 
-    $ready_date      = date('d F Y', strtotime($days_offset));
-    $subscriptions   = get_all_subscriptions();
-
-
-    $class = (('regular' === $options['type'] ) && (theme_construct_page::is_page_type('woo-checkout')))? 'checkout__aside-block' : 'order-summary-info__block no-border';
-
-     $class =(is_wc_endpoint_url('order-received'))? 'order-summary-info__block no-border' : $class;
+      $ready_date      = date('d F Y', strtotime($days_offset));
+      $subscriptions   = get_all_subscriptions();
 
 
-     if($order){
-         $date_info = $order->get_date_created();
-         $date_str = $date_info->date("d-m-Y H:i:s");
-         $ready_date_ = new DateTime( $date_str );
+      $class = (('regular' === $options['type'] ) && (theme_construct_page::is_page_type('woo-checkout')))? 'checkout__aside-block' : 'order-summary-info__block no-border';
 
-         $days_offset = get_ready_date_offset(false);
+       $class =(is_wc_endpoint_url('order-received'))? 'order-summary-info__block no-border' : $class;
 
-       foreach ($order->get_items() as $key => $item) {
-        $days_offset = ($item->get_product_id() == (int)$priority_delivery_product_id)? get_ready_date_offset(true) : $days_offset;
 
+       if($order){
+           $date_info = $order->get_date_created();
+           $date_str = $date_info->date("d-m-Y H:i:s");
+           $ready_date_ = new DateTime( $date_str );
+
+           $days_offset = get_ready_date_offset(false);
+
+         foreach ($order->get_items() as $key => $item) {
+          $days_offset = ($item->get_product_id() == (int)$priority_delivery_product_id)? get_ready_date_offset(true) : $days_offset;
+
+         }
+         $ready_date_->modify($days_offset);
+
+         $ready_date = $ready_date_->format('d F Y');
        }
-       $ready_date_->modify($days_offset);
+      ?>
 
-       $ready_date = $ready_date_->format('d F Y');
-     }
-    ?>
+      <div class="<?php echo $class ?>">
+        <p class="checkout__aside-subtitle"><?php _e('Estimated Download Date', 'theme-translation');?></p>
+        <p class="checkout__aside-date"><?php echo $ready_date ?></p>
+        <?php if (!$has_prem):
+          $ready_date      = date('d F', strtotime('+5 days'));
+          ?>
+          <?php /*if ($priority_delivery_product): ?>
 
-    <div class="<?php echo $class ?>">
-      <p class="checkout__aside-subtitle"><?php _e('Estimated Download Date', 'theme-translation');?></p>
-      <p class="checkout__aside-date"><?php echo $ready_date ?></p>
-      <?php if (!$has_prem):
-        $ready_date      = date('d F', strtotime('+5 days'));
-        ?>
-        <?php /*if ($priority_delivery_product): ?>
+          <p class="checkout__aside-text"><?php _e('Get your images as soon as', 'theme-translation');?> <b><?php echo $ready_date ?></b></p>
 
-        <p class="checkout__aside-text"><?php _e('Get your images as soon as', 'theme-translation');?> <b><?php echo $ready_date ?></b></p>
+          <a href="<?php echo $priority_delivery_product->add_to_cart_url() ?>" name="add-to-cart"  class="link-prem">Upgrade to Premium </a>
+          <?php endif */?>
+        <?php endif ?>
+      </div>
+      <?php
 
-        <a href="<?php echo $priority_delivery_product->add_to_cart_url() ?>" name="add-to-cart"  class="link-prem">Upgrade to Premium </a>
-        <?php endif */?>
-      <?php endif ?>
-    </div>
-    <?php
-
-    wp_localize_script('theme-script','days_offset', $days_offset_js);
-  }
+      wp_localize_script('theme-script','days_offset', $days_offset_js);
+    }
 
 
   /**
   * prints form for entering coupon in checkout
   */
-  public static function print_coupon_form_in_checkout(){
+ /* public static function print_coupon_form_in_checkout(){
     $options         = get_theme_checkout_content();
     if('regular' !== $options['type'])
       return;
@@ -2199,7 +2199,7 @@ class theme_content_output{
     </div>
     <?php
     endif;
-  }
+  }*/
 
 
   /**
@@ -3490,16 +3490,16 @@ class theme_content_output{
   *
   * @return void
   */
-  public static function print_single_product_images_after(){
+ /*public static function print_single_product_images_after(){
     $args = array();
     print_theme_template_part('after-image', 'single-product', $args);
-  }
+  }*/
 
 
-  public static function print_single_product_guidlines(){
-    $args = array();
-    print_theme_template_part('guidlines', 'single-product', $args);
-  }
+  // public static function print_single_product_guidlines(){
+  //   $args = array();
+  //   print_theme_template_part('guidlines', 'single-product', $args);
+  // }
 
   public static function print_fly_basket(){
     global $theme_init;
@@ -3534,94 +3534,94 @@ class theme_content_output{
   /**
   * @deprecated
   */
-  public static function print_product_content(){
-    if(!function_exists('get_field')){
-      echo 'Install ACF PLUGIN';
-      return;
-    }
+  // public static function print_product_content(){
+  //   if(!function_exists('get_field')){
+  //     echo 'Install ACF PLUGIN';
+  //     return;
+  //   }
 
-    global $product;
-    global $theme_init;
+  //   global $product;
+  //   global $theme_init;
 
-    $img_url = wp_get_attachment_image_url($product->get_image_id(), wp_is_mobile()? 'full' : 'full');
+  //   $img_url = wp_get_attachment_image_url($product->get_image_id(), wp_is_mobile()? 'full' : 'full');
 
-    $constructor_url = get_permalink(get_option('theme_page_constructor'));
+  //   $constructor_url = get_permalink(get_option('theme_page_constructor'));
 
-    $gallery_ids = $product->get_gallery_image_ids();
+  //   $gallery_ids = $product->get_gallery_image_ids();
 
 
-    $counter = 1;
+  //   $counter = 1;
 
-    $gallery = array();
+  //   $gallery = array();
 
-    foreach ($gallery_ids as $id) {
-      $size = wp_is_mobile() ? 'gallery_'.$counter : 'full';
-      $gallery[] = wp_get_attachment_image_url($id, $size);
-      $counter++;
-      $counter = $counter > 3? 0 : $counter;
-    }
+  //   foreach ($gallery_ids as $id) {
+  //     $size = wp_is_mobile() ? 'gallery_'.$counter : 'full';
+  //     $gallery[] = wp_get_attachment_image_url($id, $size);
+  //     $counter++;
+  //     $counter = $counter > 3? 0 : $counter;
+  //   }
 
-    $product_id = $product->get_id();
+  //   $product_id = $product->get_id();
 
-    wc()->cart->empty_cart();
-    wc()->cart->add_to_cart((int)$product_id , 1, (int)$product_id);
+  //   wc()->cart->empty_cart();
+  //   wc()->cart->add_to_cart((int)$product_id , 1, (int)$product_id);
 
-    $myaccount_page = get_option( 'woocommerce_myaccount_page_id' );
-    $myaccount_page_url = get_permalink( $myaccount_page );
-    $constructor_url = is_user_logged_in() ? $constructor_url.'?product_id='.$product_id.'?add_to_cart='.$product_id : $myaccount_page_url.'?product_id='.$product_id ;
+  //   $myaccount_page = get_option( 'woocommerce_myaccount_page_id' );
+  //   $myaccount_page_url = get_permalink( $myaccount_page );
+  //   $constructor_url = is_user_logged_in() ? $constructor_url.'?product_id='.$product_id.'?add_to_cart='.$product_id : $myaccount_page_url.'?product_id='.$product_id ;
 
-    $args = array(
-      'img_url' => $img_url,
+  //   $args = array(
+  //     'img_url' => $img_url,
 
-      'gallery' => $gallery,
+  //     'gallery' => $gallery,
 
-      'constructor_url' => $constructor_url,
+  //     'constructor_url' => $constructor_url,
 
-      'title'   => $product->get_name(),
+  //     'title'   => $product->get_name(),
 
-      'description_short'   => $product->get_short_description(),
+  //     'description_short'   => $product->get_short_description(),
 
-      'bg_color'  => get_post_meta($product->get_id(), 'bg_color', true)? : '#000',
+  //     'bg_color'  => get_post_meta($product->get_id(), 'bg_color', true)? : '#000',
 
-      'cta_text'  => get_post_meta($product->get_id(), 'cta_text', true)? : '<b> Customise Blocks to match your brand.</b>Order now and download your photos in <span class="green">72 hours</span>',
+  //     'cta_text'  => get_post_meta($product->get_id(), 'cta_text', true)? : '<b> Customise Blocks to match your brand.</b>Order now and download your photos in <span class="green">72 hours</span>',
 
-      'photo_price' => strip_tags(wc_price(30)),
+  //     'photo_price' => strip_tags(wc_price(30)),
 
-      'rate' => array(
-        'value' => get_post_meta($product->get_id(), 'rate_value', true)? :  4.5,
-        'title' => get_post_meta($product->get_id(), 'rate_title', true)? :'Excellent',
-      ),
+  //     'rate' => array(
+  //       'value' => get_post_meta($product->get_id(), 'rate_value', true)? :  4.5,
+  //       'title' => get_post_meta($product->get_id(), 'rate_title', true)? :'Excellent',
+  //     ),
 
-      'expect' => array(
-        'display'         => get_field('expect_display', $product_id),
-        'expect_for'      => get_field('expect_for', $product_id),
-        'elements' => get_field('expect_elements', $product_id),
-      ),
+  //     'expect' => array(
+  //       'display'         => get_field('expect_display', $product_id),
+  //       'expect_for'      => get_field('expect_for', $product_id),
+  //       'elements' => get_field('expect_elements', $product_id),
+  //     ),
 
-      'for' => array(
-        'display' => get_field('for_display', $product_id),
-        'title'   => get_field('for_title', $product_id),
-        'text'    => get_field('for_text', $product_id),
-      ),
+  //     'for' => array(
+  //       'display' => get_field('for_display', $product_id),
+  //       'title'   => get_field('for_title', $product_id),
+  //       'text'    => get_field('for_text', $product_id),
+  //     ),
 
-      'show_blocks' => array(
-        'show_customize_and_create' => get_field('show_customize_and_create', $product_id),
-        'show_good_2_know' => get_field('show_good_2_know', $product_id),
-        'show_bespoke' => get_field('show_bespoke', $product_id),
-      ),
+  //     'show_blocks' => array(
+  //       'show_customize_and_create' => get_field('show_customize_and_create', $product_id),
+  //       'show_good_2_know' => get_field('show_good_2_know', $product_id),
+  //       'show_bespoke' => get_field('show_bespoke', $product_id),
+  //     ),
 
-      'pgb' => get_option('product_global_blocks'),
+  //     'pgb' => get_option('product_global_blocks'),
 
-    );
+  //   );
 
-    wp_localize_script($theme_init->main_script_slug, 'gallery_items', $gallery);
+  //   wp_localize_script($theme_init->main_script_slug, 'gallery_items', $gallery);
 
-    if(wp_is_mobile()):
-      // print_theme_template_part('product-mobile', 'woocommerce', $args);
-    else:
-      // print_theme_template_part('product-desktop', 'woocommerce', $args);
-    endif;
-  }
+  //   if(wp_is_mobile()):
+  //     // print_theme_template_part('product-mobile', 'woocommerce', $args);
+  //   else:
+  //     // print_theme_template_part('product-desktop', 'woocommerce', $args);
+  //   endif;
+  // }
 
 
   public static function print_product_content_new(){
@@ -3713,10 +3713,7 @@ class theme_content_output{
     print_theme_template_part('product-new', 'woocommerce', $args);
   }
 
-
-
-
-   public static function print_product_mobile_bar(){
+  public static function print_product_mobile_bar(){
     if(!function_exists('get_field')){
       echo 'Install ACF PLUGIN';
       return;
@@ -3738,31 +3735,41 @@ class theme_content_output{
 
    }
 
-  public static function print_product_contructor(){
-    global $theme_init;
-    $product_id = (int)$_GET['product_id'];
 
+  /**
+  * Shoot Builder
+  * placed on WooCommerce checkout page
+  *
+  */
+  public static function print_product_contructor(){
+    // an instance of velesh_init_theme class. Used here to get a script slug
+    global $theme_init;
+
+    // get product ID from passed parameters and pass this data to a script
+    $product_id = (int)$_GET['product_id'];
     wp_localize_script($theme_init->main_script_slug, 'product_id', array($product_id));
 
     $product = wc_get_product($product_id);
 
+    // gets products ids data for fasttrack and returning products
     $fattrack = wc_get_product(get_option('wfp_priority_delivery_product_id'));
     $handle   = wc_get_product(get_option('wfp_return_product_id'));
 
+    // get and pass to javascript currency rates USD to GBP and EUR to GBP
     $currency_settings = get_option('theme_currency_settings');
-
     wp_localize_script($theme_init->main_script_slug, 'currency_settings', $currency_settings);
 
+    // prepare price data for javascript
     $options = get_option('theme_settings');
-
     $options['image'] = $options['single_product_price'] ;
     $options['fasttrack'] = $fattrack->get_price() ;
     $options['handle']    = $handle->get_price()  ;
-
     $prices = array_map(function($el){return (int)$el;}, $options);
-
     wp_localize_script($theme_init->main_script_slug, 'theme_prices', $prices);
 
+    // get a product type option
+    // products types used for a dropdown in shoot builder to be define the type of product
+    // can be countered as a category for a product
     if(isset($options['product_types'])){
       $product_types_published = isset($options['product_types']['published'])?  explode(PHP_EOL, $options['product_types']['published']): array();
 
@@ -3770,27 +3777,22 @@ class theme_content_output{
 
       $product_types_soon = isset($options['product_types']['soon'])?  explode(PHP_EOL, $options['product_types']['soon']): array();
       $product_types_soon = array_map(function($el){return array('name'=>$el, 'published' => 0);}, $product_types_soon);
-
       $product_types = array_merge( $product_types_published, $product_types_soon);
-
-
       wp_localize_script($theme_init->main_script_slug, 'product_types', $product_types);
     }else{
       wp_localize_script($theme_init->main_script_slug, 'product_types', array());
     }
 
-
+    // get available colors that can be used for this product
     $colors = get_field('constructor_color',  $product_id)? : array();
-
     $colors = array_map(function($el){
       $el['bg'] = $el['bg_img']?'url('.$el['bg_img'].')': $el['bg'];
       return $el;
     }, $colors);
-
     wp_localize_script($theme_init->main_script_slug, 'theme_colors', $colors);
 
+    // get countries data and flags from WooCOmmerce settings
     $countries = new WC_Countries();
-
     $col = array_map(function($el){
       $country_name = '';
       $regexp = '/\([\s\S]*\)/';
@@ -3807,10 +3809,11 @@ class theme_content_output{
         'flag' => THEME_URL.'/images/flags/'.$country_flag_url,
 
     ); }, $countries->get_countries());
-
     wp_localize_script($theme_init->main_script_slug, 'all_countries_flags', $col);
     wp_localize_script($theme_init->main_script_slug, 'all_countries', $countries->get_countries());
 
+
+    // parameters passed to Shoot Builder template
     $args = array(
       'product_guid_url' =>get_option('theme_page_product_guid')? get_permalink( get_option('theme_page_product_guid')) : false,
       'redo_policy_url' => get_option('theme_page_redo_policy')? get_permalink( get_option('theme_page_redo_policy')) : '',
@@ -3821,14 +3824,13 @@ class theme_content_output{
       'bg_color'  => get_post_meta( $product_id, 'bg_color', true)? : '#000',
     );
 
-
-    if(wp_is_mobile()):
-      print_theme_template_part('mobile', 'constructor', $args);
-    else:
-      print_theme_template_part('desktop', 'constructor', $args);
-    endif;
+    print_theme_template_part('main', 'constructor', $args);
   }
 
+
+  /**
+  * prints adress popup component on shoot builder page
+  */
   public static function print_popup_address(){
     $args = array();
     print_theme_template_part('popup-address', 'constructor', $args);

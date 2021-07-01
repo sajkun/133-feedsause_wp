@@ -159,7 +159,7 @@ class velesh_init_theme{
       wp_enqueue_script('theme-fancybox-thumbs', THEME_URL.'/assets/fancybox2/helpers/jquery.fancybox-thumbs.js', array('jquery'), THEME_VERSION, true);
 
       if(wp_is_mobile()){
-        if(is_product() || is_shop() || is_product_category() ){
+        if(is_product() || is_shop() || is_product_category() || is_checkout() ){
           wp_enqueue_style('theme-style-desktop', THEME_URL.'/css/desktop.main'.$this->dt_ver_css.'.min.css' );
         }  else {
           // wp_enqueue_style('theme-style-desktop', THEME_URL.'/css/desktop.main'.$this->dt_ver_css.'.min.css' );
@@ -175,7 +175,7 @@ class velesh_init_theme{
       wp_enqueue_script('vuejs', THEME_URL.'/assets/vuejs/prod.js', array(), THEME_VERSION, true);
 
       if(wp_is_mobile()){
-        if(is_product() || is_shop() || is_product_category() ){
+        if(is_product() || is_shop() || is_product_category()  || is_checkout() ){
           wp_enqueue_script($this->main_script_slug, THEME_URL.'/script/new/desktop.main'.$this->dt_ver_js.'.min.js', array('jquery'), THEME_VERSION, true);
         }  else {
           wp_enqueue_script($this->main_script_slug, THEME_URL.'/script/new/desktop.main'.$this->dt_ver_js.'.min.js', array('jquery'), THEME_VERSION, true);
@@ -485,7 +485,7 @@ class velesh_init_theme{
    */
   public function print_inline_data_body(){
     if(theme_construct_page::is_page_type( 'new-styles' )){
-      add_svg_sprite('theme_sprite_svg_133_12_new',THEME_URL.'/svg_sprite/new/symbol_sprite_3.html');
+      add_svg_sprite('theme_sprite_svg_133_13_new',THEME_URL.'/svg_sprite/new/symbol_sprite_3.html');
     }else{
       add_svg_sprite('theme_sprite_svg_133_6',THEME_URL.'/svg_sprite/symbol_sprite.html');
     }

@@ -1,3 +1,7 @@
+<?php
+//@deprecated
+?>
+
 <style>
   #studio-content{
     transition: all .6s;

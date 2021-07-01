@@ -1,4 +1,13 @@
+<?php
+if ( ! defined( 'ABSPATH' ) ) {
+  exit;
+} // Exit if accessed directly
 
+  /**
+  * template of ppup with adrress for contructor
+  *
+  */
+?>
 <div class="popup-wrapper visuallyhidden"  id="popup_address" v-show="visible">
   <div class="popup-inner">
     <div class="popup-inner__head">
