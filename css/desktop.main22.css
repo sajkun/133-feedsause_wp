@@ -14813,11 +14813,17 @@ a.comment:hover {
   padding: 15px;
   background-image: url(../images/bg/thx.png);
   background-repeat: no-repeat;
+  background-size: auto 350px;
   background-position: calc(100% + 300px) 50%;
-  background-size: contain;
   display: flex;
   position: relative;
   box-sizing: border-box;
+}
+
+@media (min-width: 992px) {
+  .thank-you {
+    background-size: contain;
+  }
 }
 
 .thank-you__inner {
