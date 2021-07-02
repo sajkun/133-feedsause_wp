@@ -63,16 +63,25 @@ if ( ! defined( 'ABSPATH' ) ) {
     <div class="spacer-h-60"></div>
 
     <div class="summary summary_mobile">
-      <div class="summary__header" v-on:click="show_summary_mob = !show_summary_mob">
+      <div class="summary__header">
         <div class="summary__col valign-center">
-          <svg class="icon svg-icon-circles"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-circles"></use> </svg>
-          <span class="summary__label">Shoot Summary</span>
+          <a href="<?php echo HOME_URL; ?>" class="logo-login-mobile block sm">
+            <img src="<?php echo THEME_URL; ?>/images/logo-single.svg" alt="">
+          </a>
         </div><!-- summary__col -->
 
-        <div class="summary__col valign-center text-right">
-          <span class="summary__total">£{{order_total.total}}</span>
+        <div class="summary__col valign-center text-center"  v-on:click="show_summary_mob = !show_summary_mob">
+          <span class="summary__total sm">{{currency_symbol}}{{order_total.total}}</span>
           <svg class="icon svg-icon-corner-down-2"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-corner-down-2"></use> </svg>
+          &nbsp;
+          &nbsp;
+          &nbsp;
         </div><!-- summary__col -->
+        <div class="summary__col valign-center text-right">
+          <currency-swithcer
+            v-on:change_currency = "change_currency_cb"
+          ></currency-swithcer>
+        </div>
       </div><!-- summary__header -->
 
       <div class="summary__body" :class="{'active': show_summary_mob}">
@@ -80,9 +89,6 @@ if ( ! defined( 'ABSPATH' ) ) {
           <div class="shoot-steps__header">
             <h2 class="title">
                <?php echo $title; ?>
-              <i class="icon-star"></i>
-              <span class="rating"> <span class="value">4.5</span> Excellent</span>
-
             </h2>
             <span class="regular-text">Select an element below to make changes</span>
           </div><!-- shoot-steps__header -->
@@ -384,7 +390,7 @@ if ( ! defined( 'ABSPATH' ) ) {
         <div class="step-markers">
           <span class="step-markers__item" v-for="ind in 7" :key="'marker_'+ind" :class="{active: ind <= max_step}"></span>
         </div>
-        <div class="spacer-h-35"></div>
+        <div class="spacer-h-25"></div>
 
         <transition-group
           class="studio-content"
@@ -401,7 +407,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                  STEP 1
             *****************-->
               <div class="studio-content__page" v-show="step == 1" :key="'step-1'">
-                <div class="step-label">
+                <div class="step-label hide-mobile">
                   <svg class="icon svg-icon-product">
                     <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-product"></use>
                   </svg>
@@ -483,7 +489,7 @@ if ( ! defined( 'ABSPATH' ) ) {
            <div class="studio-content__page"   v-show="step == 2"  :key="'step-2'">
               <div class="spacer-h-20"></div>
 
-              <div class="step-label"><svg class="icon svg-icon-number"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href=" #svg-icon-number"></use></svg> <span class="step-label__text">Photos</span></div>
+              <div class="step-label hide-mobile"><svg class="icon svg-icon-number"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href=" #svg-icon-number"></use></svg> <span class="step-label__text">Photos</span></div>
 
               <div class="spacer-h-20"></div>
               <h2 class="studio-title"><span class="text">How many </span><span class="styled photos">photos</span>
@@ -800,7 +806,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                STEP 4
           *****************-->
             <div class="studio-content__page" :key="'step-4'" v-show="step==4">
-              <div class="step-label">
+              <div class="step-label hide-mobile">
                 <svg class="icon svg-icon-notes">
                   <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-notes"></use>
                   <span class="step-label__text">Studio Notes</span>
@@ -856,7 +862,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                STEP 4 - 1
           *****************-->
           <div class="studio-content__page" :key="'step-custom'" v-show="step==5">
-            <div class="step-label">
+            <div class="step-label hide-mobile">
               <svg class="icon svg-icon-notes">
                 <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-notes"></use>
                 <span class="step-label__text">Studio Notes</span>
@@ -924,7 +930,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                STEP 5
           *****************-->
             <div class="studio-content__page" :key="'step-6'"  v-show="step==6">
-              <div class="step-label">
+              <div class="step-label hide-mobile">
                 <svg class="icon svg-icon-flash">
                   <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-flash"></use>
                   <span class="step-label__text">Turnaround</span>
@@ -981,7 +987,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                STEP 6
           *****************-->
             <div class="studio-content__page" :key="'step-7'" v-show="step==7">
-              <div class="step-label">
+              <div class="step-label hide-mobile">
                 <svg class="icon svg-icon-handling">
                   <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-handling"></use>
                   <span class="step-label__text">Handling</span>

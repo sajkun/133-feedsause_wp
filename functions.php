@@ -159,7 +159,7 @@ class velesh_init_theme{
       wp_enqueue_script('theme-fancybox-thumbs', THEME_URL.'/assets/fancybox2/helpers/jquery.fancybox-thumbs.js', array('jquery'), THEME_VERSION, true);
 
       if(wp_is_mobile()){
-        if(is_product() || is_shop() || is_product_category() || is_checkout() ){
+        if(is_product() || is_shop() || is_product_category() || is_checkout() || (is_account_page() && !is_user_logged_in() ) ){
           wp_enqueue_style('theme-style-desktop', THEME_URL.'/css/desktop.main'.$this->dt_ver_css.'.min.css' );
         }  else {
           // wp_enqueue_style('theme-style-desktop', THEME_URL.'/css/desktop.main'.$this->dt_ver_css.'.min.css' );
