@@ -7188,8 +7188,8 @@ html {
 }
 
 #search-field .input-holder:hover {
-  border: 1px solid #3B414F;
-  background-color: #4E5566;
+  border: 1px solid #383D49;
+  background-color: #121419;
 }
 
 #search-field .input-holder input {
@@ -8352,6 +8352,10 @@ html {
   line-height: normal;
   text-align: left;
   vertical-align: top;
+}
+
+#single-frontdesk-order .datepicker-wrapper input {
+  color: #fff;
 }
 
 .error {
@@ -10899,12 +10903,17 @@ html {
   position: relative;
   min-width: 100px;
   text-transform: capitalize;
+  transition: all .1s;
 }
 
 .popup-inner .select-imitation {
   border: 1px solid #303645;
   background-color: #404656;
   height: 46px;
+}
+
+.select-imitation:hover {
+  background-color: #191c22;
 }
 
 .select-imitation.error {
@@ -11059,6 +11068,7 @@ html {
   white-space: nowrap;
   overflow: hidden;
   text-align: left;
+  transition: all .1s;
 }
 
 [class^='text-right'] .select-imitation__view {
@@ -11987,7 +11997,7 @@ html {
 }
 
 .leads-block__text {
-  color: #272f3d;
+  color: #fff;
   font-family: "_HelveticaFont_", sans-serif;
   font-size: 13px;
   font-style: normal;
@@ -13173,7 +13183,7 @@ html {
 
 .summary i.trigger-expand {
   position: absolute;
-  right: 5px;
+  right: 9px;
   top: 16px;
   z-index: 10;
   cursor: pointer;
@@ -13455,6 +13465,10 @@ html {
   line-height: 14px;
   font-weight: 600;
   display: inline-block;
+}
+
+.summary__content > tbody .resert-cells svg + .item-title {
+  display: inline;
 }
 
 .summary__content > tbody .resert-cells .item-details {
@@ -13750,6 +13764,7 @@ html {
   padding: 0 5px;
   border-radius: 3px;
   line-height: 24px;
+  font-weight: 700;
   margin: 2px 0;
 }
 

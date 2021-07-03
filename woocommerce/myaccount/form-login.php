@@ -219,126 +219,131 @@ if(!$menu){
         </div>
 
         <div class="col">
-          <div class="login-form-holder">
-            <div class="spacer-h-40"></div>
+          <div class="row height-100vh ">
+            <div class="valign-center-lg  width-100p">
+              <form class="woocommerce-form woocommerce-form-login login" method="post">
+                <div class="login-form-holder">
+                  <div class="spacer-h-40"></div>
 
-            <div class="row">
-              <div class="col-8 valign-center">
-                <a href="javascript:history.go(-1)" class="back-button">
-                <svg class="icon svg-icon-bracket"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-bracket"></use></svg> Back</a>
-              </div>
-              <div class="col-4 text-right show-mobile">
-                <a href="<?php echo HOME_URL; ?>" class="logo-login-mobile">
-                  <img src="<?php echo THEME_URL?>/images/logo-single.svg" alt="">
-                </a>
-              </div>
-            </div>
-
-
-            <div class="spacer-h-30"></div>
-
-            <h2 class="login-title">Create account</h2>
-
-            <div class="spacer-h-20"></div>
-            <?php do_action('theme_custom_before_login'); ?>
-            <form class="woocommerce-form woocommerce-form-login login" method="post">
-              <?php do_action( 'woocommerce_login_form_start' ); ?>
-
-              <div class="row">
-                <div class="col-6">
-                  <label for="" class="login-label">First name</label>
-                  <input type="text" placeholder="First Name" class="login-field" name="customer_first_name" id="customer_first_name" >
-                  <div class="spacer-h-10"></div>
-                </div><!-- col-6 -->
-
-                <div class="col-6">
-                  <label for="" class="login-label">Last name</label>
-                  <input type="text" placeholder="Last Name" class="login-field" placeholder="Last Name" name="customer_last_name" id="customer_last_name">
-                  <div class="spacer-h-10"></div>
-                </div><!-- col-6 -->
-              </div><!-- row -->
-
-              <div class="row">
-                <div class="col-12">
-                  <label for="" class="login-label">Your Brand</label>
-                  <input type="text" class="login-field" name="customer_brand" placeholder="Acme Inc">
-                  <div class="spacer-h-10"></div>
-                </div>
-              </div><!-- row -->
-
-              <div class="row">
-                <div class="col-12">
-                  <label for="" class="login-label">E-mail</label>
-
-                  <input type="email" placeholder="<?php esc_html_e( 'Email address', 'woocommerce' ); ?>" class="login-field" name="email" id="reg_email" autocomplete="email" value="<?php echo ( ! empty( $_POST['email'] ) ) ? esc_attr( wp_unslash( $_POST['email'] ) ) : ''; ?>"  placeholder="joe.bloggs@acme.com" />
-                  <div class="spacer-h-10"></div>
-                </div>
-              </div><!-- row -->
-
-              <?php if ( 'no' === get_option( 'woocommerce_registration_generate_password' ) ) : ?>
-                <div class="row">
-                  <div class="col-12">
-                    <label for="" class="login-label">Password</label>
-                    <input type="password" class="login-field" name="password" id="reg_password" autocomplete="new-password" placeholder="<?php esc_html_e( 'Password', 'woocommerce' ); ?>"/>
-                    <div class="spacer-h-15"></div>
+                  <div class="row">
+                    <div class="col-8 valign-center">
+                      <a href="javascript:history.go(-1)" class="back-button">
+                      <svg class="icon svg-icon-bracket"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-bracket"></use></svg> Back</a>
+                    </div>
+                    <div class="col-4 text-right show-mobile">
+                      <a href="<?php echo HOME_URL; ?>" class="logo-login-mobile">
+                        <img src="<?php echo THEME_URL?>/images/logo-single.svg" alt="">
+                      </a>
+                    </div>
                   </div>
-                </div><!-- row -->
-              <?php endif; ?>
 
-              <?php wp_nonce_field( 'woocommerce-register', 'woocommerce-register-nonce' ); ?>
 
-              <button class="login-button" type="submit" name="register" >
-                <span class="login-button__text">Create Account</span>
-                <span class="login-button__icon">
-                  <svg class="icon svg-icon-bracket"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-bracket"></use>
-                </span>
-              </button>
+                  <div class="spacer-h-30"></div>
 
-              <div class="spacer-h-15"></div>
-              <?php
-                if(isset($_GET['product_id'])){
-                  $constructor_url = get_permalink(get_option('theme_page_constructor'));
-                  $product_url = $constructor_url.'?product_id='.$_GET['product_id'].'&add_to_cart='.$_GET['product_id'];
-                }
-                $redirect = !isset($_GET['product_id'])? esc_url(wc_get_account_endpoint_url( 'orders' )) : $product_url;
-              ?>
-              <input type="hidden" name="redirect" value="<?php echo $redirect;  ?>">
+                  <h2 class="login-title">Create account</h2>
 
-            </form>
+                  <div class="spacer-h-20"></div>
+                  <?php do_action('theme_custom_before_login'); ?>
+                    <?php do_action( 'woocommerce_login_form_start' ); ?>
 
-            <?php wp_nonce_field('google-auth-nonce-test', 'google_auth_nonce', true, true); ?>
-            <div class="g-signin2" id="google-sign-in"></div>
+                    <div class="row">
+                      <div class="col-6">
+                        <label for="" class="login-label">First name</label>
+                        <input type="text" placeholder="First Name" class="login-field" name="customer_first_name" id="customer_first_name" >
+                        <div class="spacer-h-10"></div>
+                      </div><!-- col-6 -->
 
-            <?php $my_account_id = get_option('woocommerce_myaccount_page_id'); ?>
-            <div class="spacer-h-20"></div>
-            <div class="spacer-h-4"></div>
-            <p class="login-label text-center text-left-lg">
-               Already have an account? <a href="<?php echo esc_url(get_permalink( $my_account_id ))?>" class="link-blue"> Sign In</a>.
-            </p>
-            <?php do_action( 'woocommerce_register_form_end' ); ?>
+                      <div class="col-6">
+                        <label for="" class="login-label">Last name</label>
+                        <input type="text" placeholder="Last Name" class="login-field" placeholder="Last Name" name="customer_last_name" id="customer_last_name">
+                        <div class="spacer-h-10"></div>
+                      </div><!-- col-6 -->
+                    </div><!-- row -->
 
-            <script>
+                    <div class="row">
+                      <div class="col-12">
+                        <label for="" class="login-label">Your Brand</label>
+                        <input type="text" class="login-field" name="customer_brand" placeholder="Acme Inc">
+                        <div class="spacer-h-10"></div>
+                      </div>
+                    </div><!-- row -->
 
-              function renderButton2() {
-                gapi.signin2.render('google-sign-in', {
-                  'text' : 'Sign in with google',
-                  'scope': 'profile email',
-                  'width': 320,
-                  'height': 52,
-                  'longtitle': true,
-                  'theme': 'Light',
-                  'onsuccess': onSignInDashboard,
-                  'onfailure': onFailure
-                });
-              }
+                    <div class="row">
+                      <div class="col-12">
+                        <label for="" class="login-label">E-mail</label>
 
-            </script>
+                        <input type="email" placeholder="<?php esc_html_e( 'Email address', 'woocommerce' ); ?>" class="login-field" name="email" id="reg_email" autocomplete="email" value="<?php echo ( ! empty( $_POST['email'] ) ) ? esc_attr( wp_unslash( $_POST['email'] ) ) : ''; ?>"  placeholder="joe.bloggs@acme.com" />
+                        <div class="spacer-h-10"></div>
+                      </div>
+                    </div><!-- row -->
 
-            <script src="https://apis.google.com/js/platform.js?onload=renderButton2" async defer></script>
-          </div>
-          <div class="spacer-h-90"></div>
-          <?php echo $menu; ?>
-        </div>
+                    <?php if ( 'no' === get_option( 'woocommerce_registration_generate_password' ) ) : ?>
+                      <div class="row">
+                        <div class="col-12">
+                          <label for="" class="login-label">Password</label>
+                          <input type="password" class="login-field" name="password" id="reg_password" autocomplete="new-password" placeholder="<?php esc_html_e( 'Password', 'woocommerce' ); ?>"/>
+                          <div class="spacer-h-15"></div>
+                        </div>
+                      </div><!-- row -->
+                    <?php endif; ?>
+
+                    <?php wp_nonce_field( 'woocommerce-register', 'woocommerce-register-nonce' ); ?>
+
+                    <button class="login-button" type="submit" name="register" >
+                      <span class="login-button__text">Create Account</span>
+                      <span class="login-button__icon">
+                        <svg class="icon svg-icon-bracket"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-bracket"></use>
+                      </span>
+                    </button>
+
+                    <div class="spacer-h-15"></div>
+                    <?php
+                      if(isset($_GET['product_id'])){
+                        $constructor_url = get_permalink(get_option('theme_page_constructor'));
+                        $product_url = $constructor_url.'?product_id='.$_GET['product_id'].'&add_to_cart='.$_GET['product_id'];
+                      }
+                      $redirect = !isset($_GET['product_id'])? esc_url(wc_get_account_endpoint_url( 'orders' )) : $product_url;
+                    ?>
+                    <input type="hidden" name="redirect" value="<?php echo $redirect;  ?>">
+
+
+                  <?php wp_nonce_field('google-auth-nonce-test', 'google_auth_nonce', true, true); ?>
+                  <div class="g-signin2" id="google-sign-in"></div>
+
+                  <?php $my_account_id = get_option('woocommerce_myaccount_page_id'); ?>
+                  <div class="spacer-h-20"></div>
+                  <div class="spacer-h-4"></div>
+                  <p class="login-label text-center text-left-lg">
+                     Already have an account? <a href="<?php echo esc_url(get_permalink( $my_account_id ))?>" class="link-blue"> Sign In</a>.
+                  </p>
+                  <?php do_action( 'woocommerce_register_form_end' ); ?>
+
+                  <script>
+
+                    function renderButton2() {
+                      gapi.signin2.render('google-sign-in', {
+                        'text' : 'Sign in with google',
+                        'scope': 'profile email',
+                        'width': 320,
+                        'height': 52,
+                        'longtitle': true,
+                        'theme': 'Light',
+                        'onsuccess': onSignInDashboard,
+                        'onfailure': onFailure
+                      });
+                    }
+
+                  </script>
+
+                  <script src="https://apis.google.com/js/platform.js?onload=renderButton2" async defer></script>
+                </div>
+              </form>
+               <div class="spacer-h-110"></div>
+               <div class="spacer-h-xl-90"></div>
+               <?php echo $menu; ?>
+             </div><!-- valign-center-lg  width-100p -->
+           </div><!-- row height-100vh -->
+         </div><!-- col -->
 
       </div><!-- row -->
     </div><!-- container-fluid -->

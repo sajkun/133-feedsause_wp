@@ -3746,6 +3746,16 @@ class theme_content_output{
     // an instance of velesh_init_theme class. Used here to get a script slug
     global $theme_init;
 
+    $user_id = get_current_user_id();
+
+    $addresses = get_user_meta($user_id, '_free_collection_address', true);
+
+    $addresses =$addresses?: array();
+
+    $addresses = array_unique($addresses);
+
+    wp_localize_script($theme_init->main_script_slug, 'collection_addresses_all', $addresses);
+
     // get product ID from passed parameters and pass this data to a script
     $product_id = (int)$_GET['product_id'];
     wp_localize_script($theme_init->main_script_slug, 'product_id', array($product_id));

@@ -676,7 +676,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                       </span>
                     </label>
                     <label class="radio-imitation studio-content__number">
-                      <input type="checkbox" name="size" v-model="customize.sizes" value="full-hd">
+                      <input type="checkbox" name="size" v-model="customize.sizes" value="Full HD">
                       <span class="radio-imitation__view text-center">
                         <span class="radio-imitation__longtext">
                           <span class="radio-imitation__size hd">
@@ -1153,6 +1153,8 @@ if ( ! defined( 'ABSPATH' ) ) {
               </form>
                 <div class="spacer-h-15"></div>
                <form enctype="multipart/form-data" action="<?php echo esc_url( wc_get_checkout_url() ); ?>" method="POST" id="checkout_form"  name="checkout" method="post" class="checkout woocommerce-checkout" >
+
+                <input type="hidden" name="free_collection_address" v-model="collection_address" v-if="'free' == handling.send && collection_address ">
 
                 <input type="text" class="input-field" v-model="contact_number" ref="contact_number" placeholder="Contact Number" name="contact">
                 <div class="spacer-h-25"></div>

@@ -27,8 +27,8 @@ class velesh_init_theme{
 
   public $main_script_slug = 'theme-main-script-dev11';
 
-  public $dt_ver_css = 22;
-  public $dt_ver_js = 18;
+  public $dt_ver_css = 23;
+  public $dt_ver_js = 19;
 
   public $mob_ver_js = 6;
   public $mob_ver_css = 8;
@@ -324,7 +324,6 @@ class velesh_init_theme{
    */
   public function init_hooks(){
 
-
     add_action('plugins_loaded', array($this, 'exec_on_plugins_load'));
 
     // /* js and css hooks for the frontend*/
@@ -373,7 +372,16 @@ class velesh_init_theme{
     }
 
     remove_action( 'woocommerce_view_order', 'woocommerce_order_details_table', 10 );
+    add_action('user_register', array($this, 'add_user_brand'));
   }
+
+    public static function add_user_brand($user_id){
+      if(!update_user_meta( $user_id, '_customer_brand', $_POST['customer_brand'] )){
+        add_user_meta( $user_id,  '_customer_brand', $_POST['customer_brand'] );
+      }
+
+      print_theme_log($_POST['customer_brand'] );
+    }
 
 
     public  function add_settings_for_google_auth(){

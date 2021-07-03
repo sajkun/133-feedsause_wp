@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
           <div class="col1">
             <div class="row row-h-80">
               <a href="<?php echo $home_url; ?>" class="logo beta">
-                <img src="<?php echo THEME_URL ?>/order_tracker/assets/images/logo-hub.png" alt="">
+                <img src="<?php echo THEME_URL ?>/order_tracker/assets/images/hub_logo_svg.svg" alt="">
               </a>
               <nav class="navigation">
 

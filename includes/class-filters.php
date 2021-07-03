@@ -1154,6 +1154,7 @@ add_action('woocommerce_checkout_create_order_line_item', 'theme_save_additional
 function theme_save_additional_item_data($item, $cart_item_key, $values, $order ){
 
   $order_id = $order->get_id();
+  $user_id = get_current_user_id();
 
   $currency_settings = get_option('theme_currency_settings');
   if(isset($values['currency_code']) && $values['currency_code'] != "GBP"){
@@ -1192,6 +1193,26 @@ function theme_save_additional_item_data($item, $cart_item_key, $values, $order 
   if(isset($_POST['contact'])){
     if(!update_post_meta($order_id , '_contact_number', $_POST['contact'] )){
       add_post_meta($order_id , '_contact_number', $_POST['contact'], true );
+    }
+  }
+
+
+  // save free collection address
+  if(isset($_POST['free_collection_address'])){
+
+    // saves addresses to order
+    $order->update_meta_data('collect-products', 1);
+    $order->update_meta_data('_collect_address', $_POST['free_collection_address']);
+
+    // add posted address to user addresses
+    $addresses = get_user_meta($user_id, '_free_collection_address', true);
+    $addresses =$addresses?: array();
+    array_push($addresses,  str_replace('\\', '',$_POST['free_collection_address']));
+
+    $addresses = array_unique($addresses);
+
+    if(!update_user_meta($user_id, '_free_collection_address',  $addresses )){
+      add_user_meta($user_id, '_free_collection_address',  $addresses );
     }
   }
 }

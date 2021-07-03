@@ -164,10 +164,12 @@ function update_order_statuses_history($order, $data = null){
   }
 
   $date = new DateTime();
+  $date->setTimezone(new DateTimeZone('Europe/London'));
+
   if(!isset($history[$status]['dates'])){
     $history[$status]['dates'] = array();
   }
-  $history[$status]['dates'][] =   $date->format('Y-m-d H:i:s');
+  $history[$status]['dates'][] =   $date->format('Y-m-d H:i:sP');
   $order_id = $order->get_id();
 
   if(!update_post_meta( $order_id , '_statuses_history',  $history)){
@@ -218,7 +220,7 @@ if(!class_exists('map_orders_cb')){
         'phone'      => $this->user->get_billing_phone(),
         'email'      => $this->user->get_email(),
         'source'     => $order->get_meta('_source')?: 'Site',
-        'brand'      => $order->get_billing_company(),
+        'brand'      => get_user_meta($order->get_customer_id(), '_customer_brand', true),
         'assigned'   => $order->get_meta('_assigned_person'),
         'campaign'   => $order->get_meta('_campaign'),
         'user_id'    => $this->user->get_id(),
@@ -352,6 +354,16 @@ if(!class_exists('map_orders_cb')){
       // clog($this->order_id);
       // clog($this->get_order_notes_changed($order));
 
+      $collection_address = str_replace('\\', '', $order->get_meta('_collect_address'));
+
+      if($collection_address){
+        $collection_address = implode(' ', json_decode($collection_address, true));
+      }else{
+        $collection_address = '';
+      }
+
+      clog($this->get_order_notes_changed($order));
+
       return array(
         'order_id'         => $this->order_id,
         'date_completed'   => $order->get_date_completed(),
@@ -419,7 +431,7 @@ if(!class_exists('map_orders_cb')){
 
           'product_collection' => array(
             'do_collect' => !!$order->get_meta('collect-products'),
-            'address'      => $order->get_meta('_collect_address'),
+            'address'      => $collection_address,
             'address_billing'   => str_replace('<br/>', PHP_EOL, $order->get_formatted_billing_address()),
             'address_shipping'  => str_replace('<br/>', PHP_EOL, $order->get_formatted_shipping_address()),
             'requested'         => $order->get_meta('_free_collection_date'),

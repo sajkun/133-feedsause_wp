@@ -1,8 +1,8 @@
 <?php
   $obj_id = get_queried_object_id();
   $o = get_option(duh()->slug_options);
-  $script_version = 9;
-  $style_version = 5;
+  $script_version = 10;
+  $style_version = 6;
 ?>
 <!DOCTYPE html>
 <html lang="en">

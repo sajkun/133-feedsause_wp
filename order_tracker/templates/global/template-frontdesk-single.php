@@ -117,53 +117,6 @@ if ( ! defined( 'ABSPATH' ) ) {
               <div class="clearfix"></div>
             </div><!-- leads-block__row -->
           </form>
-
-
-           <?php /*
-           <div class="spacer-h-30"></div>
-
-           <!-- NOTES BLOCK
-            ************************* -->
-           <h2 class="leads-block__title">Enquiry Notes</h2>
-
-           <div class="spacer-h-20"></div>
-
-            <div class="leads-block__row">
-              <p class="no-notes leads-block__comment" v-if="computed_enquery_notes.length === 0">No notes there yet</p>
-              <div v-for="note, key in computed_enquery_notes" class="note-block">
-                <div class="note-block__header clearfix">
-                  <span class="name">{{note.user_name}}</span>
-                  <span class="date">{{note.date}}</span>
-
-                  <i class="remove-note-icon"  v-on:click="delete_note('enquery', note.text, note.date)">
-                    <svg class="icon svg-icon-trash"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-trash"></use></svg>
-                  </i>
-                </div>
-
-                <div class="note-block__body" v-bind:class="{'manager-note': note.is_manager == 'yes'}">
-                 <span class="inner">{{note.text}}</span>
-                 <i class="icon-manager-done" v-on:click="mark_note_done(note.key, 'no')" v-if="note.is_manager == 'yes' && note.done =='yes'"></i>
-
-                  <i class="icon-manager-done not" v-on:click="mark_note_done(note.key, 'yes')" v-if="note.is_manager == 'yes' && note.done !='yes'"></i>
-                </div>
-              </div>
-
-              <span class="note-block__show-more" v-on:click="enquery_notes_count = order_data.messages.enquery.length + 999" v-if="enquery_notes_count < computed_enquery_notes_count"> <i class="icon">
-                <svg  width="25" height="23" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:avocode="https://avocode.com/" viewBox="0 0 25 23"><defs></defs><desc>Generated with Avocode.</desc><g><g clip-path="url(#clip-DE13DCBF-88C9-45C8-BBB9-358E473B1E2D)"><title>Path Copy</title><path d="M14.94831,10.53082l-2.33405,2.33389c-0.03335,0.03338 -0.07171,0.0501 -0.11511,0.0501c-0.0434,0 -0.08183,-0.01672 -0.1152,-0.0501l-2.33385,-2.33389c-0.03344,-0.03343 -0.0501,-0.0718 -0.0501,-0.11521c0,-0.0434 0.01672,-0.08182 0.0501,-0.11519l0.25036,-0.25034c0.03338,-0.03338 0.0718,-0.05006 0.1152,-0.05006c0.0434,0 0.08182,0.01668 0.1152,0.05006l1.96829,1.96826v0l1.96836,-1.96838c0.03337,-0.03338 0.0718,-0.04996 0.11513,-0.04996c0.04347,0 0.08189,0.01668 0.11525,0.04996l0.2504,0.25045c0.03336,0.03336 0.04994,0.0718 0.04994,0.11518c0.00002,0.04343 -0.01656,0.08185 -0.04992,0.11523z" fill="#ffffff" fill-opacity="1"></path><path d="M14.94831,10.53082l-2.33405,2.33389c-0.03335,0.03338 -0.07171,0.0501 -0.11511,0.0501c-0.0434,0 -0.08183,-0.01672 -0.1152,-0.0501l-2.33385,-2.33389c-0.03344,-0.03343 -0.0501,-0.0718 -0.0501,-0.11521c0,-0.0434 0.01672,-0.08182 0.0501,-0.11519l0.25036,-0.25034c0.03338,-0.03338 0.0718,-0.05006 0.1152,-0.05006c0.0434,0 0.08182,0.01668 0.1152,0.05006l1.96829,1.96826v0l1.96836,-1.96838c0.03337,-0.03338 0.0718,-0.04996 0.11513,-0.04996c0.04347,0 0.08189,0.01668 0.11525,0.04996l0.2504,0.25045c0.03336,0.03336 0.04994,0.0718 0.04994,0.11518c0.00002,0.04343 -0.01656,0.08185 -0.04992,0.11523z" fill-opacity="0" fill="#ffffff" stroke-linejoin="miter" stroke-linecap="butt" stroke-opacity="1" stroke="#ffffff" stroke-miterlimit="20" stroke-width="1"></path></g></g></svg></i> Show {{computed_enquery_notes_count - 1}} more</span>
-              <div class="spacer-h-20"></div>
-            </div>
-
-            <form id="message-form-reception-new" v-on:submit.prevent  v-on:submit="add_note('enquery')" >
-              <div class="leads-block__form">
-
-              <textarea name="text" placeholder="Enter new note…" ref="note_textarea_enquery" v-model="enquery_note_text" @keyup.alt.enter="add_note('enquery')" @keyup.ctrl.enter="add_note('enquery')" title="use Enter for line breaks, use Alt+Enter to add note"></textarea>
-
-              <button type="submit" class="button-submit">
-                <svg class="icon svg-icon-send"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-send"></use> </svg>
-              </button>
-
-              </div>
-            </form> */ ?>
         </div><!-- leads-block -->
 
         <div class="leads-block" v-if="shoot_data_set">
@@ -212,9 +165,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                         <div class="details" data-parent="products" v-show="show_product_details.names">
                           <table>
                             <tbody><tr v-for="item, key in product_names.items" :key="'product_name_'+key">
-                              <td class="limit-width"><svg class="icon svg-icon-product">
-                                  <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-product"></use>
-                                  </svg><span class="item-title">{{item.category}}</span></td>
+                              <td class="limit-width"><span class="item-title">{{item.category}}</span></td>
                               <td><span class="item-details">{{item.name}}</span>
 
                               </td>
@@ -327,13 +278,13 @@ if ( ! defined( 'ABSPATH' ) ) {
                           <div class="details" v-if="notes_label == 'Quick Notes'">
                              <span class="summary__content-text">{{this.order_data.order_items_data.extra_data.comment.value}}</span>
                           </div>
-                          <div class="details" v-if="notes_label == 'Custom Shoot List'">
+                          <div class="details" v-if="notes_label == 'Custom Shot List'">
                             <table>
                               <tbody  v-for="shoot, key in custom_shoots">
                                 <tr>
                                   <td class="limit-width"><svg class="icon svg-icon-notes">
                                     <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-notes"></use>
-                                    </svg><span class="item-title">Shoot {{key}}</span></td>
+                                    </svg><span class="item-title">Shot {{key + 1}}</span></td>
                                 <td>
                                 </td>
                                 <td> <span class="item-details expandable" :data-shoot-products="'shoot'+key"> {{shoot.product.replace(',', '\n')}} </span> </td>
@@ -1002,7 +953,7 @@ if ( ! defined( 'ABSPATH' ) ) {
           v-on:leave="animation_leave"
           v-bind:css="false"
         >
-          <div class="leads-block__row" v-if="order_data.product_collection.do_collect">
+          <div class="leads-block__row" ref="collection_address_block" v-if="order_data.product_collection.do_collect">
             <table class="leads-block__data">
               <tbody>
                 <tr v-if="order_data.product_collection.address_billing">

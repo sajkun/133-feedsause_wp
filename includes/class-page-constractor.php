@@ -25,7 +25,11 @@ class theme_construct_page{
         add_action('do_theme_header', array('theme_content_output','print_new_header_dark'));
         add_action('do_theme_footer', array('theme_content_output','print_footer_new_dark'));
       }else{
-        // add_action('do_theme_header', array('theme_content_output','print_new_header'));
+
+        if(wp_is_mobile() && is_checkout() ){
+        }else{
+          add_action('do_theme_header', array('theme_content_output','print_new_header'));
+        }
       }
 
       if(is_checkout() && !empty( is_wc_endpoint_url('order-received') )){
