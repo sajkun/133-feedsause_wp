@@ -192,6 +192,8 @@ if(!class_exists('tracker_ajax')){
       $customer = new WC_Customer( $customer_id );
       $customer->set_billing_phone($_POST['data']['customer']['phone']);
 
+      $order->update_meta_data('_wfp_image', $_POST['data']['wfp_images']);
+
       $test = save_order_meta($order);
 
       $customer->save();

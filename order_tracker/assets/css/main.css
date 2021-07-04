@@ -13981,6 +13981,16 @@ html {
   cursor: text;
 }
 
+.button-save-shoot img {
+  width: 24px;
+  height: 24px;
+  position: absolute;
+  left: 20px;
+  top: 0;
+  bottom: 0;
+  margin: auto;
+}
+
 .button-save-shoot.width200 {
   width: 200px;
   margin: 0 auto;
@@ -14002,6 +14012,16 @@ html {
   top: 0;
   bottom: 0;
   margin: auto 0;
+  transition: all .1s;
+}
+
+.button-save-shoot.not-active {
+  background-color: #67789f;
+  color: #9daccc;
+}
+
+.button-save-shoot.not-active svg {
+  fill: #9daccc;
 }
 
 .popup-wrapper {

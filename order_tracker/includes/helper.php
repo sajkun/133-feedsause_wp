@@ -351,9 +351,6 @@ if(!class_exists('map_orders_cb')){
       /***************************/
       $due_date              = $this->get_due_date($order, $is_reshoot);
 
-      // clog($this->order_id);
-      // clog($this->get_order_notes_changed($order));
-
       $collection_address = str_replace('\\', '', $order->get_meta('_collect_address'));
 
       if($collection_address){
@@ -361,8 +358,6 @@ if(!class_exists('map_orders_cb')){
       }else{
         $collection_address = '';
       }
-
-      clog($this->get_order_notes_changed($order));
 
       return array(
         'order_id'         => $this->order_id,

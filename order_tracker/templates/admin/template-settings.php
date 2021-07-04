@@ -38,21 +38,21 @@ if ( ! defined( 'ABSPATH' ) ) {
       </select>
 
       <h3> Studio page: </h3>
-      <select name="<?php echo $slug ?>[review_page]">
-        <?php foreach ($pages as $key => $p): ?>
-          <option
-            value="<?php echo $p->ID ?>"
-            <?php echo isset($options['review_page']) && $p->ID == (int)$options['review_page']? 'selected="selected"': ''; ?>
-            ><?php echo $p->post_title ?></option>
-        <?php endforeach ?>
-      </select>
-
-      <h3> Review page: </h3>
       <select name="<?php echo $slug ?>[studio_page]">
         <?php foreach ($pages as $key => $p): ?>
           <option
             value="<?php echo $p->ID ?>"
             <?php echo isset($options['studio_page']) && $p->ID == (int)$options['studio_page']? 'selected="selected"': ''; ?>
+            ><?php echo $p->post_title ?></option>
+        <?php endforeach ?>
+      </select>
+
+      <h3> Review page: </h3>
+      <select name="<?php echo $slug ?>[review_page]">
+        <?php foreach ($pages as $key => $p): ?>
+          <option
+            value="<?php echo $p->ID ?>"
+            <?php echo isset($options['review_page']) && $p->ID == (int)$options['review_page']? 'selected="selected"': ''; ?>
             ><?php echo $p->post_title ?></option>
         <?php endforeach ?>
       </select>

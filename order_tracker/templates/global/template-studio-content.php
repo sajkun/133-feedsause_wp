@@ -552,18 +552,11 @@ echo '<script type="text/x-template" id="studio-single-content">';
             </span>
           </p>
           <div class="spacer-h-30"></div>
-          <a href="#" v-on:click.prevent="exec_start_shoot" class="button-save-shoot width200 active">Start Shoot</a>
+          <a href="#" v-on:click.prevent="exec_start_shoot" class="button-save-shoot width200 active"> <img v-if="start_shoot" src="<?php echo THEME_URL ?>/order_tracker/assets/images/spinner_white.gif" alt=""> Start Shoot</a>
         </div>
 
         <div class="upload-area__body">
           <div class="row" v-if="shoot_started || is_old_order">
-            <upload-item-blank
-               v-if = "!is_old_order && !is_single_order"
-              :_blank_number = "blank_item_id  + 1"
-              :_order_id = "order_data.order_id"
-              :_blank_item_id = "blank_item_id"
-              v-on:file_changed_blank = "update_files_blank"
-            ></upload-item-blank>
 
            <upload-item-exists
               v-for="(file, i) in files_uploaded"
@@ -600,18 +593,26 @@ echo '<script type="text/x-template" id="studio-single-content">';
 
             <upload-item
               v-for="(file, i) in watch_files_prepared"
-              :_order_id = "order_data.order_id"
-              :_number         = "get_index_prepared(i) + 1"
-              :_item_id        = "get_index_prepared(i)"
-              :key             = "'upload_item_prepared_'+get_index_prepared(i)"
-              :_comments       = "[]"
-              :_files = "file"
-              :_files_uploaded = "files_uploaded[get_index_prepared(i)]"
-              v-on:show_image = "show_image_popup"
+              :_order_id        = "order_data.order_id"
+              :_number          = "get_index_prepared(i) + 1"
+              :_item_id         = "get_index_prepared(i)"
+              :key              = "'upload_item_prepared_'+get_index_prepared(i)"
+              :_comments        = "[]"
+              :_files           = "file"
+              :_files_uploaded  = "files_uploaded[get_index_prepared(i)]"
+              v-on:show_image   = "show_image_popup"
               v-on:file_changed = "update_files"
               v-on:change_thumbnail = "change_thumbnail"
               v-on:toggle_free_paid = "toggle_free_paid_cb"
             ></upload-item>
+
+            <upload-item-blank
+               v-if = "!is_old_order && !is_single_order"
+              :_blank_number = "blank_item_id  + 1"
+              :_order_id = "order_data.order_id"
+              :_blank_item_id = "blank_item_id"
+              v-on:file_changed_blank = "update_files_blank"
+            ></upload-item-blank>
 
           </div><!-- row -->
         </div><!-- upload-area__body -->
@@ -670,7 +671,7 @@ echo '<script type="text/x-template" id="studio-single-content">';
 
             <a href="#"
               v-on:click.prevent="do_upload" v-if="show_submit_button"
-              v-bind:class="{active: files_to_load_exist}"
+              v-bind:class="{active: files_to_load_exist, 'not-active': !files_to_load_exist}"
               class="button-save-shoot">Submit Photos <svg class="icon svg-icon-tick" v-if="!files_to_load_exist"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-tick"></use></svg></a>
               <div class="spacer-h-20"></div>
           </div>
