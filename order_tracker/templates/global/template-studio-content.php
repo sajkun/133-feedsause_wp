@@ -7,8 +7,6 @@ echo '<script type="text/x-template" id="studio-single-content">';
 
   <div class="container-fluid" v-if="visible">
     <div class="row full-height">
-
-
       <div class="col-4 col-12 col-lg-4 limited-width-400">
         <!-- ******************************
         ********** ORDER DATA ***********
@@ -37,9 +35,7 @@ echo '<script type="text/x-template" id="studio-single-content">';
             <div class="hr"></div>
              <div class="leads-block__row">
               <div class="leads-block__name">
-
                 <h1 class="block-title">Order #{{order_data.order_id}}</h1>
-
                 <span class="leads-block__comment" v-if="order_data.order.date">Paid on {{order_data.order.date}}</span>
               </div>
             </div><!-- leads-block__row -->

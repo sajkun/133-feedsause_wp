@@ -15763,7 +15763,7 @@ html {
   cursor: pointer;
   left: 10px;
   bottom: 9px;
-  z-index: 100;
+  z-index: 1000;
 }
 
 .upload-item .paid-free__marker {
@@ -16264,7 +16264,7 @@ html {
   cursor: pointer;
   left: 10px;
   bottom: 9px;
-  z-index: 100;
+  z-index: 1000;
 }
 
 .frnt-upload-item .paid-free__marker {
