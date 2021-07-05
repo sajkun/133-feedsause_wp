@@ -3934,12 +3934,19 @@ class theme_content_output{
         $product_count = isset($meta['name']['value'])? count($product_name) : '';
         $product = $item->get_product();
 
+        if( $product ){
+          $title = $product->get_title();
+        }else{
+          $title = $item->get_name();
+          $title = explode('-', $title);
+          $title = trim($title[0]);
+        }
 
         $items[] = array(
           'order_item_id'=> $item->get_id(),
           'extra_data'   => $extra_data,
           'prices'       => $item->get_meta('theme_prices') && !is_null($item->get_meta('theme_prices'))?$item->get_meta('theme_prices'): get_option('theme_settings'),
-          'product_name' => $product->get_title(),
+          'product_name' =>  $title ,
           'item_name'    => $product_name,
           'item_count'   => $product_count,
         );
