@@ -62,7 +62,14 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 
           $product = $item->get_product();
 
-          $title = $product->get_title();
+          if( $product ){
+            $title = $product->get_title();
+          }else{
+            $title = $item->get_name();
+            $title = explode('-', $title);
+            $title = trim($title[0]);
+          }
+
 
           $customer     = new WC_Customer( $customer_id );
           $product_name = isset($meta['name']['value'])? explode(PHP_EOL, $meta['name']['value']) : '';
