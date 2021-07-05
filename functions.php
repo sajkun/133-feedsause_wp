@@ -334,7 +334,7 @@ class velesh_init_theme{
 
     add_action('wp_enqueue_scripts', array($this,'inline_custom_data'), 9990);
 
-    add_action('do_theme_after_head', array($this,'print_theme_inline_styles'), 9999);
+    add_action('wp_head', array($this,'print_theme_inline_styles'), 9999);
 
 
     add_filter( 'script_loader_tag', array($this,'add_async_attribute'), 10, 2 );

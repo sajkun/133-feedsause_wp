@@ -119,7 +119,16 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
             <div class="row no-gutters">
               <div class="col-12">
                 <span class="thank-you__order-label">Sizes</span>
-                <span class="thank-you__order-value"><?php echo isset($meta['sizes']['value']) ? implode(', ',$meta['sizes']['value']) : 'na'; ?></span>
+
+                <?php if(isset($meta['sizes']['value']) && isset($meta['sizes']['value']['value'])):?>
+                <span class="thank-you__order-value"><?php echo isset($meta['sizes']['value']['value']) ? implode(', ',$meta['sizes']['value']['value']) : 'na'; ?></span>
+                <?php else:
+
+                 ?>
+                <?php
+                ?>
+                <span class="thank-you__order-value"><?php echo isset($meta['sizes']) && isset($meta['sizes']['value'])  && is_array($meta['sizes']['value'])? implode(', ',$meta['sizes']['value']) : 'na'; ?></span>
+                <?php endif; ?>
               </div>
             </div><!-- row -->
             <div class="spacer-h-15"></div>
