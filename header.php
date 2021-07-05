@@ -39,25 +39,25 @@ do_action('start_page');
 </head>
 
 <?php
-add_filter( 'body_class', function( $classes ) {
-  return array_merge( $classes, array( 'page' ) );
-} );
+// add_filter( 'body_class', function( $classes ) {
+//   return array_merge( $classes, array( 'page' ) );
+// } );
 
-if (theme_construct_page::is_page_type('woo-checkout')) {
-  $options = get_theme_checkout_content();
+// if (theme_construct_page::is_page_type('woo-checkout')) {
+//   $options = get_theme_checkout_content();
 
-  if('regular' === $options['type']){
-    add_filter( 'body_class', function( $classes ) {
-      return array_merge( $classes, array( 'white' ) );
-    } );
-  }
-}
+//   if('regular' === $options['type']){
+//     add_filter( 'body_class', function( $classes ) {
+//       return array_merge( $classes, array( 'white' ) );
+//     } );
+//   }
+// }
 
-if(function_exists('is_cart') && is_cart()){
-    add_filter( 'body_class', function( $classes ) {
-      return array_merge( $classes, array( 'white' ) );
-    } );
-}
+// if(function_exists('is_cart') && is_cart()){
+//     add_filter( 'body_class', function( $classes ) {
+//       return array_merge( $classes, array( 'white' ) );
+//     } );
+// }
 ?>
 <body  <?php body_class(); ?>>
 

@@ -379,8 +379,6 @@ class velesh_init_theme{
       if(!update_user_meta( $user_id, '_customer_brand', $_POST['customer_brand'] )){
         add_user_meta( $user_id,  '_customer_brand', $_POST['customer_brand'] );
       }
-
-      print_theme_log($_POST['customer_brand'] );
     }
 
 
