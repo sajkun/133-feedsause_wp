@@ -62,9 +62,7 @@ foreach ($order->get_items() as $key => $item) {
 
 	$current_status       = new WC_Order_Status_Manager_Order_Status($order->get_status());
 	$current_status_meta  = get_post_meta($current_status->get_id(), 'custom_order_data', true);
-	$current_status_order = isset(	$current_status_meta['order'] ) ? (int)$current_status_meta['order']   :0;
-
-  clog($meta);
+	$current_status_order = isset(	$current_status_meta['order'] ) ? (int)$current_status_meta['order']   : 0;
 ?>
 <div class="container-lg fixed" id="my_order">
   <div class="spacer-h-0 spacer-h-md-30 spacer-h-lg-50"></div>
@@ -75,15 +73,16 @@ foreach ($order->get_items() as $key => $item) {
       	<div class="col-md-5 col-lg-5 clearfix">
           <div class="shoot-steps">
             <div class="shoot-steps__header">
-              <a href="javascript:history.go(-1)" class="comment"><svg class="icon svg-icon-bracket"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-bracket"></use></svg> BACK</a>
+              <a href="javascript:history.go(-1)" class="comment"><svg class="icon svg-icon-bracket"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-bracket"></use></svg> Back</a>
               <div class="spacer-h-20"></div>
               <h2 class="title">
                   <?php echo $product->get_name();?>
-                 <svg class="icon svg-icon-dots"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-dots"></use> </svg>
               </h2>
             <span class="comment">#FS-<?php echo $order->get_order_number(); ?></span >
 
             </div><!-- shoot-steps__header -->
+            <div class="shoot-steps-hr"></div>
+            <div class="spacer-h-20"></div>
             <div class="summary">
               <div class="summary__body">
                 <h3 class="summary__title">Shoot Summary</h3>
@@ -196,40 +195,42 @@ foreach ($order->get_items() as $key => $item) {
                             <tr>
                               <td class="limit-width"><svg class="icon svg-icon-custom">
                                   <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-custom"></use>
-                                  </svg><span class="item-title">Theme</span></td>
+                                  </svg><span class="item-title">Theme</span><div class="spacer-h-5"></div></td>
                               <td>
                                 <?php if ($meta['colors']['value']): ?>
                                   <span class="item-details"><?php echo str_replace(PHP_EOL, '<br>' ,$meta['colors']['value']); ?></span>
                                 <?php else: ?>
                                   <span class="item-details">Don't care</span>
                                 <?php endif ?>
+                                <div class="spacer-h-5"></div>
                               </td>
                             </tr>
                             <tr>
                               <td class="limit-width"><svg class="icon svg-icon-position">
                                   <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-position"></use>
-                                  </svg><span class="item-title">Position</span></td>
+                                  </svg><span class="item-title">Position</span><div class="spacer-h-5"></div></td>
                               <td><?php if ($meta['position']['value'] && $meta['position']['value']!='none'): ?>
                                  <span class="item-details"><?php echo $meta['position']['value'] ?></span>
                                 <?php else: ?>
                                   <span class="item-details">Don't care</span>
-                                <?php endif ?></td>
+                                <?php endif ?>
+                                <div class="spacer-h-5"></div></td>
                             </tr>
                             <tr>
                               <td class="limit-width"><svg class="icon svg-icon-glasess">
                                   <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-glasess"></use>
-                                  </svg><span class="item-title">Props</span></td>
+                                  </svg><span class="item-title">Props</span><div class="spacer-h-5"></div></td>
                               <td><?php if ($meta['props']['value'] && $meta['props']['value']!='none'): ?>
                                  <span class="item-details"><?php echo $meta['props']['value'] ?></span>
                                 <?php else: ?>
                                   <span class="item-details">Don't care</span></td>
-                                <?php endif ?></td>
+                                <?php endif ?><div class="spacer-h-5"></div></td>
                             </tr>
                             <tr>
                               <td class="limit-width"><svg class="icon svg-icon-resize">
                                   <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-resize"></use>
-                                  </svg><span class="item-title">Sizes</span></td>
-                              <td><span class="item-details"><?php echo implode('<br>', $meta['sizes']['value']); ?></span></td>
+                                  </svg><span class="item-title">Sizes</span><div class="spacer-h-5"></div></td>
+                              <td><span class="item-details"><?php echo implode('<br>', $meta['sizes']['value']); ?></span><div class="spacer-h-5"></div></td>
                             </tr>
                           </table>
                         </div>
@@ -281,7 +282,7 @@ foreach ($order->get_items() as $key => $item) {
                                 <tr>
                                   <td class="limit-width"><svg class="icon svg-icon-notes">
                                       <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-notes"></use>
-                                      </svg><span class="item-title">Shoot <?php echo $key + 1; ?></span></td>
+                                      </svg><span class="item-title">Shot <?php echo $key + 1; ?></span></td>
                                   <td>
                                   </td>
                                   <td>
@@ -304,7 +305,7 @@ foreach ($order->get_items() as $key => $item) {
                               <span class="item-details">Notes Skipped</span>
                               <?php
                               break;
-                          }
+                            }
                           ?>
                         </div>
                       </td>
@@ -366,7 +367,7 @@ foreach ($order->get_items() as $key => $item) {
               </div>
             </div><!-- summary -->
             <?php
-            if ($actions['print-invoice']): ?>
+            if (isset($actions['print-invoice'])): ?>
 
             <div class="spacer-h-25"></div>
             <div class="text-right"><a href="<?php echo $actions['print-invoice']['url'];?>" download class="invoice-link"><svg class="icon svg-icon-download"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-download"></use> </svg>Invoice </a></div>
@@ -714,7 +715,7 @@ foreach ($order->get_items() as $key => $item) {
                   </table>
 
                     <?php
-                  if ($actions['print-invoice']): ?>
+                  if (isset($actions['print-invoice'])): ?>
 
                   <div class="spacer-h-15"></div>
                   <div class="text-right"><a href="<?php echo $actions['print-invoice']['url'];?>" download class="invoice-link"><svg class="icon svg-icon-download"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-download"></use> </svg>Invoice </a></div>
@@ -730,7 +731,17 @@ foreach ($order->get_items() as $key => $item) {
         <div class="order-subpage" id="status">
       <?php endif ?>
 
-  		 <div class="spacer-h-60"></div>
+      <div class="spacer-h-20"></div>
+
+       <ul class="progress-order progress">
+        <?php foreach ($orders as $key => $_order):
+          $active = $key <= $current_status_order? 'active' : '';
+          ?>
+          <li class="progress__item <?php echo $active ?>">
+            <span class="progress__item-dots"></span> <span class="progress__item-name"><?php echo $_order['name']; ?></span></li>
+        <?php endforeach ?>
+       </ul>
+       <div class="spacer-h-60"></div>
 
   		 <div class="text-center">
 
@@ -752,7 +763,7 @@ foreach ($order->get_items() as $key => $item) {
 
   		 <h2 class="order-title text-center"> <?php echo isset($current_status_meta['title'])? $current_status_meta['title']: wc_get_order_status_name($order->get_status()); ?> </h2>
 
-  		 <div class="spacer-h-30"></div>
+  		 <div class="spacer-h-10"></div>
 
        <?php if (isset( $current_status_meta['descr'] )): ?>
 

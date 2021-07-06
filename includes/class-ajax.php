@@ -42,7 +42,63 @@
 
     add_action('wp_ajax_get_stripe_keys', array($this, 'get_stripe_keys_cb'));
     add_action('wp_ajax_nopriv_get_stripe_keys', array($this, 'get_stripe_keys_cb'));
+
+    add_action('wp_ajax_update_collection_addresses', array($this, 'update_collection_addresses_cb'));
+    add_action('wp_ajax_nopriv_update_collection_addresses', array($this, 'update_collection_addresses_cb'));
+
+    add_action('wp_ajax_update_my_details', array($this, 'update_my_details_cb'));
+    add_action('wp_ajax_nopriv_update_my_details', array($this, 'update_my_details_cb'));
+
+    add_action('wp_ajax_update_my_password', array($this, 'update_my_password_cb'));
+    add_action('wp_ajax_nopriv_update_my_password', array($this, 'update_my_password_cb'));
   }
+
+  public static function update_my_password_cb(){
+    $user_id = get_current_user_id();
+    $userdata  = get_user_by('ID',$user_id);
+
+    $valid = wp_check_password( $_POST['data']['password_current'], $userdata->data->user_pass, $user_id );
+
+    wp_set_password($_POST['data']['password_new'] ,$user_id );
+
+    wp_send_json(array(
+      'old_pass_valid'=> $valid,
+    ));
+  }
+
+
+  public static function update_my_details_cb(){
+
+    $user_id = get_current_user_id();
+
+
+    foreach ($_POST['data'] as $key => $value) {
+      if(!update_user_meta($user_id, $key,  $value )){
+        add_user_meta($user_id, $key,  $value );
+      }
+    }
+    wp_send_json($_POST);
+  }
+
+  public static function update_collection_addresses_cb(){
+
+    $addresses = $_POST['data'];
+
+    $save = array();
+
+    foreach ($addresses as $key => $addr) {
+      $save[] = json_encode($addr);
+    }
+
+    $user_id = get_current_user_id();
+
+    if(!update_user_meta($user_id, '_free_collection_address',  $save )){
+      add_user_meta($user_id, '_free_collection_address',  $save );
+    }
+
+    wp_send_json($save);
+  }
+
 
   public static function get_stripe_keys_cb(){
     $helper = new WC_Gateway_Stripe();

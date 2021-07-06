@@ -17,7 +17,7 @@ class theme_construct_page{
   public static function init(){
 
 
-    add_action( 'woocommerce_account_my-gallery_endpoint', array('theme_content_output','print_gallery') );
+    add_action( 'woocommerce_account_gallery_endpoint', array('theme_content_output','print_gallery') );
 
     if(self::is_page_type( 'new-styles' )){
 
@@ -30,9 +30,13 @@ class theme_construct_page{
         }else{
           add_action('do_theme_header', array('theme_content_output','print_new_header'));
         }
+
+        if(is_account_page() && is_user_logged_in() && !wp_is_mobile()){
+          add_action('do_theme_footer', array('theme_content_output','print_footer_new_dark'));
+        }
       }
 
-      if(is_checkout() && !empty( is_wc_endpoint_url('order-received') )){
+      if(is_checkout() && !empty( is_wc_endpoint_url('order-received') ) ){
         add_action('do_theme_footer', array('theme_content_output','print_footer_new_dark'));
       }
       // add_action('do_theme_footer', array('theme_content_output','print_footer_new'));
@@ -150,7 +154,7 @@ class theme_construct_page{
     $obj = get_queried_object();
     switch ($type){
       case 'new-styles':
-        return (function_exists('is_product') && is_product()) || ($obj->ID == (int)get_option('theme_page_constructor'))  || ( is_checkout() && !empty( is_wc_endpoint_url('order-received') ) || is_checkout() || is_shop() || is_product_category() || (is_account_page() ));
+        return (function_exists('is_product') && is_product()) || (isset($obj->ID) && $obj->ID == (int)get_option('theme_page_constructor'))  || ( is_checkout() && !empty( is_wc_endpoint_url('order-received') ) || is_checkout() || is_shop() || is_product_category() || ( is_account_page() ));
         break;
       case 'constructor':
       return $obj->ID == (int)get_option('theme_page_constructor');

@@ -98,7 +98,7 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
             <div class="clearfix"></div>
             <div class="spacer-h-10"></div>
             <span class="thank-you__order-title"><?php echo $title; ?></span>
-            <span class="thank-you__order-name"><?php echo is_array( $product_name)? $product_name[0] : 'No name'  ?>  <?php if ($product_name  && count($product_name) - 1  > 0): ?> <span class="count">
+            <span class="thank-you__order-name"><?php echo is_array( $product_name)? explode('-',$product_name[0])[0] : 'No name'  ?>  <?php if ($product_name  && count($product_name) - 1  > 0): ?> <span class="count">
             + <?php echo count($product_name) - 1; ?></span>
             <?php endif ?></span>
           </a><!-- thank-you__order-header -->
@@ -118,7 +118,7 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
                 <span class="thank-you__order-value"><?php echo isset( $meta['image_count']['value'] )? $meta['image_count']['value'] : 'na'; ?></span>
               </div>
               <div class="col-4">
-                <span class="thank-you__order-label">Delivery</span>
+                <span class="thank-you__order-label">Turnaround</span>
                 <span class="thank-you__order-value"><?php echo $fasttrack? '3 Days' : '10 Days' ?></span>
               </div>
             </div><!-- row -->

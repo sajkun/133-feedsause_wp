@@ -84,7 +84,7 @@
       <p class="my-cta__text">Top up your gallery with beautiful new photos, fresh from the Feedsauce kitchen</p>
 
       <div class="text-center">
-        <a href="<?php echo get_permalink( woocommerce_get_page_id( 'shop' ) );?>" class="my-cta__button">Explore Recipes</a>
+        <a href="<?php echo get_permalink( wc_get_page_id( 'shop' ) );?>" class="my-cta__button">Explore Recipes</a>
       </div>
     </div>
   </div>

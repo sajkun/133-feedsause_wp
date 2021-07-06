@@ -155,11 +155,11 @@
     <div class="my-menu__dropdown-divider"></div>
     <p class="mobile-my-menu__title">Account</p>
     <div class="spacer-h-10"></div>
-    <a href="#" class="mobile-my-menu__link">
+    <a href="<?php echo $edit;?>" class="mobile-my-menu__link">
       <i class="mobile-my-menu__icon"><svg class="icon svg-icon-human"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-human"></use> </svg></i>
       <span>Edit Profile</span>
     </a>
-    <a href="#" class="mobile-my-menu__link">
+    <a href="#" class="mobile-my-menu__link hidden">
       <i class="mobile-my-menu__icon"><svg class="icon svg-icon-billing"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-billing"></use> </svg></i>
       <span>Billing</span>
     </a>

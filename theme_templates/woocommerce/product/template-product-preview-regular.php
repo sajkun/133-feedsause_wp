@@ -38,12 +38,12 @@ if (get_field('key_words',$product_id)) {
 <div class="shop-product-item" data-keywords="<?php echo $key_words; ?>">
   <div class="shop-product-item__image">
     <div class="shop-product-item__image-1">
-      <?php if ($gallery[1]): ?>
+      <?php if (isset($gallery[1]) && $gallery[1]): ?>
         <img class="lazy-load fix-height" data-src="<?php echo $gallery[1]?>" alt="<?php echo $product->get_title(); ?>">
       <?php endif ?>
     </div>
     <div class="shop-product-item__image-2">
-      <?php if ($gallery[2]): ?>
+      <?php if (isset($gallery[2]) && $gallery[2]): ?>
       <img class="lazy-load fix-height" data-src="<?php echo $gallery[2]?>" alt="<?php echo $product->get_title(); ?>">
       <?php endif ?>
     </div>

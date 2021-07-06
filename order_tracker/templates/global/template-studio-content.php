@@ -290,7 +290,7 @@ echo '<script type="text/x-template" id="studio-single-content">';
                             <div class="details" v-if="notes_label == 'Quick Notes'">
                                <span class="summary__content-text">{{this.order_data.order_items_data.extra_data.comment.value}}</span>
                             </div>
-                            <div class="details" v-if="notes_label == 'Custom Shoot List'">
+                            <div class="details" v-if="notes_label == 'Custom Shot List'">
                               <table>
                                 <tbody  v-for="shoot, key in custom_shoots">
                                   <tr>

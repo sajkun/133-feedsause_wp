@@ -192,7 +192,7 @@ class theme_content_output{
               sprintf('<a href="%s"  class="logo"><img src="%s/images/logo-new.svg" alt=""></a>',get_home_url(), THEME_URL):
               sprintf('<a  href="%s" class="logo"><img src="%s" alt=""></a>',get_home_url(),  esc_url( $custom_logo_url ));
 
-    $logo =  $header_class == 'contrast'  || isset($wp->query_vars['my-gallery'])? sprintf('<a href="%s"  class="logo"><img src="%s/images/logo_contrast.png" alt=""></a>', get_home_url(), THEME_URL): $logo;
+    $logo =  $header_class == 'contrast'  || isset($wp->query_vars['gallery'])? sprintf('<a href="%s"  class="logo"><img src="%s/images/logo_contrast.png" alt=""></a>', get_home_url(), THEME_URL): $logo;
 
     $user_id = get_current_user_id();
 
@@ -210,6 +210,10 @@ class theme_content_output{
     }
 
     $my_account_id = get_option('woocommerce_myaccount_page_id');
+    $url_shoots    = wc_get_account_endpoint_url('orders');
+    $edit          = wc_get_account_endpoint_url('edit-account');
+    $url_gallery   = wc_get_account_endpoint_url('gallery');
+    $logout_url    = wp_logout_url( get_permalink( $my_account_id ) );
 
     if(wp_is_mobile()):
         $login_url =  $my_account_id? get_permalink( $my_account_id) : false;
@@ -219,10 +223,8 @@ class theme_content_output{
         if( is_account_page()){
           global $wp;
 
-          $url_shoots = wc_get_account_endpoint_url('orders');
           $url_shoots_active = is_account_page() && is_wc_endpoint_url('orders') || is_wc_endpoint_url('view-order')? 'active' : '';
-          $url_gallery = wc_get_account_endpoint_url('my-gallery');
-          $url_gallery_active = isset($wp->query_vars['my-gallery']) ? 'active' : '';
+          $url_gallery_active = isset($wp->query_vars['gallery']) ? 'active' : '';
 
           $main_menu = sprintf('<nav class="main-menu centered"><ul class="mobile-menu__list"> <li class="%s"><a href="%s"><svg class=" svg-icon-dots-2"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-dots-2"></use> </svg> Shoots</a></li> <li class="%s"><a href="%s"><svg class=" svg-icon-gallery"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-gallery"></use> </svg> Gallery</a></li> </ul></nav>',
             $url_shoots_active,
@@ -260,7 +262,7 @@ class theme_content_output{
         'hide_menu'   => $hide_menu,
         'main_menu'   => $main_menu,
         'avatar_url'     => $user_id >0 ? get_avatar_url($user_id) : '',
-        'is_account_page' => is_account_page() && is_wc_endpoint_url('orders') ||  is_wc_endpoint_url('view-order') ||  isset($wp->query_vars['my-gallery']) ,
+        'is_account_page' => is_account_page() && is_wc_endpoint_url('orders') ||  is_wc_endpoint_url('view-order') ||  isset($wp->query_vars['gallery']) ,
       );
 
       print_theme_template_part('header-mobile-new', 'globals', $args);
@@ -269,11 +271,8 @@ class theme_content_output{
      if( is_account_page()){
 
       global $wp;
-
-      $url_shoots = wc_get_account_endpoint_url('orders');
       $url_shoots_active = is_account_page() && is_wc_endpoint_url('orders') ||  is_wc_endpoint_url('view-order') ? 'active' : '';
-      $url_gallery = wc_get_account_endpoint_url('my-gallery');
-      $url_gallery_active = isset($wp->query_vars['my-gallery']) ? 'active' : '';
+      $url_gallery_active = isset($wp->query_vars['gallery']) ? 'active' : '';
 
       $main_menu = sprintf('<nav class="main-menu"><ul class="menu"> <li class="%s"><a href="%s"><svg class="icon svg-icon-dots-2"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-dots-2"></use> </svg> Shoots</a></li> <li class="%s"><a href="%s"><svg class="icon svg-icon-gallery"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-gallery"></use> </svg>Gallery</a></li> </ul></nav>',
         $url_shoots_active,
@@ -304,12 +303,12 @@ class theme_content_output{
      }
 
 
-      $header_class = is_checkout() && !empty( is_wc_endpoint_url('order-received') ) ? ' contrast ' : '';
+      $header_class = is_checkout() && !empty( is_wc_endpoint_url('order-received') ) ? ' contrast ' : 'light';
 
       $header_class .=  is_account_page() || is_checkout()?  ' underline ' : '';
 
       $main_menu = is_checkout()? '<nav class="main-menu"><ul class="menu"><li class="menu-item active"><a href="#">Create</a></li></ul></nav>' : $main_menu ;
-      $shop_url = function_exists('woocommerce_get_page_id')? get_permalink( woocommerce_get_page_id( 'shop' ) ) : false;
+      $shop_url = function_exists('wc_get_page_id')? get_permalink( wc_get_page_id( 'shop' ) ) : false;
 
       $args = array(
         'logo'           => $logo,
@@ -317,9 +316,13 @@ class theme_content_output{
         'header_class'   => $header_class,
         'main_menu'      => $main_menu,
         'user_id'        => $user_id,
+        'url_shoots'     => $url_shoots,
+        'edit'           => $edit,
+        'url_gallery'    => $url_gallery,
+        'logout_url'     => $logout_url,
         'user_name'      => $user_name,
         'avatar_url'     => $user_id >0 ? get_avatar_url($user_id) : '',
-        'account_url'      => $my_account_id? wc_get_account_endpoint_url('orders') : false,
+        'account_url'    => $my_account_id? wc_get_account_endpoint_url('orders') : false,
       );
 
       print_theme_template_part('header-desktop-new', 'globals', $args);
@@ -371,7 +374,7 @@ class theme_content_output{
     }
 
     $url_shoots = wc_get_account_endpoint_url('orders');
-    $url_gallery = wc_get_account_endpoint_url('my-gallery');
+    $url_gallery = wc_get_account_endpoint_url('gallery');
 
     $user_id = get_current_user_id();
 
@@ -384,8 +387,8 @@ class theme_content_output{
 
 
 
-    $shop_url = function_exists('woocommerce_get_page_id')? get_permalink( woocommerce_get_page_id( 'shop' ) ) : false;
-
+    $shop_url = function_exists('wc_get_page_id')? get_permalink( wc_get_page_id( 'shop' ) ) : false;
+    $edit          = wc_get_account_endpoint_url('edit-account');
     if(is_product()){
      global $product;
      $product_id = $product->get_id();
@@ -402,6 +405,7 @@ class theme_content_output{
       'custom_logo_url'     => $custom_logo_url,
       'myaccount_page_url'  => $myaccount_page_url,
       'url_shoots'          => $url_shoots,
+      'edit'                => $edit,
       'url_gallery'         => $url_gallery,
       'user_id'             => $user_id,
       'logout_url'          => $logout_url,
@@ -417,7 +421,7 @@ class theme_content_output{
   public static function print_footer_new_dark(){
     $custom_logo_id = get_theme_mod( 'custom_logo' );
     $custom_logo_url = wp_get_attachment_image_url( $custom_logo_id , 'full' );
-    $custom_logo_url = THEME_URL.'/images/logo_contrast.png';
+    $custom_logo_url = (is_account_page() && is_user_logged_in())?  THEME_URL.'/images/logo-new.svg' : THEME_URL.'/images/logo_contrast.png';
 
     $copyrights =  get_option('theme_footer_copyrights');
     $today = new DateTime();
@@ -967,7 +971,7 @@ class theme_content_output{
             <p class="pricing-item-text textcenter"><?php _e('Plus access to','theme-translations'); ?> <b><?php _e('All Premium Recipes','theme-translations'); ?></b></p>
             <div class="spacer-h-10"></div>
 
-              <a href="<?php echo get_permalink( woocommerce_get_page_id( 'shop' ) ); ?>" class="pricing-item__submit free">
+              <a href="<?php echo get_permalink( wc_get_page_id( 'shop' ) ); ?>" class="pricing-item__submit free">
                  <svg class="icon svg-icon-unlock"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-unlock"></use> </svg>
                 <span><?php _e('Start Creating','theme-translations'); ?></span>
               </a>
@@ -3706,7 +3710,7 @@ class theme_content_output{
       ),
       'what_to_expect'     => get_field( 'what_to_expect' ,$product_id),
       'faq'     => get_field( '_faq' ,$product_id),
-      'shop_url' => function_exists('woocommerce_get_page_id')? get_permalink( woocommerce_get_page_id( 'shop' ) ) : false,
+      'shop_url' => function_exists('wc_get_page_id')? get_permalink( wc_get_page_id( 'shop' ) ) : false,
       'customer_reviews'     => get_field( 'customer_reviews' ,$product_id),
     );
 
@@ -3880,6 +3884,7 @@ class theme_content_output{
 
   public static function print_gallery(){
 
+
     global $theme_init;
 
     $user_id = get_current_user_id();
@@ -3897,11 +3902,14 @@ class theme_content_output{
       return !!$images;
     } );
 
+
+
     $shoots = array_map(function($order_item){
       $handle_id       = (int)get_option('wfp_return_product_id');
       $product_fast_id = (int)get_option('wfp_priority_delivery_product_id');
+
       $images          = get_post_meta($order_item->ID , '_wfp_image', true);
-      $order = wc_get_order($order_item->ID);
+      $order           = wc_get_order($order_item->ID);
 
       $items = array();
 
@@ -3956,10 +3964,10 @@ class theme_content_output{
 
       $current_status_meta = get_post_meta($current_status->get_id(), 'custom_order_data', true);
 
-      $current_status_order = isset(  $current_status_meta['order'] ) ? (int)$current_status_meta['order']   :0;
+      // $current_status_order = isset(  $current_status_meta['order'] ) ? (int)$current_status_meta['order']   :0;
 
-      $images =  get_post_meta($order->ID , '_wfp_image', true)?
-              array_filter(get_post_meta($order->ID , '_wfp_image', true),function($el){
+      $images =  get_post_meta($order->get_id() , '_wfp_image', true)?
+              array_filter(get_post_meta($order->get_id() , '_wfp_image', true),function($el){
                 return isset($el['files_uploaded']);
               }) :
               array();
@@ -3976,11 +3984,11 @@ class theme_content_output{
         'date'   => str_replace(' ','T', $order_item->post_date),
         'order_id' => $order->get_id(),
         'status'   => wc_get_order_status_name($order->get_status()),
-        'coupons' => $order->get_used_coupons(),
+        'coupons' => $order->get_coupon_codes(),
         'current_status' =>  isset($current_status_meta['title'])? $current_status_meta['title']: wc_get_order_status_name($order->get_status()),
         'current_status_meta' => get_post_meta($current_status->get_id(), 'custom_order_data', true),
         'current_status_order' => isset(  $current_status_meta['order'] ) ? (int)$current_status_meta['order']   : -1,
-        'item'  =>  $items[0],
+        'item'  => isset($items[0])? $items[0]: '',
         'has_fasttrack'    =>  $has_fasttrack,
         'has_handle'       =>  $has_handle,
         'fasttrack_price'  =>  $fasttrack_price,
@@ -3989,11 +3997,12 @@ class theme_content_output{
         'thumbnails' => get_post_meta($order_item->ID, '_wfp_thumbnails', true),
         'total'    =>html_entity_decode( strip_tags(wc_price($order->get_total()))),
         'discount' =>html_entity_decode( strip_tags( wc_price($order->get_total_discount()))),
-        'photo_limit' => get_post_meta($order->ID , '_wfp_image_limit', true),
+        'photo_limit' => get_post_meta($order->get_id() , '_wfp_image_limit', true),
         'diff' => $diff->format('%d') < 3 && $diff->format('%m') < 1 && $diff->format('%y') < 1 ?  3 - $diff->format('%d') : 0,
         'download_pdf' =>  isset($actions['print-invoice']['url'])? html_entity_decode($actions['print-invoice']['url']) : false,
       );
     },$shoots);
+
 
     $shoots = array_values($shoots);
 
@@ -4032,8 +4041,9 @@ class theme_content_output{
     wp_localize_script($theme_init->main_script_slug, 'DUMMY_S', DUMMY_DARK);
     wp_localize_script($theme_init->main_script_slug, 'currency_symbol', html_entity_decode(get_woocommerce_currency_symbol()));
 
+
+
     if (wp_is_mobile()) {
-      # code...
       print_theme_template_part('gallery-mobile', 'woocommerce', $args);
       print_theme_template_part('order-details-mobile', 'woocommerce', $args);
       print_theme_template_part('order-popup-mobile', 'woocommerce', $args);

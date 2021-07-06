@@ -551,7 +551,7 @@ class theme_filter_class{
      $classes .= " contrast ";
     }
 
-    if(is_checkout()){
+    if(is_checkout() || (is_account_page() && is_user_logged_in())){
      $classes .= " checkout-bg ";
     }
 
@@ -677,7 +677,7 @@ class theme_filter_class{
   */
   public static function woocommerce_account_menu_items($items){
     $items['orders'] = __('My Orders', 'theme-translations');
-    $items['my-gallery'] = __('Gallery', 'theme-translations');
+    $items['gallery'] = __('Gallery', 'theme-translations');
     $items['edit-account'] = __('Edit Profile', 'theme-translations');
     $items['edit-address/billing'] = __('Billing', 'theme-translations');
     return $items;
@@ -1315,5 +1315,5 @@ function set_cart_item_calculated_price( $cart ) {
 
 add_action( 'init', 'gallery_add_endpoint' );
 function gallery_add_endpoint() {
-  add_rewrite_endpoint( 'my-gallery', EP_PAGES );
+  add_rewrite_endpoint( 'gallery', EP_PAGES );
 }

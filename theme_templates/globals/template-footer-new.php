@@ -1,5 +1,5 @@
 <div class="spacer-h-md-80 spacer-h-30"></div>
-<footer class="site-footer">
+<footer class="site-footer <?php if(is_account_page() && is_user_logged_in()): echo 'light'; endif;?> ">
      <div class="container-lg">
        <div class="row">
          <div class="col-lg-10 offset-lg-1">

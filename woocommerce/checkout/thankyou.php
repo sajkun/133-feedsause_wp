@@ -47,7 +47,7 @@ $first_name = get_user_meta(get_current_user_id(), 'first_name', true);
 
       <div class="thank-you__holder text-left">
         <a href="<?php echo (wc_get_account_endpoint_url( 'orders' ))  ?>" class="thank-you__button">Track Shoot</a>
-        <a href="<?php echo get_permalink(woocommerce_get_page_id( 'shop' ))  ?>" class="thank-you__link">  <img src="<?php echo THEME_URL; ?>/images/svg/glasses.svg" alt=""> Get Inspired
+        <a href="<?php echo get_permalink(wc_get_page_id( 'shop' ))  ?>" class="thank-you__link">  <img src="<?php echo THEME_URL; ?>/images/svg/glasses.svg" alt=""> Get Inspired
         </a>
       </div>
       <div class="spacer-h-50"></div>
