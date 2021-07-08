@@ -39,6 +39,7 @@
 
         <div class="spacer-h-20"></div>
       </div>
+
       <div class="col-12 col-md-5 col-lg-5 clearfix padding-right-20">
 
       <transition

@@ -1,4 +1,4 @@
-<header class="site-header
+<header class="site-header desktop-header-style-1
 <?php if (get_queried_object_id() == (int)get_option('theme_page_constructor') && !isset($_GET['no_reload']) && empty( is_wc_endpoint_url('order-received') ) ): ?>
   visuallyhidden
 <?php endif ?>
@@ -7,7 +7,7 @@
 " >
   <div class="container-fluid">
     <div class="row justify-content-between">
-      <div class="col-6 col-md-3 valign-center">
+      <div class="col-6 col-md-4 col-lg-4 valign-center">
           <?php echo $logo ?>
         <?php if (is_checkout()): ?>
           <?php echo $main_menu; ?>
@@ -21,7 +21,7 @@
         <?php endif ?>
       </div>
 
-      <div class="col-6 col-md-3 order-0 order-md-1 valign-center">
+      <div class="col-6 col-md-4 col-lg-4 order-0 order-md-1 valign-center childs-right">
         <?php if (!is_checkout()): ?>
         <div href="#" class="dots-link">
 

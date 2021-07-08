@@ -557,7 +557,9 @@ html {
 }
 
 .dark-mode .site-header {
-  background-color: #212732;
+  background-color: rgba(33, 39, 50, 0.9);
+  -webkit-backdrop-filter: blur(20px);
+          backdrop-filter: blur(20px);
 }
 
 .dark-mode .site-header .svg-icon-safe {

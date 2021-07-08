@@ -32,14 +32,10 @@ $product_name = '';
 $product_count = '';
 do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 <?php if ( $has_orders ) : ?>
-  <div class="container_sm container">
+  <div class="container-lg mobile-no-padding">
   <div class="spacer-h-30 spacer-h-md-50"></div>
     <div class="order-scroll" id="scroll-orders">
-      <?php if (wp_is_mobile()): ?>
-        <div class="row" <?php echo 'style="width: '.(count($customer_orders->orders)*280).'px; margin:0"' ?>>
-      <?php else: ?>
-       	<div class="row">
-      <?php endif ?>
+      <div class="row no-gutters" data-width="<?php echo count($customer_orders->orders)*280; ?>">
   		<?php foreach ( $customer_orders->orders as $customer_order ) :
   			$order      = wc_get_order( $customer_order );
   			$item_count = $order->get_item_count();
@@ -48,7 +44,6 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
         $fasttrack = false;
 
         foreach ($order_items as $key => $item) {
-
           if($item->get_product_id() == (int)get_option('wfp_priority_delivery_product_id') ){
             $fasttrack = true;
           }

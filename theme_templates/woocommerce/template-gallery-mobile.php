@@ -15,7 +15,6 @@
         :class="'fit-size'"
          v-on:change_dates = 'change_dates_cb'
         ></my-date-range>
-
         <a href="<?php echo $shoot_url; ?>" class="my-order__button-add">+</a>
       </div>
     </div><!--   -->

@@ -58,12 +58,15 @@ if (get_field('key_words',$product_id)) {
   <div class="shop-product-item__content">
     <div class="spacer-h-15"></div>
 
-    <?php foreach ($terms as $t): ?>
-      <a href="<?php get_term_link($t);?>" class="product-data__tag">
-        <span class="icon"><img data-src="<?php echo $t->icon ?>" class="lazy-load" alt=""></span>
-        <span class="text"><?php echo $t->name ?></span>
-      </a>
-    <?php endforeach ?>
+
+    <div class="product-data__tag-holder">
+      <?php foreach ($terms as $t): ?>
+        <a href="<?php get_term_link($t);?>" class="product-data__tag">
+          <span class="icon"><img data-src="<?php echo $t->icon ?>" class="lazy-load" alt=""></span>
+          <span class="text"><?php echo $t->name ?></span>
+        </a>
+      <?php endforeach ?>
+    </div>
 
     <div class="spacer-h-15"></div>
 

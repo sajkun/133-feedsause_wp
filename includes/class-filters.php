@@ -540,6 +540,7 @@ class theme_filter_class{
   * @return string
   */
   public static function theme_site_container_styles($data){
+    global $wp;
     $pricing_id  = (int)get_option('theme_page_pricing');
     $classes     = '';
 

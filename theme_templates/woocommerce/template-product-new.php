@@ -62,7 +62,7 @@
     <div class="spacer-h-20 spacer-h-lg-35"></div>
 
     <p class="product-data__description">
-      <?php echo $product->get_short_description();?>
+      <?php echo $product->get_description();?>
     </p>
 
     <div class="spacer-h-20"></div>

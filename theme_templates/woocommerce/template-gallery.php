@@ -13,7 +13,8 @@
          v-on:change_dates = 'change_dates_cb'
         ></my-date-range>
 
-        <a href="<?php echo $shoot_url; ?>" class="my-order__button-add"><span class="plus">+</span> New Shoot</a>
+        <a href="<?php echo $shoot_url; ?>" class="my-order__button-add" v-if="!is_tablet"><span class="plus">+</span> New Shoot</a>
+        <a href="<?php echo $shoot_url; ?>" class="my-order__button-add" v-if="is_tablet">+</a>
       </div>
     </div><!-- row  -->
 
@@ -48,32 +49,24 @@
 
     <div class="spacer-h-20"></div>
 
-    <transition-group
-      class="images-row"
-      name="studio-content"
-      tag="div"
-      v-bind:css="false"
-      v-on:before-enter="beforeEnter"
-      v-on:enter="enter_width"
-      v-on:leave="leave_width"
-      v-on:after-enter="enterAfter_width"
-      v-on:before-leave="beforeLeave_width"
-      v-on:after-leave="leaveAfter_width"
-    >
-      <div class="images-item"
-         v-for="g_thumb, id in gallery_thumbs_filtered"
-         :data-index="id"
-         :key="'g_thumb_'+id"
-         v-on:click = "open_order(g_thumb.order_id)"
-        >
-        <img :src="g_thumb.url" alt="">
-      </div>
 
-      <div class="spacer" key="spacer_1"></div>
-      <div class="spacer" key="spacer_2"></div>
-      <div class="spacer" key="spacer_3"></div>
-      <div class="spacer" key="spacer_4"></div>
-    </transition-group>
+    <div class="images-row">
+      <div class="images-row-scroll" ref="images_scroll">
+        <div class="images-item"
+           v-for="g_thumb, id in gallery_thumbs_filtered"
+           :data-index="id"
+           :key="'g_thumb_'+id"
+           v-on:click = "open_order(g_thumb.order_id)"
+          >
+          <img :src="g_thumb.url" alt="">
+        </div>
+
+        <div class="spacer" key="spacer_1"></div>
+        <div class="spacer" key="spacer_2"></div>
+        <div class="spacer" key="spacer_3"></div>
+        <div class="spacer" key="spacer_4"></div>
+      </div>
+    </div>
 
     <div class="spacer-h-50"></div>
 
@@ -92,7 +85,8 @@
     </div><!-- my-cta -->
   </div><!-- show_list -->
 
-  <div class="spacer-h-50"></div>
+  <div class="spacer-h-lg-50"></div>
+
 
   <my-order-details
     ref="order_details"

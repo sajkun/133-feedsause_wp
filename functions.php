@@ -27,8 +27,8 @@ class velesh_init_theme{
 
   public $main_script_slug = 'theme-main-script-dev11';
 
-  public $dt_ver_css = 24;
-  public $dt_ver_js  = 20;
+  public $dt_ver_css = 2;
+  public $dt_ver_js  = 1;
 
   public $mob_ver_js = 6;
   public $mob_ver_css = 8;
@@ -149,41 +149,40 @@ class velesh_init_theme{
     if(theme_construct_page::is_page_type( 'new-styles' )){
 
       wp_enqueue_style('theme-fancybox', THEME_URL.'/assets/fancybox2/jquery.fancybox.css' );
-
-      wp_enqueue_style('theme-fancybox', THEME_URL.'/assets/fancybox2/jquery.fancybox.css' );
-
       wp_enqueue_script('theme-fancybox', THEME_URL.'/assets/fancybox2/jquery.fancybox.js', array('jquery'), THEME_VERSION, true);
 
       wp_enqueue_style('theme-fancybox-thumbs', THEME_URL.'/assets/fancybox2/helpers/jquery.fancybox-thumbs.css' );
-
       wp_enqueue_script('theme-fancybox-thumbs', THEME_URL.'/assets/fancybox2/helpers/jquery.fancybox-thumbs.js', array('jquery'), THEME_VERSION, true);
 
-      if(wp_is_mobile()){
-        if(is_product() || is_shop() || is_product_category() || is_checkout() || (is_account_page() && !is_user_logged_in()) ){
-          wp_enqueue_style('theme-style-desktop', THEME_URL.'/css/desktop.main'.$this->dt_ver_css.'.min.css' );
-        }  else {
-          // wp_enqueue_style('theme-style-desktop', THEME_URL.'/css/desktop.main'.$this->dt_ver_css.'.min.css' );
-          wp_enqueue_style('theme-style-mobile', THEME_URL.'/css/mobile.main'.$this->mob_ver_css.'.min.css' );
-        }
-      }else{
-        wp_enqueue_style('theme-style-desktop', THEME_URL.'/css/desktop.main'.$this->dt_ver_css.'.min.css' );
-      }
+      wp_enqueue_style('theme-style-desktop', THEME_URL.'/css/new-styles-'.$this->dt_ver_css.'.min.css' );
+
+      // delete later
+      // if(wp_is_mobile()){
+      //   if(is_product() || is_shop() || is_product_category() || is_checkout() || (is_account_page() && !is_user_logged_in()) ){
+      //   }  else {
+      //     // wp_enqueue_style('theme-style-desktop', THEME_URL.'/css/desktop.main'.$this->dt_ver_css.'.min.css' );
+      //     wp_enqueue_style('theme-style-mobile', THEME_URL.'/css/mobile.main'.$this->mob_ver_css.'.min.css' );
+      //   }
+      // }else{
+      //   wp_enqueue_style('theme-style-desktop', THEME_URL.'/css/desktop.main'.$this->dt_ver_css.'.min.css' );
+      // }
 
       wp_enqueue_script('velocity-min', THEME_URL.'/assets/velocity/velocity.min.js', array('jquery'), THEME_VERSION, true);
 
       wp_enqueue_script('masonry-min', THEME_URL.'/assets/masonry/masonry.js', array('jquery'), THEME_VERSION, true);
       wp_enqueue_script('vuejs', THEME_URL.'/assets/vuejs/prod.js', array(), THEME_VERSION, true);
 
-      if(wp_is_mobile()){
-        if(is_product() || is_shop() || is_product_category()  || is_checkout() ){
-          wp_enqueue_script($this->main_script_slug, THEME_URL.'/script/new/desktop.main'.$this->dt_ver_js.'.min.js', array('jquery'), THEME_VERSION, true);
-        }  else {
-          // wp_enqueue_script($this->main_script_slug, THEME_URL.'/script/new/desktop.main'.$this->dt_ver_js.'.min.js', array('jquery'), THEME_VERSION, true);
-          wp_enqueue_script($this->main_script_slug, THEME_URL.'/script/new/mobile.main'.$this->mob_ver_js.'.min.js', array('jquery'), THEME_VERSION, true);
-        }
-      }else{
-        wp_enqueue_script($this->main_script_slug, THEME_URL.'/script/new/desktop.main'.$this->dt_ver_js.'.min.js', array('jquery'), THEME_VERSION, true);
-      }
+      wp_enqueue_script($this->main_script_slug, THEME_URL.'/script/new/new-script-'.$this->dt_ver_js.'.min.js', array('jquery'), THEME_VERSION, true);
+
+      // if(wp_is_mobile()){
+      //   if(is_product() || is_shop() || is_product_category()  || is_checkout() ){
+      //     wp_enqueue_script($this->main_script_slug, THEME_URL.'/script/new/desktop.main'.$this->dt_ver_js.'.min.js', array('jquery'), THEME_VERSION, true);
+      //   }  else {
+      //     // wp_enqueue_script($this->main_script_slug, THEME_URL.'/script/new/desktop.main'.$this->dt_ver_js.'.min.js', array('jquery'), THEME_VERSION, true);
+      //     wp_enqueue_script($this->main_script_slug, THEME_URL.'/script/new/mobile.main'.$this->mob_ver_js.'.min.js', array('jquery'), THEME_VERSION, true);
+      //   }
+      // }else{
+      // }
     }else{
 
       /*********************************/

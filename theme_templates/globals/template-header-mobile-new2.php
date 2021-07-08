@@ -16,13 +16,13 @@
     <a href="#" class="logo">
      <img src="<?php echo $custom_logo_url; ?>" class="logo__img" alt="">
     </a>
-               <?php if($user_id>0): ?>
-                <div class="my-menu__gravatar gravatar"><img src="<?php echo $avatar_url; ?>" alt=""></div>
-               <?php else: ?>
-                <a href="<?php echo $myaccount_page_url; ?>" >
-                  <svg class="icon svg-icon-login"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-login"></use> </svg>
-                </a>
-                <?php endif ?>
+   <?php if($user_id>0): ?>
+    <div class="my-menu__gravatar gravatar"><img src="<?php echo $avatar_url; ?>" alt=""></div>
+   <?php else: ?>
+    <a href="<?php echo $myaccount_page_url; ?>" >
+      <svg class="icon svg-icon-login"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-login"></use> </svg>
+    </a>
+    <?php endif ?>
   </header>
 </div>
 
@@ -118,7 +118,6 @@
   <div class="spacer-h-20"></div>
 
   <?php dynamic_sidebar('dots_menu'); ?>
-
 </nav>
 
 

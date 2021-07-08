@@ -9,6 +9,7 @@
 
 get_header();
 $data = get_queried_object();
+global $wp;
 if(isset($wp->query_vars[ 'gallery'])){
   add_filter('theme_site_container_styles', function(){return 'dark-mode';});
 }

@@ -210,12 +210,13 @@ if (function_exists('wc') && !class_exists('woocommerce_theme_contructor')) {
 
 
       if(is_shop()){
-        $products = wc_get_products(['limit'=> -1]);
+        $products = wc_get_products(['limit'=> -1, 'post__not_in' => array( get_option('wfp_priority_delivery_product_id'),  get_option('wfp_return_product_id') ,  get_option('wfp_single_product_id') )]);
 
         $args = array(
          'products'        => $products,
          'icon'   => '🍯',
          'title'   => 'All products',
+
         );
       }
 
@@ -224,6 +225,7 @@ if (function_exists('wc') && !class_exists('woocommerce_theme_contructor')) {
         $products = wc_get_products([
           'limit'=> -1,
           'category' => $term,
+          'post__not_in' => array( get_option('wfp_priority_delivery_product_id'),  get_option('wfp_return_product_id'),  get_option('wfp_single_product_id') )
         ]);
 
         $term = get_term_by('slug', $term, 'product_cat');

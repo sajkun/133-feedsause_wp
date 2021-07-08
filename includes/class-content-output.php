@@ -182,113 +182,65 @@ class theme_content_output{
     global $wp;
     $page = get_queried_object();
 
-    $header_class = is_checkout() && !empty( is_wc_endpoint_url('order-received') ) ? 'contrast' : '';
-
-    $custom_logo_id = get_theme_mod( 'custom_logo' );
-
-    $custom_logo_url =  wp_get_attachment_image_url( $custom_logo_id , 'full' );
-
-    $logo = (empty(get_theme_mod( 'custom_logo' ))) ?
-              sprintf('<a href="%s"  class="logo"><img src="%s/images/logo-new.svg" alt=""></a>',get_home_url(), THEME_URL):
-              sprintf('<a  href="%s" class="logo"><img src="%s" alt=""></a>',get_home_url(),  esc_url( $custom_logo_url ));
-
-    $logo =  $header_class == 'contrast'  || isset($wp->query_vars['gallery'])? sprintf('<a href="%s"  class="logo"><img src="%s/images/logo_contrast.png" alt=""></a>', get_home_url(), THEME_URL): $logo;
-
+    // get different ids
     $user_id = get_current_user_id();
-
-    if(theme_construct_page::is_page_type('woo-cart')){
-      $main_menu = '';
-    }
-
-    $header_class = '';
-    $user_name  = '';
-
-    if(function_exists('wc_get_account_endpoint_url')){
-      $orders_url = wc_get_account_endpoint_url('orders');
-      $customer   = new WC_Customer($user_id);
-      $user_name  = $customer->get_first_name();
-    }
-
     $my_account_id = get_option('woocommerce_myaccount_page_id');
+
+
+    // get customer name
+    $customer   = new WC_Customer($user_id);
+    $user_name  = $customer->get_first_name();
+
+    //different urls
+    $shop_url = function_exists('wc_get_page_id')? get_permalink( wc_get_page_id( 'shop' ) ) : false;
     $url_shoots    = wc_get_account_endpoint_url('orders');
     $edit          = wc_get_account_endpoint_url('edit-account');
     $url_gallery   = wc_get_account_endpoint_url('gallery');
     $logout_url    = wp_logout_url( get_permalink( $my_account_id ) );
+    $login_url =  $my_account_id? get_permalink( $my_account_id) : false;
+    $orders_url = wc_get_account_endpoint_url('orders');
 
-    if(wp_is_mobile()):
-        $login_url =  $my_account_id? get_permalink( $my_account_id) : false;
-        $login_text =  $user_id == 0 ? "Log In" : 'My Account';
-        $addon = $login_url? sprintf('<li class="menu-item last-item"> <a href="%s">%s</a> </li>', $login_url,  $login_text) : '';
+    // get header class for mobile header
+    $header_class = is_checkout() && !empty( is_wc_endpoint_url('order-received') ) ? 'contrast' : '';
 
-        if( is_account_page()){
-          global $wp;
+    // get custom logo data
+    $custom_logo_id = get_theme_mod( 'custom_logo' );
+    $custom_logo_url =  wp_get_attachment_image_url( $custom_logo_id , 'full' );
+    $logo = (empty(get_theme_mod( 'custom_logo' ))) ?
+              sprintf('<a href="%s"  class="logo"><img src="%s/images/logo-new.svg" alt=""></a>',get_home_url(), THEME_URL):
+              sprintf('<a  href="%s" class="logo"><img src="%s" alt=""></a>',get_home_url(),  esc_url( $custom_logo_url ));
+    $logo =  $header_class == 'contrast'  || isset($wp->query_vars['gallery'])? sprintf('<a href="%s"  class="logo"><img src="%s/images/logo_contrast.png" alt=""></a>', get_home_url(), THEME_URL): $logo;
 
-          $url_shoots_active = is_account_page() && is_wc_endpoint_url('orders') || is_wc_endpoint_url('view-order')? 'active' : '';
-          $url_gallery_active = isset($wp->query_vars['gallery']) ? 'active' : '';
 
-          $main_menu = sprintf('<nav class="main-menu centered"><ul class="mobile-menu__list"> <li class="%s"><a href="%s"><svg class=" svg-icon-dots-2"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-dots-2"></use> </svg> Shoots</a></li> <li class="%s"><a href="%s"><svg class=" svg-icon-gallery"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-gallery"></use> </svg> Gallery</a></li> </ul></nav>',
-            $url_shoots_active,
-            $url_shoots,
-            $url_gallery_active,
-            $url_gallery
-         );
-        }else{
-          $main_menu = wp_nav_menu( array(
-            'theme_location'  => 'main_menu',
-            'menu'            => '',
-            'container'       => '',
-            'container_class' => '',
-            'container_id'    => '',
-            'menu_class'      => 'mobile-menu__list',
-            'menu_id'         => '',
-            'echo'            => false,
-            // 'fallback_cb'     => '',
-            'before'          => '',
-            'after'           => '',
-            'link_before'     => '',
-            'link_after'      => '',
-            'items_wrap'      => '<ul id="%1$s" class="%2$s">%3$s'. $addon .'</ul>',
-            'depth'           => 2,
-            'walker'          => new main_menu_walker(),
-          ) );
-        }
 
-      $header_class = is_checkout() && !empty( is_wc_endpoint_url('order-received') ) ? ' contrast ' : '';
-      $hide_menu = is_checkout() && !empty( is_wc_endpoint_url('order-received') ) ? true : false;
+    $header_class = '';
+    $login_text =  $user_id == 0 ? "Log In" : 'My Account';
 
-      $args = array(
-        'header_class'   => $header_class,
-        'logo'   => $logo,
-        'hide_menu'   => $hide_menu,
-        'main_menu'   => $main_menu,
-        'avatar_url'     => $user_id >0 ? get_avatar_url($user_id) : '',
-        'is_account_page' => is_account_page() && is_wc_endpoint_url('orders') ||  is_wc_endpoint_url('view-order') ||  isset($wp->query_vars['gallery']) ,
-      );
-
-      print_theme_template_part('header-mobile-new', 'globals', $args);
-
-    else:
-     if( is_account_page()){
-
-      global $wp;
-      $url_shoots_active = is_account_page() && is_wc_endpoint_url('orders') ||  is_wc_endpoint_url('view-order') ? 'active' : '';
+    if(theme_construct_page::is_page_type('woo-cart')){
+      $main_menu = '';
+    }
+    // get main menu html code
+    if( is_account_page()){
+      // get active classes for 2 menu items on my account page
+      $url_shoots_active = is_account_page() && is_wc_endpoint_url('orders') || is_wc_endpoint_url('view-order')? 'active' : '';
       $url_gallery_active = isset($wp->query_vars['gallery']) ? 'active' : '';
 
-      $main_menu = sprintf('<nav class="main-menu"><ul class="menu"> <li class="%s"><a href="%s"><svg class="icon svg-icon-dots-2"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-dots-2"></use> </svg> Shoots</a></li> <li class="%s"><a href="%s"><svg class="icon svg-icon-gallery"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-gallery"></use> </svg>Gallery</a></li> </ul></nav>',
-        $url_shoots_active,
-        $url_shoots,
-        $url_gallery_active,
-        $url_gallery
-     );
+      $main_menu = sprintf('<nav class="main-menu centered"><ul class="mobile-menu__list"> <li class="%s"><a href="%s"><svg class=" svg-icon-dots-2"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-dots-2"></use> </svg> Shoots</a></li> <li class="%s"><a href="%s"><svg class=" svg-icon-gallery"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-gallery"></use> </svg> Gallery</a></li> </ul></nav>',
+          $url_shoots_active,
+          $url_shoots,
+          $url_gallery_active,
+          $url_gallery
+       );
+    }else{
 
-     }else{
+        $addon = $login_url? sprintf('<li class="menu-item last-item"> <a href="%s">%s</a> </li>', $login_url,  $login_text) : '';
         $main_menu = wp_nav_menu( array(
           'theme_location'  => 'main_menu',
           'menu'            => '',
-          'container'       => 'nav',
-          'container_class' => 'main-menu',
+          'container'       => '',
+          'container_class' => '',
           'container_id'    => '',
-          'menu_class'      => 'menu',
+          'menu_class'      => 'mobile-menu__list',
           'menu_id'         => '',
           'echo'            => false,
           // 'fallback_cb'     => '',
@@ -296,37 +248,86 @@ class theme_content_output{
           'after'           => '',
           'link_before'     => '',
           'link_after'      => '',
-          'items_wrap'      => '<ul id="%1$s" class="%2$s">%3$s</ul>',
+          'items_wrap'      => '<ul id="%1$s" class="%2$s">%3$s'. $addon .'</ul>',
           'depth'           => 2,
           'walker'          => new main_menu_walker(),
         ) );
-     }
+    }
 
+    // detect if menu should be shown
+    $hide_menu = is_checkout() && !empty( is_wc_endpoint_url('order-received') ) ? true : false;
 
-      $header_class = is_checkout() && !empty( is_wc_endpoint_url('order-received') ) ? ' contrast ' : 'light';
+    $args = array(
+      'header_class'        => $header_class,
+      'username'            => $user_name,
+      'logo'                => $logo,
+      'hide_menu'           => $hide_menu,
+      'url_shoots'          => $url_shoots,
+      'url_gallery'         => $url_gallery,
+      'logout_url'          => $logout_url,
+      'shop_url'            => $shop_url,
+      'main_menu'           => $main_menu,
+      'edit'                => $edit,
+      'avatar_url'     => $user_id >0 ? get_avatar_url($user_id) : '',
+      'is_account_page' => is_account_page() && is_wc_endpoint_url('orders') ||  is_wc_endpoint_url('view-order') ||  isset($wp->query_vars['gallery']) ,
+    );
 
-      $header_class .=  is_account_page() || is_checkout()?  ' underline ' : '';
+    print_theme_template_part('header-mobile-style-1', 'globals', $args);
 
-      $main_menu = is_checkout()? '<nav class="main-menu"><ul class="menu"><li class="menu-item active"><a href="#">Create</a></li></ul></nav>' : $main_menu ;
-      $shop_url = function_exists('wc_get_page_id')? get_permalink( wc_get_page_id( 'shop' ) ) : false;
+    /**
+    * DESKTOP HEADER
+    */
 
-      $args = array(
-        'logo'           => $logo,
-        'shop_url'       => $shop_url,
-        'header_class'   => $header_class,
-        'main_menu'      => $main_menu,
-        'user_id'        => $user_id,
-        'url_shoots'     => $url_shoots,
-        'edit'           => $edit,
-        'url_gallery'    => $url_gallery,
-        'logout_url'     => $logout_url,
-        'user_name'      => $user_name,
-        'avatar_url'     => $user_id >0 ? get_avatar_url($user_id) : '',
-        'account_url'    => $my_account_id? wc_get_account_endpoint_url('orders') : false,
+    if( is_account_page()){
+
+      $main_menu = sprintf('<nav class="main-menu"><ul class="menu"> <li class="%s"><a href="%s"><svg class="icon svg-icon-dots-2"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-dots-2"></use> </svg> Shoots</a></li> <li class="%s"><a href="%s"><svg class="icon svg-icon-gallery"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-gallery"></use> </svg>Gallery</a></li> </ul></nav>',
+        $url_shoots_active,
+        $url_shoots,
+        $url_gallery_active,
+        $url_gallery
       );
 
-      print_theme_template_part('header-desktop-new', 'globals', $args);
-    endif;
+    }else{
+      $main_menu = wp_nav_menu( array(
+        'theme_location'  => 'main_menu',
+        'menu'            => '',
+        'container'       => 'nav',
+        'container_class' => 'main-menu',
+        'container_id'    => '',
+        'menu_class'      => 'menu',
+        'menu_id'         => '',
+        'echo'            => false,
+        // 'fallback_cb'     => '',
+        'before'          => '',
+        'after'           => '',
+        'link_before'     => '',
+        'link_after'      => '',
+        'items_wrap'      => '<ul id="%1$s" class="%2$s">%3$s</ul>',
+        'depth'           => 2,
+        'walker'          => new main_menu_walker(),
+      ));
+    }
+
+    $header_class = ( is_checkout() && !empty( is_wc_endpoint_url('order-received')) ) || isset($wp->query_vars['gallery']) ? ' contrast ' : 'light';
+    $header_class .=  is_account_page() || is_checkout()?  ' underline ' : '';
+    $main_menu = is_checkout()? '<nav class="main-menu"><ul class="menu"><li class="menu-item active"><a href="#">Create</a></li></ul></nav>' : $main_menu ;
+    $shop_url = function_exists('wc_get_page_id')? get_permalink( wc_get_page_id( 'shop' ) ) : false;
+    $args = array(
+      'logo'           => $logo,
+      'shop_url'       => $shop_url,
+      'header_class'   => $header_class,
+      'main_menu'      => $main_menu,
+      'user_id'        => $user_id,
+      'url_shoots'     => $url_shoots,
+      'edit'           => $edit,
+      'url_gallery'    => $url_gallery,
+      'logout_url'     => $logout_url,
+      'user_name'      => $user_name,
+      'avatar_url'     => $user_id >0 ? get_avatar_url($user_id) : '',
+      'account_url'    => $my_account_id? wc_get_account_endpoint_url('orders') : false,
+    );
+
+    print_theme_template_part('header-desktop-style-1', 'globals', $args);
   }
 
   public static function print_new_header_dark(){
@@ -402,12 +403,12 @@ class theme_content_output{
 
     $args = array(
       'username'            => $username,
+      'edit'                => $edit,
+      'user_id'             => $user_id,
       'custom_logo_url'     => $custom_logo_url,
       'myaccount_page_url'  => $myaccount_page_url,
       'url_shoots'          => $url_shoots,
-      'edit'                => $edit,
       'url_gallery'         => $url_gallery,
-      'user_id'             => $user_id,
       'logout_url'          => $logout_url,
       'right_menu'          => $right_menu,
       'avatar_url'          => $user_id > 0 ? get_avatar_url($user_id) : '',
@@ -419,9 +420,10 @@ class theme_content_output{
   }
 
   public static function print_footer_new_dark(){
+    global $wp;
     $custom_logo_id = get_theme_mod( 'custom_logo' );
     $custom_logo_url = wp_get_attachment_image_url( $custom_logo_id , 'full' );
-    $custom_logo_url = (is_account_page() && is_user_logged_in())?  THEME_URL.'/images/logo-new.svg' : THEME_URL.'/images/logo_contrast.png';
+    $custom_logo_url = (is_account_page() && is_user_logged_in() && !isset($wp->query_vars[ 'gallery']))?  THEME_URL.'/images/logo-new.svg' : THEME_URL.'/images/logo_contrast.png';
 
     $copyrights =  get_option('theme_footer_copyrights');
     $today = new DateTime();
@@ -430,7 +432,7 @@ class theme_content_output{
 
 
     $args = array(
-      'custom_logo_url'      => $custom_logo_url,
+      'custom_logo_url' => $custom_logo_url,
       'copyrights'      => $copyrights,
     );
     print_theme_template_part('footer-new', 'globals', $args);
@@ -2254,11 +2256,8 @@ class theme_content_output{
                 <svg class="icon svg-icon-arrows"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-arrows"></use> </svg>
               </div>
 
-              <?php if (!wp_is_mobile()): ?>
-              <a href="<?php echo esc_url(get_permalink(wc_get_page_id( 'shop' ) )); ?>" class="my-order__button-add">+ New Shoot</a>
-              <?php else: ?>
-              <a href="<?php echo esc_url(get_permalink(wc_get_page_id( 'shop' ) )); ?>" class="my-order__button-add">+</a>
-              <?php endif ?>
+              <a href="<?php echo esc_url(get_permalink(wc_get_page_id( 'shop' ) )); ?>" class="my-order__button-add mobile-hidden-inline">+ New Shoot</a>
+              <a href="<?php echo esc_url(get_permalink(wc_get_page_id( 'shop' ) )); ?>" class="my-order__button-add mobile-show-inline">+</a>
             </div>
             <div class="spacer-h-10"></div>
           </div>
@@ -4038,19 +4037,20 @@ class theme_content_output{
     wp_localize_script($theme_init->main_script_slug, 'order_statuses', $orders);
     wp_localize_script($theme_init->main_script_slug, 'theme_prices', $theme_prices);
     wp_localize_script($theme_init->main_script_slug, 'my_shoots', $shoots);
-    wp_localize_script($theme_init->main_script_slug, 'DUMMY_S', DUMMY_DARK);
-    wp_localize_script($theme_init->main_script_slug, 'currency_symbol', html_entity_decode(get_woocommerce_currency_symbol()));
+
+    wp_add_inline_script($theme_init->main_script_slug, 'var DUMMY_S ="'. DUMMY_DARK .'"', 'before');
+    wp_add_inline_script($theme_init->main_script_slug, 'var currency_symbol ="'. html_entity_decode(get_woocommerce_currency_symbol()) .'"', 'before');
 
 
 
-    if (wp_is_mobile()) {
-      print_theme_template_part('gallery-mobile', 'woocommerce', $args);
-      print_theme_template_part('order-details-mobile', 'woocommerce', $args);
-      print_theme_template_part('order-popup-mobile', 'woocommerce', $args);
-    }else{
-      print_theme_template_part('gallery', 'woocommerce', $args);
-      print_theme_template_part('order-details', 'woocommerce', $args);
-      print_theme_template_part('order-popup', 'woocommerce', $args);
-    }
+    // if (wp_is_mobile()) {
+    //   print_theme_template_part('gallery-mobile', 'woocommerce', $args);
+    //   print_theme_template_part('order-details-mobile', 'woocommerce', $args);
+    //   print_theme_template_part('order-popup-mobile', 'woocommerce', $args);
+    // }else{
+    // }
+    print_theme_template_part('gallery', 'woocommerce', $args);
+    print_theme_template_part('order-details', 'woocommerce', $args);
+    print_theme_template_part('order-popup', 'woocommerce', $args);
   }
 }
