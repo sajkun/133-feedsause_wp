@@ -216,7 +216,6 @@ if (function_exists('wc') && !class_exists('woocommerce_theme_contructor')) {
          'products'        => $products,
          'icon'   => '🍯',
          'title'   => 'All products',
-
         );
       }
 

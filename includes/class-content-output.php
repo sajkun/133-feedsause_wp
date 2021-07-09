@@ -206,11 +206,12 @@ class theme_content_output{
     // get custom logo data
     $custom_logo_id = get_theme_mod( 'custom_logo' );
     $custom_logo_url =  wp_get_attachment_image_url( $custom_logo_id , 'full' );
+
     $logo = (empty(get_theme_mod( 'custom_logo' ))) ?
               sprintf('<a href="%s"  class="logo"><img src="%s/images/logo-new.svg" alt=""></a>',get_home_url(), THEME_URL):
               sprintf('<a  href="%s" class="logo"><img src="%s" alt=""></a>',get_home_url(),  esc_url( $custom_logo_url ));
-    $logo =  $header_class == 'contrast'  || isset($wp->query_vars['gallery'])? sprintf('<a href="%s"  class="logo"><img src="%s/images/logo_contrast.png" alt=""></a>', get_home_url(), THEME_URL): $logo;
 
+    $logo =  $header_class == 'contrast'  || isset($wp->query_vars['gallery'])? sprintf('<a href="%s"  class="logo"><img src="%s/images/logo-new.svg" alt=""></a>', get_home_url(), THEME_URL): $logo;
 
 
     $header_class = '';
@@ -359,7 +360,7 @@ class theme_content_output{
 
     $custom_logo_id = get_theme_mod( 'custom_logo' );
     $custom_logo_url = wp_get_attachment_image_url( $custom_logo_id , 'full' );
-    $custom_logo_url = THEME_URL.'/images/logo_contrast.png';
+    $custom_logo_url = THEME_URL.'/images/logo-new-white.svg';
     global $wp_registered_sidebars, $wp_registered_widgets;
 
     $sidebars_widgets = wp_get_sidebars_widgets();
@@ -423,7 +424,7 @@ class theme_content_output{
     global $wp;
     $custom_logo_id = get_theme_mod( 'custom_logo' );
     $custom_logo_url = wp_get_attachment_image_url( $custom_logo_id , 'full' );
-    $custom_logo_url = (is_account_page() && is_user_logged_in() && !isset($wp->query_vars[ 'gallery']))?  THEME_URL.'/images/logo-new.svg' : THEME_URL.'/images/logo_contrast.png';
+    $custom_logo_url = (is_account_page() && is_user_logged_in() && !isset($wp->query_vars[ 'gallery']))?  THEME_URL.'/images/logo-new.svg' : THEME_URL.'/images/logo-new-white.svg';
 
     $copyrights =  get_option('theme_footer_copyrights');
     $today = new DateTime();
@@ -3634,6 +3635,7 @@ class theme_content_output{
     }
 
     global $product;
+    global $theme_init;
 
     /*get category*/
 
@@ -3695,8 +3697,16 @@ class theme_content_output{
     $bottom_image_regular   = wp_get_attachment_image_url($bottom_image_id, 'image_1920');
     $bottom_image_retina   = wp_get_attachment_image_url($bottom_image_id, 'full');
 
+    // get and pass to javascript currency rates USD to GBP and EUR to GBP
+    $currency_settings = get_option('theme_currency_settings');
+    wp_localize_script($theme_init->main_script_slug, 'currency_settings', $currency_settings);
+
+    $theme_settings = get_option('theme_settings');
+    wp_localize_script($theme_init->main_script_slug, 'theme_settings', $theme_settings);
+
     $args = array(
       'constructor_url'   => $constructor_url,
+      'theme_settings'   => $theme_settings,
       'gallery'   => $gallery,
       'product'   => $product,
       'term_tree' => $term_tree ,
@@ -3731,7 +3741,11 @@ class theme_content_output{
     $myaccount_page_url = get_permalink( $myaccount_page );
     $constructor_url = is_user_logged_in() ? $constructor_url.'?product_id='.$product_id.'?add_to_cart='.$product_id : $myaccount_page_url.'?product_id='.$product_id ;
 
+    $theme_settings = get_option('theme_settings');
+    wp_localize_script($theme_init->main_script_slug, 'theme_settings', $theme_settings);
+
     $args = array(
+      'theme_settings'    => $theme_settings,
       'constructor_url'   => $constructor_url,
       'faq'     => get_field( '_faq' ,$product_id),
     );

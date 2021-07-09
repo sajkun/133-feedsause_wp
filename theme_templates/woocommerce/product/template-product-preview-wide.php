@@ -27,7 +27,7 @@ foreach ($gallery_ids as $id) {
 
     <div class="spacer-h-40"></div>
 
-    <h3 class="shop-product-item__title lg"><?php echo $product->get_title(); ?></h3>
+    <h3 class="shop-product-item__title lg"> <a href="<?php echo get_permalink($product->get_id());?>"><?php echo $product->get_title(); ?></a></h3>
     <?php if ($description_short): ?>
       <p class="shop-product-item__text lg"><?php echo $description_short; ?></p>
     <?php endif ?>

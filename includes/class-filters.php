@@ -541,10 +541,11 @@ class theme_filter_class{
   */
   public static function theme_site_container_styles($data){
     global $wp;
+    $data = get_queried_object();
     $pricing_id  = (int)get_option('theme_page_pricing');
     $classes     = '';
 
-    if($pricing_id == $data->ID){
+    if(isset($data->ID) &&  $pricing_id == $data->ID){
       $classes .= ' lines';
     }
 
@@ -665,6 +666,7 @@ class theme_filter_class{
 
 
   public static function woocommerce_login_redirect( $redirect, $user){
+
     return $redirect;
   }
 
@@ -1317,4 +1319,48 @@ function set_cart_item_calculated_price( $cart ) {
 add_action( 'init', 'gallery_add_endpoint' );
 function gallery_add_endpoint() {
   add_rewrite_endpoint( 'gallery', EP_PAGES );
+}
+
+
+add_filter('wp_redirect', 'run_theme_wp_login');
+
+function run_theme_wp_login($redirect){
+
+  if(strpos($redirect, 'product_id') > 0){
+    $parts = explode('/', $redirect);
+
+    $product_str = '';
+
+    foreach ($parts as  $value) {
+      if(strpos($value, 'product_id') > 0){
+        $product_str = $value;
+      }
+    }
+
+    $parts = explode('&', $product_str);
+
+    foreach ($parts as  $value) {
+      if(strpos($value, 'product_id') > 0){
+        $product_str = $value;
+      }
+    }
+
+    $product_id = explode('=', $product_str);
+    $product_id = $product_id[1];
+
+    print_theme_log($product_id);
+    $product = wc_get_product( $product_id );
+
+    if($product->get_type() == 'variable'){
+      $variations = $product->get_available_variations();
+      $variation_id = $variations[0]['variation_id'];
+    }else{
+      $variation_id = 0;
+    }
+
+    wc()->cart->add_to_cart((int)$product_id , 1, $variation_id);
+
+  }
+
+  return $redirect;
 }

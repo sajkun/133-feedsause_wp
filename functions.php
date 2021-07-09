@@ -218,12 +218,14 @@ class velesh_init_theme{
    */
   public function print_theme_inline_styles(){
 
+
     if(theme_construct_page::is_page_type( 'new-styles' )){
       $inline_styles_4_script = array(
         'theme_style_owl'   => THEME_URL.'/assets/owlcarousel/css/owl.carousel.min.css',
         'theme_font_style_4'  => THEME_URL.$this->font,
       );
     }else{
+      clog('test');
       $inline_styles_4_script = array(
         $this->main_style_slug  => THEME_URL.$this->main_style,
         'theme_style_fancy' => THEME_URL.'/assets/fancybox/dist/jquery.fancybox.min.css',
@@ -333,7 +335,7 @@ class velesh_init_theme{
 
     add_action('wp_enqueue_scripts', array($this,'inline_custom_data'), 9990);
 
-    add_action('wp_head', array($this,'print_theme_inline_styles'), 9999);
+    add_action('do_theme_after_head', array($this,'print_theme_inline_styles'), 9999);
 
 
     add_filter( 'script_loader_tag', array($this,'add_async_attribute'), 10, 2 );

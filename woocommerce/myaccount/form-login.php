@@ -164,7 +164,7 @@ if(!$menu){
                 <?php if ( get_option( 'woocommerce_enable_myaccount_registration' ) === 'yes' ): ?>
                 <div class="spacer-h-20"></div>
                 <p class="login-label text-center text-left-lg">
-                   <?php _e('New to Feedsauce','theme-translations');?>?  <a href="?create_account=do" class="auth-link"> <?php _e('Create a free account','theme-translations');?></a>.
+                   <?php _e('New to Feedsauce','theme-translations');?>?  <a href="?create_account=do<?php echo isset($_GET['product_id'])? '&product_id='.$_GET['product_id']: '' ?>" class="auth-link"> <?php _e('Create a free account','theme-translations');?></a>.
                 </p>
                 <?php endif; ?>
 
@@ -314,8 +314,12 @@ if(!$menu){
                   <div class="spacer-h-20"></div>
                   <div class="spacer-h-4"></div>
                   <p class="login-label text-center text-left-lg">
-                     Already have an account? <a href="<?php echo esc_url(get_permalink( $my_account_id ))?>" class="link-blue"> Sign In</a>.
+                     Already have an account? <a href="<?php echo esc_url(get_permalink( $my_account_id ))?><?php echo isset($_GET['product_id'])? '?product_id='.$_GET['product_id']. '&add-to-cart='.$_GET['product_id']: '' ?>" class="link-blue"> Sign In</a>.
                   </p>
+
+                  <?php if (isset($_GET['product_id'])): ?>
+                    <input type="hidden" name="product_id" value="<?php echo $_GET['product_id']; ?>">
+                  <?php endif ?>
                   <?php do_action( 'woocommerce_register_form_end' ); ?>
 
                   <script>

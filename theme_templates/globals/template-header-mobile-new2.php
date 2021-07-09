@@ -45,7 +45,7 @@
           <div class="main-menu-new__expand-inner">
             <div class="spacer-h-20"></div>
             <div class="clearfix">
-              <h2 class="main-menu-new__expand-moto"><span>Find your style.<img src="<?php echo THEME_URL?>/images/zig.png" alt=""> </span> </h2>
+              <h2 class="main-menu-new__expand-moto"><span>Find your style.<img src="<?php echo THEME_URL?>/images/svg/zig2.svg" alt=""> </span> </h2>
               <p class="main-menu-new__expand-text">Browse 200+ photo inspirations and start building your perfect product shoot today.</p>
               <div class="spacer-h-20"></div>
             </div><!-- clearfix -->
@@ -61,7 +61,7 @@
           <div class="main-menu-new__expand-inner">
             <div class="spacer-h-20"></div>
             <div class="clearfix">
-              <h2 class="main-menu-new__expand-moto"><span>Find your style.<img src="<?php echo THEME_URL?>/images/zig.png" alt=""> </span> </h2>
+              <h2 class="main-menu-new__expand-moto"><span>Find your style.<img src="<?php echo THEME_URL?>/images/svg/zig2.svg" alt=""> </span> </h2>
               <p class="main-menu-new__expand-text">Browse 200+ photo inspirations and start building your perfect product shoot today.</p>
 
               <div class="spacer-h-20"></div>
@@ -79,7 +79,7 @@
           <div class="main-menu-new__expand-inner">
             <div class="spacer-h-20"></div>
             <div class="clearfix">
-              <h2 class="main-menu-new__expand-moto"><span>Find your style.<img src="<?php echo THEME_URL?>/images/zig.png" alt=""> </span> </h2>
+              <h2 class="main-menu-new__expand-moto"><span>Find your style.<img src="<?php echo THEME_URL?>/images/svg/zig2.svg" alt=""> </span> </h2>
               <p class="main-menu-new__expand-text">Browse 200+ photo inspirations and start building your perfect product shoot today.</p>
 
               <div class="spacer-h-20"></div>

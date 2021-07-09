@@ -42,7 +42,7 @@
 </div><!-- container-md  -->
 
 <div class="container-md">
-<div class="spacer-h-5"></div>
+<div class="spacer-h-25"></div>
 
 <div class="product-data">
   <div class="product-data__information">
@@ -116,14 +116,14 @@
       <div class="to-right">
         <div class="currency-switcher sm">
           <div class="currency-switcher__value">
-            <img src="<?php echo THEME_URL;?>/images/svg/us.svg" alt="">
-            USD
+            <img src="<?php echo THEME_URL;?>/images/svg/gb.svg" alt="">
+            GBP
           </div>
 
           <div class="currency-switcher__dropdown">
             <ul>
-              <li data-currency="gpb"> <img src="<?php echo THEME_URL;?>/images/svg/gb.svg" alt=""> GPB</li>
-              <li data-currency="usd" class="active"> <img src="<?php echo THEME_URL;?>/images/svg/us.svg" alt="usd"> USD</li>
+              <li data-currency="gbp"  class="active"> <img src="<?php echo THEME_URL;?>/images/svg/gb.svg" alt=""> GBP</li>
+              <li data-currency="usd"> <img src="<?php echo THEME_URL;?>/images/svg/us.svg" alt="usd"> USD</li>
               <li data-currency="eur"> <img src="<?php echo THEME_URL;?>/images/svg/eu.svg" alt=""> EUR</li>
             </ul>
           </div>
@@ -138,7 +138,7 @@
       <div class="product-data__adv-cont">
         <div class="text-center">
           <span class="price-info__value" id="price-value">
-            $49
+           £<?php echo $theme_settings['single_product_price'] ?>
           </span>
           <span class="price-info__comment">
             /photo
@@ -201,7 +201,7 @@
           <svg class="icon svg-icon-chat"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-chat"></use> </svg>
           <i class="status"></i>
         </i>
-        Got a Question? Live chat with an expert</a>
+        <span>Got a Question? Live chat with an expert</span></a>
       </div>
 
       <div class="spacer-h-30"></div>
@@ -254,7 +254,7 @@
 
       <p class="product-more-information__text"><span><?php echo get_field('video_text', $product_id); ?></span></p>
 
-       <div class="spacer-h-35"></div>
+       <div class="spacer-h-10"></div>
 
       <a href="<?php echo get_field('video_url', $product_id); ?>" onclick='play_video("<?php echo get_field('video_url', $product_id); ?>", event)' class="product-more-information__button js-show-video">
         <svg class="icon svg-icon-play"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-play"></use> </svg>
@@ -409,3 +409,69 @@
 </a>
 </div>
 <?php endif ?>
+
+
+<div class="product-image-popup">
+  <div class="container-lg">
+    <div class="spacer-h-85 spacer-h-xl2-45 "></div>
+
+    <div class="row mobile-hidden-flex">
+      <div class="col-6">
+        <div class="product-image-popup__back">
+          <svg class="icon svg-icon-bracket"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-bracket"></use> </svg>
+        </div>
+      </div>
+      <div class="col-6 text-right">
+        <a href="<?php echo $constructor_url; ?>" class="product-image-popup__build">
+          Build Shoot <svg class="icon svg-icon-bracket"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-bracket"></use> </svg>
+        </a>
+      </div>
+    </div>
+
+    <span class="product-image-popup__mobile-close">
+      <svg class="icon svg-icon-close"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-close"></use> </svg>
+      Close
+    </span>
+
+    <div class="spacer-h-40 mobile-hidden"></div>
+
+
+    <?php
+     $length = ceil(count($gallery)/7);
+     // clog($length);
+     // clog(count($gallery));
+     for ($i = 0; $i <$length ; $i++) { ?>
+
+    <div class="product-image-popup__holder">
+      <?php if (isset($gallery[$i*7])): ?>
+      <div class="product-image-popup__item item-1"><img class="lazy-load-2" data-src="<?php echo $gallery[($i*7)]?>" alt=""></div>
+      <?php endif ?>
+      <?php if (isset($gallery[($i*7)+1])): ?>
+      <div class="product-image-popup__item item-2"><img class="lazy-load-2" data-src="<?php echo $gallery[($i*7)+1]?>" alt=""></div>
+      <?php endif ?>
+      <?php if (isset($gallery[($i*7)+2])): ?>
+      <div class="product-image-popup__item item-3"><img class="lazy-load-2" data-src="<?php echo $gallery[($i*7)+2]?>" alt=""></div>
+      <?php endif ?>
+      <?php if (isset($gallery[($i*7)+3])): ?>
+      <div class="product-image-popup__item item-4"><img class="lazy-load-2" data-src="<?php echo $gallery[($i*7)+3]?>" alt=""></div>
+      <?php endif ?>
+
+      <?php if ( isset($gallery[($i*7)+4]) && isset($gallery[($i*7)+5]) ): ?>
+      <div class="product-image-popup__sub-holder">
+        <?php if (isset($gallery[($i*7)+4])): ?>
+          <div class="product-image-popup__item item-5"><img class="lazy-load-2" data-src="<?php echo $gallery[($i*7)+4]?>" alt=""></div>
+        <?php endif ?>
+        <?php if (isset($gallery[($i*7)+5])): ?>
+        <div class="product-image-popup__item item-5"><img class="lazy-load-2" data-src="<?php echo $gallery[($i*7)+5]?>" alt=""></div>
+        <?php endif ?>
+      </div>
+      <?php endif ?>
+
+      <?php if (isset($gallery[($i*7)+6])): ?>
+      <div class="product-image-popup__item item-6"><img class="lazy-load-2" data-src="<?php echo $gallery[($i*7)+6]?>" alt=""></div>
+        <?php endif ?>
+    </div><!-- product-image-popup__holder -->
+  <?php } ?>
+    <div class="spacer-h-100"></div>
+  </div><!-- container -->
+</div><!-- product-image-popup -->

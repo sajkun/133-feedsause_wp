@@ -36,14 +36,14 @@
         <div class="to-right">
           <div class="currency-switcher sm">
             <div class="currency-switcher__value">
-              <img src="<?php echo THEME_URL;?>/images/svg/us.svg" alt="">
-              USD
+              <img src="<?php echo THEME_URL;?>/images/svg/gb.svg" alt="">
+              GBP
             </div>
 
             <div class="currency-switcher__dropdown">
               <ul>
-                <li data-currency="gpb"> <img src="<?php echo THEME_URL;?>/images/svg/gb.svg" alt=""> GPB</li>
-                <li data-currency="usd" class="active"> <img src="<?php echo THEME_URL;?>/images/svg/us.svg" alt="usd"> USD</li>
+                <li data-currency="gbp" class="active"> <img src="<?php echo THEME_URL;?>/images/svg/gb.svg" alt=""> GBP</li>
+                <li data-currency="usd"> <img src="<?php echo THEME_URL;?>/images/svg/us.svg" alt="usd"> USD</li>
                 <li data-currency="eur"> <img src="<?php echo THEME_URL;?>/images/svg/eu.svg" alt=""> EUR</li>
               </ul>
             </div>
@@ -58,7 +58,7 @@
         <div class="product-data__adv-cont">
           <div class="text-center">
             <span class="price-info__value" id="price-value3">
-              $49
+              £<?php echo $theme_settings['single_product_price'] ?>
             </span>
             <span class="price-info__comment">
               /photo

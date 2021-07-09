@@ -18,7 +18,7 @@
           <nav class="main-menu-new">
             <ul class="menu">
               <?php if (is_active_sidebar('main_menu_create2')): ?>
-              <li class="menu-item new dropdwon"><a href="#">Create</a><span class="new">New</span>
+              <li class="menu-item new dropdwon"><a href="#">Create <span class="new">New</span></a>
                 <div class="main-menu-new__dropdown">
                   <div class="main-menu-new__dropdown-inner">
                     <div class="container">
@@ -27,13 +27,13 @@
                           <div class="clearfix">
                             <p class="main-menu-new__dropdown-category">
                               <svg class="icon svg-icon-flash"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-flash"></use> </svg>
-                              photo ready in <span class="marked">72 hours</span>
+                              photo ready in <span class="marked">24 hours</span>
                             </p>
-                            <h2 class="main-menu-new__dropdown-moto">Find your style. <img src="<?php echo THEME_URL?>/images/zig.png" alt=""> </h2>
+                            <h2 class="main-menu-new__dropdown-moto">Find your style. <img src="<?php echo THEME_URL?>/images/svg/zig2.svg" alt=""> </h2>
                             <p class="main-menu-new__dropdown-text">Browse 200+ photo inspirations and start building your perfect product shoot today.</p>
 
                             <?php if ($shop_url): ?>
-                            <a href="<?php echo $shop_url; ?>" class="main-menu-new__dropdown-create">+ &nbsp;&nbsp;&nbsp;Create</a>
+                            <a href="<?php echo $shop_url; ?>" class="main-menu-new__dropdown-create"><span>+</span>&nbsp;Create</a>
                             <?php endif ?>
                           </div><!-- clearfix -->
                         </div><!-- col-md-3 -->
@@ -60,13 +60,13 @@
                           <div class="clearfix">
                             <p class="main-menu-new__dropdown-category">
                               <svg class="icon svg-icon-flash"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-flash"></use> </svg>
-                              photo ready in <span class="marked">72 hours</span>
+                              photo ready in <span class="marked">24 hours</span>
                             </p>
-                            <h2 class="main-menu-new__dropdown-moto">Find your style. <img src="<?php echo THEME_URL?>/images/zig.png" alt=""> </h2>
+                            <h2 class="main-menu-new__dropdown-moto">Find your style. <img src="<?php echo THEME_URL?>/images/svg/zig2.svg" alt=""> </h2>
                             <p class="main-menu-new__dropdown-text">Browse 200+ photo inspirations and start building your perfect product shoot today.</p>
 
                             <?php if ($shop_url): ?>
-                            <a href="<?php echo $shop_url; ?>" class="main-menu-new__dropdown-create">+ &nbsp;&nbsp;&nbsp;Create</a>
+                            <a href="<?php echo $shop_url; ?>" class="main-menu-new__dropdown-create"><span>+</span>&nbsp;Create</a>
                             <?php endif ?>
                           </div><!-- clearfix -->
                         </div><!-- col-md-3 -->
@@ -93,13 +93,13 @@
                           <div class="clearfix">
                             <p class="main-menu-new__dropdown-category">
                               <svg class="icon svg-icon-flash"> <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#svg-icon-flash"></use> </svg>
-                              photo ready in <span class="marked">72 hours</span>
+                              photo ready in <span class="marked">24 hours</span>
                             </p>
-                            <h2 class="main-menu-new__dropdown-moto">Find your style. <img src="<?php echo THEME_URL?>/images/zig.png" alt=""> </h2>
+                            <h2 class="main-menu-new__dropdown-moto">Find your style. <img src="<?php echo THEME_URL?>/images/svg/zig2.svg" alt=""> </h2>
                             <p class="main-menu-new__dropdown-text">Browse 200+ photo inspirations and start building your perfect product shoot today.</p>
 
                             <?php if ($shop_url): ?>
-                            <a href="<?php echo $shop_url; ?>" class="main-menu-new__dropdown-create">+ &nbsp;&nbsp;&nbsp;Create</a>
+                            <a href="<?php echo $shop_url; ?>" class="main-menu-new__dropdown-create"><span>+</span>&nbsp;Create</a>
                             <?php endif ?>
                           </div><!-- clearfix -->
                         </div><!-- col-md-3 -->
